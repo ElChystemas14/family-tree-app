@@ -1,0 +1,6 @@
+'use client'
+import { Handle, Position, type NodeProps } from '@xyflow/react'
+import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import type { UnionNodeData } from '@/types/family-tree'
+export function UnionNode({ data }: NodeProps & { data: UnionNodeData }) { return <div className={`relative flex size-[22px] items-center justify-center rounded-full border-2 border-primary bg-background shadow-sm transition-opacity ${data.isDimmed ? 'opacity-20' : 'opacity-100'} ${data.isPathHighlighted ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}><Handle type="target" position={Position.Top} className="!size-1 !border-0 !bg-primary" /><Button variant="ghost" size="icon" className="absolute -right-8 -top-6 size-6 rounded-full border bg-card opacity-0 shadow-sm transition-opacity hover:opacity-100 group-hover:opacity-100 focus-visible:opacity-100" aria-label="Add child to this union" onClick={() => data.onAddChild?.()}><Plus data-icon /></Button><Handle type="source" position={Position.Bottom} className="!size-1 !border-0 !bg-primary" /><span className="sr-only">Union between {data.partner1Id} and {data.partner2Id}</span></div> }
