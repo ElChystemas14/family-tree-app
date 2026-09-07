@@ -128,3 +128,23 @@
     @apply font-sans;
   }
 }
+
+.react-flow__node {
+  font-family: inherit;
+}
+.react-flow__controls {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  box-shadow: 0 4px 16px oklch(0 0 0 / 8%);
+}
+.react-flow__controls-button {
+  background: var(--card);
+  border-bottom-color: var(--border);
+  color: var(--foreground);
+}
+.react-flow__minimap {
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  overflow: hidden;
+}
