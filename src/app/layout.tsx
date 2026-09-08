@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hawthorne Archive — Family Tree",
-  description: "Explore the Hawthorne family archive across generations.",
+  title: "Archivo Hawthorne — Árbol genealógico",
+  description: "Explora el archivo de la familia Hawthorne a lo largo de las generaciones.",
   icons: {
     icon: [
       {
@@ -49,7 +49,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="es"
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
     >
       <body className="min-h-full flex flex-col">

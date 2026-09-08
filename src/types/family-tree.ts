@@ -57,6 +57,7 @@ export interface PersonNodeData {
   isSearchFocused: boolean
   isDimmed?: boolean
   isPathHighlighted?: boolean
+  layout: LayoutMode
   onQuickAction?: (action: 'parent' | 'spouse' | 'child') => void
 }
 
@@ -66,6 +67,7 @@ export interface UnionNodeData {
   partner2Id: string
   isDimmed?: boolean
   isPathHighlighted?: boolean
+  layout: LayoutMode
   onAddChild?: () => void
 }
 
