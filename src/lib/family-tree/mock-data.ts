@@ -6,12 +6,12 @@ export const familyTreeData: FamilyTreeData = {
     { id: 'walter', firstName: 'Walter', lastName: 'Hawthorne', gender: 'male', birthDate: '1925-11-03', deathDate: '1998-06-19', bio: 'Walter built furniture by hand and taught his children to see beauty in useful things.', attributes: { occupation: 'Woodworker' } },
     { id: 'evelyn', firstName: 'Evelyn', lastName: 'Mercer', gender: 'female', birthDate: '1932-06-27', deathDate: '2004-02-14', bio: 'Evelyn was a school principal known for her fierce curiosity and generous spirit.' },
     { id: 'arthur', firstName: 'Arthur', lastName: 'Mercer', gender: 'male', birthDate: '1929-01-21', deathDate: '2001-05-02', bio: 'Arthur loved long rail journeys and kept an extensive collection of maps.' },
-    { id: 'margaret', firstName: 'Margaret', lastName: 'Hawthorne', gender: 'female', birthDate: '1954-08-17', photoUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces', bio: 'Margaret is the family archivist. She has spent the last decade digitising photographs and letters from both sides of the family.', attributes: { occupation: 'Archivist' } },
-    { id: 'thomas', firstName: 'Thomas', lastName: 'Hawthorne', gender: 'male', birthDate: '1951-03-09', photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&crop=faces', bio: 'Thomas grew up near the coast and still returns every summer with a camera and a sketchbook.' },
+    { id: 'margaret', firstName: 'Margaret', lastName: 'Hawthorne', gender: 'female', birthDate: '1954-08-17', photoUrl: '/placeholder-user.jpg', bio: 'Margaret is the family archivist. She has spent the last decade digitising photographs and letters from both sides of the family.', attributes: { occupation: 'Archivist' } },
+    { id: 'thomas', firstName: 'Thomas', lastName: 'Hawthorne', gender: 'male', birthDate: '1951-03-09', photoUrl: '/placeholder-user.jpg', bio: 'Thomas grew up near the coast and still returns every summer with a camera and a sketchbook.' },
     { id: 'susan', firstName: 'Susan', lastName: 'Vale', gender: 'female', birthDate: '1956-12-01', bio: 'Susan is an avid traveller and beloved aunt to a growing generation.', attributes: { occupation: 'Cartographer' } },
     { id: 'peter', firstName: 'Peter', lastName: 'Hawthorne', gender: 'male', birthDate: '1958-05-22', deathDate: '2020-10-11', bio: 'Peter was a quiet maker who repaired radios and collected field recordings.' },
     { id: 'james', firstName: 'James', lastName: 'Reed', gender: 'male', birthDate: '1953-02-14', bio: 'James and Margaret shared a love of old films and Sunday markets.' },
-    { id: 'lucy', firstName: 'Lucy', lastName: 'Hawthorne', gender: 'female', birthDate: '1981-07-04', photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=faces', bio: 'Lucy lives in Copenhagen with her family and works in community design.', attributes: { occupation: 'Designer' } },
+    { id: 'lucy', firstName: 'Lucy', lastName: 'Hawthorne', gender: 'female', birthDate: '1981-07-04', photoUrl: '/placeholder-user.jpg', bio: 'Lucy lives in Copenhagen with her family and works in community design.', attributes: { occupation: 'Designer' } },
     { id: 'ben', firstName: 'Benjamin', lastName: 'Hawthorne', gender: 'male', birthDate: '1984-10-19', bio: 'Ben is a teacher, amateur chef, and the family’s most enthusiastic group-chat participant.' },
     { id: 'olivia', firstName: 'Olivia', lastName: 'Reed', gender: 'female', birthDate: '1987-09-28', bio: 'Olivia is a marine biologist based in Wellington.' },
     { id: 'nora', firstName: 'Nora', lastName: 'Hawthorne', gender: 'female', birthDate: '1991-01-16', attributes: { adopted: true }, bio: 'Nora joined the Hawthorne family at age two. She is a ceramic artist and storyteller.' },
@@ -37,7 +37,7 @@ export const familyTreeData: FamilyTreeData = {
 
 export const getInitials = (person: { firstName: string; lastName: string }) => `${person.firstName[0]}${person.lastName[0]}`
 export const formatYear = (date?: string) => date ? new Date(date).getFullYear().toString() : ''
-export const formatDate = (date?: string) => date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''
+export const formatDate = (date?: string) => date ? new Date(date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
 export const getPersonName = (person: { firstName: string; lastName: string }) => `${person.firstName} ${person.lastName}`
 
 export interface RelativePerson { person: Person; relationship: ChildRelationship['type'] | 'partner'; union?: Union }
