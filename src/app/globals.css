@@ -14,6 +14,14 @@
 .dark { color-scheme: dark; --background: oklch(.16 .02 75); --foreground: oklch(.94 .02 82); --card: oklch(.205 .025 75); --card-foreground: oklch(.94 .02 82); --popover: oklch(.205 .025 75); --popover-foreground: oklch(.94 .02 82); --primary: oklch(.68 .1 155); --primary-foreground: oklch(.16 .02 75); --secondary: oklch(.27 .03 75); --secondary-foreground: oklch(.9 .02 82); --muted: oklch(.25 .025 75); --muted-foreground: oklch(.7 .03 82); --accent: oklch(.3 .06 155); --accent-foreground: oklch(.9 .03 155); --border: oklch(1 0 0 / 12%); --input: oklch(1 0 0 / 15%); --ring: oklch(.68 .1 155); --destructive: oklch(.65 .16 28); }
 @layer base { * { @apply border-border outline-ring/50; } html { @apply bg-background; } body { @apply bg-background text-foreground font-sans; } }
 .react-flow__node { font-family: inherit; }
+.family-tree-flow {
+  --xy-controls-button-background-color: var(--card);
+  --xy-controls-button-background-color-hover: var(--muted);
+  --xy-controls-button-color: var(--foreground);
+  --xy-controls-button-color-hover: var(--foreground);
+  --xy-controls-button-border-color: var(--border);
+  --xy-edge-stroke: var(--muted-foreground);
+}
 .react-flow__controls { overflow: hidden; border: 1px solid var(--border); border-radius: .7rem; box-shadow: 0 4px 16px oklch(0 0 0 / 8%); }
 .react-flow__controls-button { background: var(--card); border-bottom-color: var(--border); color: var(--foreground); }
 .react-flow__minimap { border: 1px solid var(--border); border-radius: .7rem; overflow: hidden; }

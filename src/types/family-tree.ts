@@ -78,6 +78,8 @@ export interface GraphData {
     id: string
     data: NodeData
     position: { x: number; y: number }
+    width: number
+    height: number
     type: 'person' | 'union'
   }>
   edges: Array<{
