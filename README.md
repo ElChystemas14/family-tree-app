@@ -29,6 +29,16 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Documentación del proyecto
+
+El mapa completo está en [`docs/`](docs/):
+
+- [`docs/audit.md`](docs/audit.md) — auditoría inicial y hallazgos.
+- [`docs/roadmap.md`](docs/roadmap.md) — plan por fases con seguimiento.
+- [`docs/ideas.md`](docs/ideas.md) — ideas futuras aparcadas.
+- [`docs/decisions.md`](docs/decisions.md) — decisiones tomadas.
+- [`docs/guides/`](docs/guides/) — guías de ejecución por fase y formato CSV.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
