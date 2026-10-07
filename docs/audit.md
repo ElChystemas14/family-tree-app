@@ -152,12 +152,14 @@ HIGH (deuda que frena el desarrollo), MED (mejora con coste bajo), LOW (higiene)
 - **Fix**: GitHub Actions con `tsc` + `eslint` + `build` (+ tests en Fase B).
 - **Roadmap**: Fase B.
 
-#### AUD-LOW-03 — Atribución XYFlow visible (corrección 2026-10-07)
-- **Ubicación**: `src/components/family-tree/family-tree-canvas.tsx` — verificado el
-  2026-10-07: **no** existe `proOptions` ni `hideAttribution` en `src/`; la atribución
-  por defecto queda visible, que es lo correcto para la licencia.
-- **Fix**: ninguno requerido; no ocultar la atribución sin licencia Pro.
-- **Roadmap**: Fase A (solo verificación, coste ~0 — ya cumplido).
+#### AUD-LOW-03 — Verificar atribución XYFlow
+- **Ubicación**: `src/components/family-tree/family-tree-canvas.tsx` (props del
+  `<ReactFlow … proOptions={{ hideAttribution: true }}>`). Confirmado el 2026-10-07
+  con lectura del fichero completo (el grep inicial truncó la línea kilométrica y
+  pareció ausente por error).
+- **Fix**: revisar términos/licencia para este uso; si no hay licencia Pro, quitar
+  `hideAttribution` y dejar la atribución visible.
+- **Roadmap**: Fase A (una línea de verificación, coste ~0).
 
 #### AUD-LOW-04 — Archivos de una sola línea kilométrica (herencia v0)
 - Dificultan revisión y debug. **Fix**: Prettier + formateo. **Roadmap**: Fase B.

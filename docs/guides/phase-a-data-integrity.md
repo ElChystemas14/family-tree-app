@@ -18,16 +18,17 @@ Roadmap: ítems A1–A5 (`../roadmap.md`).
 - Aceptación: tests en verde en al menos 2 zonas horarias distintas.
   Verificado en 3: `America/Lima`, `Pacific/Kiritimati`, `America/New_York` (6 tests).
 
-## A2 — Persistencia local + export/import JSON (AUD-CRIT-02)
+## A2 — Persistencia local + export/import JSON (AUD-CRIT-02) — hecho 2026-10-07
 
-- [ ] Clave versionada, p. ej. `hawthorne-tree-v1`; guardar `{ version: 1, persons, unions, relationships, posOverrides? }`
+- [x] Clave versionada, p. ej. `hawthorne-tree-v1`; guardar `{ version: 1, persons, unions, relationships, posOverrides? }`
       con debounce (~500 ms) ante cada `setData` (AUD-MED-08).
-- [ ] Al arrancar: estado inicial = dataset Hawthorne; en `useEffect` leer `localStorage`
+- [x] Al arrancar: estado inicial = dataset Hawthorne; en `useEffect` leer `localStorage`
       (evita mismatch de hidratación); si hay guardado válido, usarlo; si no, Hawthorne (hasta B6).
-- [ ] Validar lo leído con el esquema de A3 antes de hidratar (si falla: aviso + dataset de prueba, nunca crash).
+- [x] Validar lo leído con el esquema de A3 antes de hidratar (si falla: aviso + dataset de prueba, nunca crash).
       Envolver lectura/escritura en `try/catch` (`QuotaExceededError`, modo privado → aviso sin bloquear).
-- [ ] Exportar: botón "Exportar JSON" (descarga `arbol-YYYY-MM-DD.json`, formato canónico = mismo shape + `version`).
-- [ ] Importar: selector de archivo + validación + resumen (N personas, M uniones, K errores) antes de aplicar.
+      Nota: validación estructural en `storage.ts`; la estricta con zod llega en A3 y la reutilizará.
+- [x] Exportar: botón "Exportar JSON" (descarga `arbol-YYYY-MM-DD.json`, formato canónico = mismo shape + `version`).
+- [x] Importar: selector de archivo + validación + resumen (N personas, M uniones, K errores) antes de aplicar.
 - Aceptación: recargar conserva cambios; export→vaciar→import restaura idéntico.
 
 ## A3 — Esquema zod + validación en formularios (AUD-HIGH-03)
@@ -51,8 +52,8 @@ Roadmap: ítems A1–A5 (`../roadmap.md`).
 - [ ] Mover `shadcn` a `devDependencies`.
 - [ ] Borrar SVGs sin uso de `public/` (`next.svg`, `vercel.svg`, `file.svg`, `globe.svg`, `window.svg`).
 - [ ] Quitar `remotePatterns` de Unsplash de `next.config.ts` (o documentar por qué se queda).
-- [ ] Atribución XYFlow: verificado 2026-10-07 que no hay `hideAttribution` en código —
-      mantenerla visible (AUD-LOW-03 ya cumplido, sin acción).
+- [ ] Verificar términos de atribución XYFlow con `hideAttribution: true`
+      (confirmado presente en `family-tree-canvas.tsx`; quitarlo si no hay licencia Pro).
 - Aceptación: `pnpm install --frozen-lockfile` limpio + `build` verde.
 
 ## A5 — README real (AUD-HIGH-04)

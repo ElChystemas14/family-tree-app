@@ -18,7 +18,7 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 | Fase | Estado | Guía | Criterio de salida |
 |---|---|---|---|
-| A — Integridad de datos | en curso (A1 hecho) | `guides/phase-a-data-integrity.md` | Fechas correctas + persistencia local + validación base + repo higiénico |
+| A — Integridad de datos | en curso (A1–A2 hechos) | `guides/phase-a-data-integrity.md` | Fechas correctas + persistencia local + validación base + repo higiénico |
 | B — Calidad de producto | pendiente | `guides/phase-b-product-quality.md` | Store extraído + tests + CI + dataset de prueba limpio |
 | C — Intercambio de datos | pendiente | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV |
 | D — Puerta a multiusuario | pendiente (diseño) | (se creará `guides/phase-d-multiuser.md`) | Modelo con `ownerId`/`treeId`, decisions actualizadas |
@@ -26,13 +26,13 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 ## Fase A — Integridad de datos
 
 - [x] **A1** Fix fechas UTC→local + instalar `vitest` + tests con TZ fija → `AUD-CRIT-01` (hecho 2026-10-07)
-- [ ] **A2** Persistencia `localStorage` versionada (`{ version, … }`, lectura en `useEffect`,
-      `try/catch` de cupo) + export/import JSON → `AUD-CRIT-02`, `AUD-MED-08`
+- [x] **A2** Persistencia `localStorage` versionada (`{ version, … }`, lectura en `useEffect`,
+      `try/catch` de cupo) + export/import JSON → `AUD-CRIT-02`, `AUD-MED-08` (hecho 2026-10-07)
 - [ ] **A3** Esquema zod Persona/Unión/Relación + validación en formularios +
       `birthDate?` opcional + `photoUrl` validada + `getFamilyRelationships(id, data)` pura →
       `AUD-HIGH-03`, `AUD-HIGH-05`, `AUD-HIGH-06`, `AUD-MED-07`
 - [ ] **A4** Higiene de repo: borrar `package-lock.json`, `shadcn` a devDeps, limpiar
-      SVGs sin uso y config de imágenes; atribución XYFlow ya verificada (sin acción) →
+      SVGs sin uso y config de imágenes, verificar atribución XYFlow →
       `AUD-HIGH-01`, `AUD-MED-01`, `AUD-MED-03`, `AUD-LOW-03`
 - [ ] **A5** README real (setup, scripts, modelo de datos, enlaces a docs) → `AUD-HIGH-04`
 - Detalle paso a paso: `guides/phase-a-data-integrity.md`.
@@ -78,7 +78,7 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 | AUD-MED-01, AUD-MED-03 | A4 |
 | AUD-MED-02, AUD-MED-04, AUD-MED-05, AUD-MED-06 | B4, B5, B4, B4 |
 | AUD-MED-07, AUD-MED-08 | A3, A2 |
-| AUD-LOW-01, AUD-LOW-02, AUD-LOW-03, AUD-LOW-04 | B4, B3, A4 (verificado), B3 |
+| AUD-LOW-01, AUD-LOW-02, AUD-LOW-03, AUD-LOW-04 | B4, B3, A4, B3 |
 
 ## Cómo se avanza
 
