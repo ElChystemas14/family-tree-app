@@ -1,46 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Archivo Hawthorne — Árbol genealógico (`family-tree-app`)
 
-## Getting Started
+App local-first (sin backend) para explorar y editar el árbol genealógico familiar
+en un canvas interactivo. Interfaz en español, canvas como pantalla principal y
+datos de prueba de la familia Hawthorne.
 
-First, run the development server:
+## Requisitos
+
+- Node.js 20+ (probado con Node 24) y **pnpm** como único gestor
+  (`packageManager: pnpm@11` en `package.json`; actívalo con `corepack enable` si hace falta).
+
+## Puesta en marcha
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000). La primera carga muestra el
+dataset Hawthorne; tus cambios se guardan en `localStorage` (`hawthorne-tree-v1`)
+y sobreviven recargas.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Script | Qué hace |
+|---|---|
+| `pnpm dev` | Servidor de desarrollo |
+| `pnpm build` / `pnpm start` | Build de producción / servirlo |
+| `pnpm lint` | ESLint |
+| `pnpm test` | Vitest (lógica de fechas, validación, persistencia) |
 
-## Learn More
+## Estructura de `src/`
 
-To learn more about Next.js, take a look at the following resources:
+- `app/` — ruta única `/` (`page.tsx` renderiza el canvas) y `layout.tsx` (español, tema, metadatos).
+- `components/family-tree/` — `family-tree-canvas.tsx` (estado + React Flow),
+  `person-node.tsx`, `union-node.tsx`, `tree-controls.tsx`, `person-detail-sheet.tsx`,
+  `add-relative-modal.tsx`.
+- `components/ui/` — primitivas shadcn/base-ui.
+- `lib/family-tree/` — `dates.ts` (parseo local `YYYY-MM-DD`, nunca UTC),
+  `schema.ts` (validación zod + mensajes en español), `storage.ts` (persistencia
+  versionada + export/import JSON), `transform.ts` (dagre → grafo),
+  `mock-data.ts` (dataset Hawthorne + relaciones).
+- `types/family-tree.ts` — `Person`, `Union`, `ChildRelationship`, `FamilyTreeData`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Modelo de datos (resumen)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Person**: `id`, `firstName`, `lastName`, `gender`, `birthDate?` (`YYYY-MM-DD`,
+  opcional), `deathDate?` (≥ nacimiento), `photoUrl?` (solo `https://` o ruta `/`),
+  `bio?`. La adopción vive en la relación, no en la persona.
+- **Union**: `id`, `partner1Id`, `partner2Id` (distintos), `unionType`
+  (`marriage` | `partnership` | `domestic`), `startDate?`/`endDate?`.
+- **ChildRelationship**: `id`, `childId`, `unionId` **o** `singleParentId`
+  (excluyentes), `type` (`biological` | `adopted` | `step`).
+- **Formato canónico JSON**: `{ version: 1, persons, unions, relationships,
+  posOverrides? }` — es lo que se guarda en local y lo que se exporta/importa
+  (`arbol-AAAA-MM-DD.json`).
 
 ## Documentación del proyecto
 
 El mapa completo está en [`docs/`](docs/):
 
-- [`docs/audit.md`](docs/audit.md) — auditoría inicial y hallazgos.
-- [`docs/roadmap.md`](docs/roadmap.md) — plan por fases con seguimiento.
-- [`docs/ideas.md`](docs/ideas.md) — ideas futuras aparcadas.
+- [`docs/audit.md`](docs/audit.md) — auditoría inicial y hallazgos (`AUD-*`).
+- [`docs/roadmap.md`](docs/roadmap.md) — plan por fases con seguimiento (Fase A
+  hecha; siguiente: Fase B — calidad de producto).
+- [`docs/ideas.md`](docs/ideas.md) — ideas futuras aparcadas (`IDEA-*`).
 - [`docs/decisions.md`](docs/decisions.md) — decisiones tomadas.
 - [`docs/guides/`](docs/guides/) — guías de ejecución por fase y formato CSV.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Todo el trabajo es local: commits y ramas en local, sin push hasta indicación
+contraria (ver `decisions.md`).

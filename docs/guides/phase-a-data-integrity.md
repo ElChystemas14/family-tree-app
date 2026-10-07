@@ -48,18 +48,17 @@ Roadmap: ítems A1–A5 (`../roadmap.md`).
       edición con aviso y sin cerrar).
 - Aceptación: imposible guardar persona sin nombre ni fechas incoherentes.
 
-## A4 — Higiene de repo (AUD-HIGH-01, AUD-MED-01, AUD-MED-03, AUD-LOW-03)
+## A4 — Higiene de repo (AUD-HIGH-01, AUD-MED-01, AUD-MED-03, AUD-LOW-03) — hecho 2026-10-07
 
-- [ ] Borrar `package-lock.json` (único gestor: pnpm) y reinstalar limpio.
-- [ ] Mover `shadcn` a `devDependencies`.
-- [ ] Borrar SVGs sin uso de `public/` (`next.svg`, `vercel.svg`, `file.svg`, `globe.svg`, `window.svg`).
-- [ ] Quitar `remotePatterns` de Unsplash de `next.config.ts` (o documentar por qué se queda).
-- [ ] Verificar términos de atribución XYFlow con `hideAttribution: true`
-      (confirmado presente en `family-tree-canvas.tsx`; quitarlo si no hay licencia Pro).
+- [x] Borrar `package-lock.json` (único gestor: pnpm) y reinstalar limpio.
+- [x] Mover `shadcn` a `devDependencies`.
+- [x] Borrar SVGs sin uso de `public/` (`next.svg`, `vercel.svg`, `file.svg`, `globe.svg`, `window.svg`).
+- [x] Quitar `remotePatterns` de Unsplash de `next.config.ts` (sin imágenes remotas en uso).
+- [x] Atribución XYFlow: quitado `hideAttribution` (sin licencia Pro, la atribución queda visible).
 - Aceptación: `pnpm install --frozen-lockfile` limpio + `build` verde.
 
-## A5 — README real (AUD-HIGH-04)
+## A5 — README real (AUD-HIGH-04) — hecho 2026-10-07
 
-- [ ] Sustituir el de create-next-app por: qué es, setup con pnpm, scripts, estructura
+- [x] Sustituir el de create-next-app por: qué es, setup con pnpm, scripts, estructura
       de `src/`, modelo de datos (resumen), enlaces a `docs/` y estado del roadmap.
 - Aceptación: una persona nueva levanta el proyecto solo con el README.
