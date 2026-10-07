@@ -26,15 +26,15 @@ describe("getFamilyRelationships con datos vivos (AUD-HIGH-05)", () => {
     };
 
     const margaretLive = getFamilyRelationships("margaret", live);
-    expect(
-      margaretLive.children.some((c) => c.person.id === "bebe"),
-    ).toBe(true);
+    expect(margaretLive.children.some((c) => c.person.id === "bebe")).toBe(
+      true
+    );
 
     // Con el dataset estático el bebé no existe.
     const margaretStatic = getFamilyRelationships("margaret");
-    expect(
-      margaretStatic.children.some((c) => c.person.id === "bebe"),
-    ).toBe(false);
+    expect(margaretStatic.children.some((c) => c.person.id === "bebe")).toBe(
+      false
+    );
   });
 
   it("deriva padres de unionId y de singleParentId", () => {

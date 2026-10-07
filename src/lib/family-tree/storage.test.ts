@@ -22,7 +22,9 @@ describe("validateStoredTree (A2)", () => {
   });
 
   it("rechaza version distinta, IDs duplicados y referencias rotas sin crashear", () => {
-    expect(validateStoredTree({ ...validPayload, version: 999 }).ok).toBe(false);
+    expect(validateStoredTree({ ...validPayload, version: 999 }).ok).toBe(
+      false
+    );
     expect(validateStoredTree(null).ok).toBe(false);
     expect(validateStoredTree("hola").ok).toBe(false);
 
@@ -104,7 +106,7 @@ describe("parseImportedJson / export filename", () => {
 
   it("genera arbol-YYYY-MM-DD.json con fecha local", () => {
     expect(buildExportFilename(new Date(2026, 9, 7))).toBe(
-      "arbol-2026-10-07.json",
+      "arbol-2026-10-07.json"
     );
     expect(buildExportFilename()).toMatch(/^arbol-\d{4}-\d{2}-\d{2}\.json$/);
   });
@@ -116,7 +118,7 @@ describe("parseImportedJson / export filename", () => {
         unions: familyTreeData.unions,
         relationships: familyTreeData.relationships,
       },
-      { ruth: { x: 10, y: 20 } },
+      { ruth: { x: 10, y: 20 } }
     );
     const res = parseImportedJson(JSON.parse(JSON.stringify(payload)));
     expect(res.ok).toBe(true);

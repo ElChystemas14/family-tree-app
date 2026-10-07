@@ -7,13 +7,86 @@
 @theme inline {
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --color-background: var(--background); --color-foreground: var(--foreground); --color-card: var(--card); --color-card-foreground: var(--card-foreground); --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground); --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground); --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground); --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground); --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground); --color-border: var(--border); --color-input: var(--input); --color-ring: var(--ring); --color-destructive: var(--destructive);
-  --radius-sm: calc(var(--radius) * .6); --radius-md: calc(var(--radius) * .8); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) * 1.4);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 }
-:root { color-scheme: light; --background: oklch(.975 .012 82); --foreground: oklch(.19 .02 70); --card: oklch(.995 .006 82); --card-foreground: oklch(.19 .02 70); --popover: oklch(.995 .006 82); --popover-foreground: oklch(.19 .02 70); --primary: oklch(.43 .09 155); --primary-foreground: oklch(.98 .01 90); --secondary: oklch(.93 .025 82); --secondary-foreground: oklch(.3 .03 70); --muted: oklch(.94 .018 82); --muted-foreground: oklch(.48 .03 75); --accent: oklch(.9 .045 155); --accent-foreground: oklch(.24 .04 155); --border: oklch(.86 .025 78); --input: oklch(.86 .025 78); --ring: oklch(.43 .09 155); --destructive: oklch(.55 .18 28); --radius: .7rem; }
-.dark { color-scheme: dark; --background: oklch(.16 .02 75); --foreground: oklch(.94 .02 82); --card: oklch(.205 .025 75); --card-foreground: oklch(.94 .02 82); --popover: oklch(.205 .025 75); --popover-foreground: oklch(.94 .02 82); --primary: oklch(.68 .1 155); --primary-foreground: oklch(.16 .02 75); --secondary: oklch(.27 .03 75); --secondary-foreground: oklch(.9 .02 82); --muted: oklch(.25 .025 75); --muted-foreground: oklch(.7 .03 82); --accent: oklch(.3 .06 155); --accent-foreground: oklch(.9 .03 155); --border: oklch(1 0 0 / 12%); --input: oklch(1 0 0 / 15%); --ring: oklch(.68 .1 155); --destructive: oklch(.65 .16 28); }
-@layer base { * { @apply border-border outline-ring/50; } html { @apply bg-background; } body { @apply bg-background text-foreground font-sans; } }
-.react-flow__node { font-family: inherit; }
+:root {
+  color-scheme: light;
+  --background: oklch(0.975 0.012 82);
+  --foreground: oklch(0.19 0.02 70);
+  --card: oklch(0.995 0.006 82);
+  --card-foreground: oklch(0.19 0.02 70);
+  --popover: oklch(0.995 0.006 82);
+  --popover-foreground: oklch(0.19 0.02 70);
+  --primary: oklch(0.43 0.09 155);
+  --primary-foreground: oklch(0.98 0.01 90);
+  --secondary: oklch(0.93 0.025 82);
+  --secondary-foreground: oklch(0.3 0.03 70);
+  --muted: oklch(0.94 0.018 82);
+  --muted-foreground: oklch(0.48 0.03 75);
+  --accent: oklch(0.9 0.045 155);
+  --accent-foreground: oklch(0.24 0.04 155);
+  --border: oklch(0.86 0.025 78);
+  --input: oklch(0.86 0.025 78);
+  --ring: oklch(0.43 0.09 155);
+  --destructive: oklch(0.55 0.18 28);
+  --radius: 0.7rem;
+}
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.16 0.02 75);
+  --foreground: oklch(0.94 0.02 82);
+  --card: oklch(0.205 0.025 75);
+  --card-foreground: oklch(0.94 0.02 82);
+  --popover: oklch(0.205 0.025 75);
+  --popover-foreground: oklch(0.94 0.02 82);
+  --primary: oklch(0.68 0.1 155);
+  --primary-foreground: oklch(0.16 0.02 75);
+  --secondary: oklch(0.27 0.03 75);
+  --secondary-foreground: oklch(0.9 0.02 82);
+  --muted: oklch(0.25 0.025 75);
+  --muted-foreground: oklch(0.7 0.03 82);
+  --accent: oklch(0.3 0.06 155);
+  --accent-foreground: oklch(0.9 0.03 155);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.68 0.1 155);
+  --destructive: oklch(0.65 0.16 28);
+}
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply bg-background;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+.react-flow__node {
+  font-family: inherit;
+}
 .family-tree-flow {
   --xy-controls-button-background-color: var(--card);
   --xy-controls-button-background-color-hover: var(--muted);
@@ -22,6 +95,19 @@
   --xy-controls-button-border-color: var(--border);
   --xy-edge-stroke: var(--muted-foreground);
 }
-.react-flow__controls { overflow: hidden; border: 1px solid var(--border); border-radius: .7rem; box-shadow: 0 4px 16px oklch(0 0 0 / 8%); }
-.react-flow__controls-button { background: var(--card); border-bottom-color: var(--border); color: var(--foreground); }
-.react-flow__minimap { border: 1px solid var(--border); border-radius: .7rem; overflow: hidden; }
+.react-flow__controls {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  box-shadow: 0 4px 16px oklch(0 0 0 / 8%);
+}
+.react-flow__controls-button {
+  background: var(--card);
+  border-bottom-color: var(--border);
+  color: var(--foreground);
+}
+.react-flow__minimap {
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  overflow: hidden;
+}

@@ -71,7 +71,8 @@ function validatePosOverrides(value: unknown): string[] {
 }
 
 export function validateStoredTree(raw: unknown): ValidationResult {
-  if (!isRecord(raw)) return { ok: false, errors: ["archivo: no es un objeto"] };
+  if (!isRecord(raw))
+    return { ok: false, errors: ["archivo: no es un objeto"] };
   if (raw.version !== STORAGE_VERSION)
     return {
       ok: false,
@@ -87,7 +88,7 @@ export function validateStoredTree(raw: unknown): ValidationResult {
 export function loadStoredTree(
   storage: Pick<Storage, "getItem"> | undefined = typeof window !== "undefined"
     ? window.localStorage
-    : undefined,
+    : undefined
 ): LoadResult {
   if (!storage) return { data: null };
   let rawText: string | null;
@@ -121,7 +122,7 @@ export function saveStoredTree(
   posOverrides: PosOverrides = {},
   storage: Pick<Storage, "setItem"> | undefined = typeof window !== "undefined"
     ? window.localStorage
-    : undefined,
+    : undefined
 ): SaveResult {
   if (!storage) return { ok: false, error: "Guardado no disponible." };
   const payload: StoredTreeData = {
@@ -156,7 +157,7 @@ export function buildExportFilename(from: Date = new Date()): string {
 
 export function buildExportPayload(
   data: FamilyTreeData,
-  posOverrides: PosOverrides = {},
+  posOverrides: PosOverrides = {}
 ): StoredTreeData {
   return {
     version: STORAGE_VERSION,

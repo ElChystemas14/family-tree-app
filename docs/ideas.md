@@ -37,9 +37,9 @@ Valor: S/M/L. Esfuerzo: S/M/L.
 
 ## Mapeo a fases
 
-| Idea | Destino previsto |
-|---|---|
-| IDEA-01 – IDEA-04 | Futura fase de genealogía avanzada (post-v1.0) |
-| IDEA-05, IDEA-06 | Explícitamente aparcadas hasta consolidar modelo + importación |
-| IDEA-08 – IDEA-10 | Fase D (multiusuario) |
-| IDEA-11 – IDEA-16 | Post-v1.0 según prioridad |
+| Idea              | Destino previsto                                               |
+| ----------------- | -------------------------------------------------------------- |
+| IDEA-01 – IDEA-04 | Futura fase de genealogía avanzada (post-v1.0)                 |
+| IDEA-05, IDEA-06  | Explícitamente aparcadas hasta consolidar modelo + importación |
+| IDEA-08 – IDEA-10 | Fase D (multiusuario)                                          |
+| IDEA-11 – IDEA-16 | Post-v1.0 según prioridad                                      |

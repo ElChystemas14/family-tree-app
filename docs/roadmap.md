@@ -16,12 +16,12 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 ## Estado general
 
-| Fase | Estado | Guía | Criterio de salida |
-|---|---|---|---|
-| A — Integridad de datos | hecho (A1–A5, 2026-10-07) | `guides/phase-a-data-integrity.md` | Fechas correctas + persistencia local + validación base + repo higiénico |
-| B — Calidad de producto | en curso (B1–B2 hechos 2026-10-07) | `guides/phase-b-product-quality.md` | Store extraído + tests + CI + dataset de prueba limpio |
-| C — Intercambio de datos | pendiente | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV |
-| D — Puerta a multiusuario | pendiente (diseño) | (se creará `guides/phase-d-multiuser.md`) | Modelo con `ownerId`/`treeId`, decisions actualizadas |
+| Fase                      | Estado                             | Guía                                                       | Criterio de salida                                                       |
+| ------------------------- | ---------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------ |
+| A — Integridad de datos   | hecho (A1–A5, 2026-10-07)          | `guides/phase-a-data-integrity.md`                         | Fechas correctas + persistencia local + validación base + repo higiénico |
+| B — Calidad de producto   | en curso (B1–B3 hechos 2026-10-07) | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
+| C — Intercambio de datos  | pendiente                          | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV                     |
+| D — Puerta a multiusuario | pendiente (diseño)                 | (se creará `guides/phase-d-multiuser.md`)                  | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
 
 ## Fase A — Integridad de datos
 
@@ -45,8 +45,8 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 - [x] **B2** Ampliar tests Vitest (ya instalado en A1): `transform`, parentesco/antepasados
       con datos vivos, validaciones, serialización → `AUD-HIGH-02`, `AUD-HIGH-05`
       (hecho 2026-10-07, 34/34 en 2 TZ)
-- [ ] **B3** CI (tsc + eslint + build + tests) + Prettier y formateo de archivos v0 →
-      `AUD-LOW-02`, `AUD-LOW-04`
+- [x] **B3** CI (tsc + eslint + build + tests) + Prettier y formateo de archivos v0 →
+      `AUD-LOW-02`, `AUD-LOW-04` (hecho 2026-10-07)
 - [ ] **B4** Pulido: dark persistente, quitar solo `Geist Sans`, táctil, OG mínimo →
       `AUD-MED-02`, `AUD-MED-05`, `AUD-MED-06`, `AUD-LOW-01`
 - [ ] **B5** Memoizar layout por estructura+modo (resaltado aparte) → `AUD-MED-04`
@@ -71,15 +71,15 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 ## Trazabilidad auditoría → roadmap
 
-| Hallazgo | Fase/Ítem |
-|---|---|
-| AUD-CRIT-01, AUD-CRIT-02 | A1, A2 |
-| AUD-HIGH-01, AUD-HIGH-03, AUD-HIGH-04 | A4, A3/C2, A5 |
-| AUD-HIGH-02 | B2 |
-| AUD-HIGH-05, AUD-HIGH-06 | A3 (+ B1/B2) |
-| AUD-MED-01, AUD-MED-03 | A4 |
+| Hallazgo                                       | Fase/Ítem      |
+| ---------------------------------------------- | -------------- |
+| AUD-CRIT-01, AUD-CRIT-02                       | A1, A2         |
+| AUD-HIGH-01, AUD-HIGH-03, AUD-HIGH-04          | A4, A3/C2, A5  |
+| AUD-HIGH-02                                    | B2             |
+| AUD-HIGH-05, AUD-HIGH-06                       | A3 (+ B1/B2)   |
+| AUD-MED-01, AUD-MED-03                         | A4             |
 | AUD-MED-02, AUD-MED-04, AUD-MED-05, AUD-MED-06 | B4, B5, B4, B4 |
-| AUD-MED-07, AUD-MED-08 | A3, A2 |
+| AUD-MED-07, AUD-MED-08                         | A3, A2         |
 | AUD-LOW-01, AUD-LOW-02, AUD-LOW-03, AUD-LOW-04 | B4, B3, A4, B3 |
 
 ## Cómo se avanza

@@ -16,11 +16,7 @@ import { isValidISODate } from "./dates";
 
 export const genderSchema = z.enum(["male", "female", "other"]);
 export const unionTypeSchema = z.enum(["marriage", "partnership", "domestic"]);
-export const relationshipTypeSchema = z.enum([
-  "biological",
-  "adopted",
-  "step",
-]);
+export const relationshipTypeSchema = z.enum(["biological", "adopted", "step"]);
 
 const isoDateFormat = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -96,7 +92,7 @@ const emptyToUndefined = (v: unknown) =>
 function checkDateField(
   value: unknown,
   field: "birthDate" | "deathDate",
-  errors: PersonFormErrors,
+  errors: PersonFormErrors
 ): string | undefined {
   const normalized = emptyToUndefined(value) as string | undefined;
   if (normalized === undefined) return undefined;
@@ -195,9 +191,9 @@ export function validateFamilyTreeData(raw: unknown): {
   errors: string[];
 } {
   const errors: string[] = [];
-  if (!isRecord(raw)) return { ok: false, errors: ["archivo: no es un objeto"] };
-  if (!Array.isArray(raw.persons))
-    errors.push("persons: debe ser una lista");
+  if (!isRecord(raw))
+    return { ok: false, errors: ["archivo: no es un objeto"] };
+  if (!Array.isArray(raw.persons)) errors.push("persons: debe ser una lista");
   if (!Array.isArray(raw.unions)) errors.push("unions: debe ser una lista");
   if (!Array.isArray(raw.relationships))
     errors.push("relationships: debe ser una lista");
@@ -212,9 +208,7 @@ export function validateFamilyTreeData(raw: unknown): {
     const parsed = personSchema.safeParse(p);
     if (!parsed.success) {
       for (const issue of parsed.error.issues) {
-        const field = String(
-          issue.path[issue.path.length - 1] ?? "valor",
-        );
+        const field = String(issue.path[issue.path.length - 1] ?? "valor");
         errors.push(`${where}.${field}: no válido`);
       }
       return;
@@ -252,9 +246,7 @@ export function validateFamilyTreeData(raw: unknown): {
     const parsed = unionSchema.safeParse(u);
     if (!parsed.success) {
       for (const issue of parsed.error.issues) {
-        const field = String(
-          issue.path[issue.path.length - 1] ?? "valor",
-        );
+        const field = String(issue.path[issue.path.length - 1] ?? "valor");
         errors.push(`${where}.${field}: no válido`);
       }
       return;
@@ -297,9 +289,7 @@ export function validateFamilyTreeData(raw: unknown): {
     const parsed = relationshipSchema.safeParse(r);
     if (!parsed.success) {
       for (const issue of parsed.error.issues) {
-        const field = String(
-          issue.path[issue.path.length - 1] ?? "valor",
-        );
+        const field = String(issue.path[issue.path.length - 1] ?? "valor");
         errors.push(`${where}.${field}: no válido`);
       }
       return;
@@ -362,7 +352,7 @@ export function validateFamilyTreeData(raw: unknown): {
       !personIds.has(r.singleParentId)
     ) {
       errors.push(
-        `relación ${id}: singleParentId inexistente (${r.singleParentId})`,
+        `relación ${id}: singleParentId inexistente (${r.singleParentId})`
       );
     }
   }

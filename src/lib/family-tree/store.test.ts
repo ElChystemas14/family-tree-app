@@ -22,7 +22,11 @@ const otra: Person = {
   lastName: "Dos",
   gender: "female",
 };
-const empty: FamilyTreeData = { persons: [solo, otra], unions: [], relationships: [] };
+const empty: FamilyTreeData = {
+  persons: [solo, otra],
+  unions: [],
+  relationships: [],
+};
 
 describe("applyAddPerson (B1)", () => {
   it("crea persona suelta sin relaciones", () => {
@@ -93,19 +97,31 @@ describe("applyConnectUnion / parentesco (B1)", () => {
     expect(ok.result.ok).toBe(true);
     expect(ok.state.unions).toHaveLength(1);
 
-    const blocked = applyConnectUnion(
-      familyTreeData,
-      "margaret",
-      "lucy",
-    );
+    const blocked = applyConnectUnion(familyTreeData, "margaret", "lucy");
     expect(blocked.result.ok).toBe(false);
     expect(blocked.result.error).toContain("parientes directos");
   });
 
   it("getParentIds e isAncestorOf con uniones y monoparental", () => {
-    expect(getParentIds("lucy", familyTreeData.unions, familyTreeData.relationships)).toContain("margaret");
-    expect(isAncestorOf("ruth", "lucy", familyTreeData.unions, familyTreeData.relationships)).toBe(true);
-    expect(isAncestorOf("lucy", "ruth", familyTreeData.unions, familyTreeData.relationships)).toBe(false);
+    expect(
+      getParentIds("lucy", familyTreeData.unions, familyTreeData.relationships)
+    ).toContain("margaret");
+    expect(
+      isAncestorOf(
+        "ruth",
+        "lucy",
+        familyTreeData.unions,
+        familyTreeData.relationships
+      )
+    ).toBe(true);
+    expect(
+      isAncestorOf(
+        "lucy",
+        "ruth",
+        familyTreeData.unions,
+        familyTreeData.relationships
+      )
+    ).toBe(false);
   });
 });
 
@@ -128,7 +144,11 @@ describe("applyRemovePerson / applyUpdatePerson (B1)", () => {
     const updated = { ...solo, firstName: "Soloedit" };
     const { state, result } = applyUpdatePerson(empty, updated);
     expect(result.ok).toBe(true);
-    expect(state.persons.find((p) => p.id === "solo")?.firstName).toBe("Soloedit");
-    expect(applyUpdatePerson(empty, { ...solo, id: "nadie" }).result.ok).toBe(false);
+    expect(state.persons.find((p) => p.id === "solo")?.firstName).toBe(
+      "Soloedit"
+    );
+    expect(applyUpdatePerson(empty, { ...solo, id: "nadie" }).result.ok).toBe(
+      false
+    );
   });
 });

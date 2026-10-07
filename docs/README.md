@@ -5,16 +5,16 @@ el qué sigue y cómo avanzarlo**.
 
 ## Mapa
 
-| Documento | Qué contiene |
-|---|---|
-| [`audit.md`](audit.md) | Auditoría inicial (2026-09-20): notas por área y hallazgos `AUD-*` con evidencia |
-| [`roadmap.md`](roadmap.md) | Plan por fases con checkboxes, criterios de salida y trazabilidad a hallazgos |
-| [`ideas.md`](ideas.md) | Backlog de ideas futuras `IDEA-*` (aparcadas, no comprometidas) |
-| [`decisions.md`](decisions.md) | Registro de decisiones tomadas y su contexto |
-| [`guides/phase-a-data-integrity.md`](guides/phase-a-data-integrity.md) | Guía de ejecución: Fase A (integridad) |
-| [`guides/phase-b-product-quality.md`](guides/phase-b-product-quality.md) | Guía de ejecución: Fase B (calidad) |
-| [`guides/phase-c-data-exchange.md`](guides/phase-c-data-exchange.md) | Guía de ejecución: Fase C (intercambio) |
-| [`guides/csv-format.md`](guides/csv-format.md) | Especificación v1.0 (borrador) del formato CSV de importación |
+| Documento                                                                | Qué contiene                                                                     |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| [`audit.md`](audit.md)                                                   | Auditoría inicial (2026-09-20): notas por área y hallazgos `AUD-*` con evidencia |
+| [`roadmap.md`](roadmap.md)                                               | Plan por fases con checkboxes, criterios de salida y trazabilidad a hallazgos    |
+| [`ideas.md`](ideas.md)                                                   | Backlog de ideas futuras `IDEA-*` (aparcadas, no comprometidas)                  |
+| [`decisions.md`](decisions.md)                                           | Registro de decisiones tomadas y su contexto                                     |
+| [`guides/phase-a-data-integrity.md`](guides/phase-a-data-integrity.md)   | Guía de ejecución: Fase A (integridad)                                           |
+| [`guides/phase-b-product-quality.md`](guides/phase-b-product-quality.md) | Guía de ejecución: Fase B (calidad)                                              |
+| [`guides/phase-c-data-exchange.md`](guides/phase-c-data-exchange.md)     | Guía de ejecución: Fase C (intercambio)                                          |
+| [`guides/csv-format.md`](guides/csv-format.md)                           | Especificación v1.0 (borrador) del formato CSV de importación                    |
 
 ## Cómo se relacionan
 

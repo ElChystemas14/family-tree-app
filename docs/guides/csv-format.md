@@ -8,36 +8,36 @@ importa (`crypto.randomUUID()` recomendado); vacíos = se generan al importar.
 
 ## `personas.csv`
 
-| Columna | Requerida | Valores |
-|---|---|---|
-| `id` | no | texto único |
-| `firstName` | **sí** | texto no vacío |
-| `lastName` | **sí** | texto no vacío |
-| `gender` | no (`other`) | `male` \| `female` \| `other` |
-| `birthDate` | no | `YYYY-MM-DD` (alineado con `Person.birthDate?` opcional, AUD-HIGH-06) |
-| `deathDate` | no | `YYYY-MM-DD` (≥ `birthDate`) |
-| `photoUrl` | no | `https://…` o ruta `/…` (se rechaza `javascript:`, `data:`, etc., AUD-MED-07) |
-| `bio` | no | texto libre (máx. recomendado 2000 car.) |
+| Columna     | Requerida    | Valores                                                                       |
+| ----------- | ------------ | ----------------------------------------------------------------------------- |
+| `id`        | no           | texto único                                                                   |
+| `firstName` | **sí**       | texto no vacío                                                                |
+| `lastName`  | **sí**       | texto no vacío                                                                |
+| `gender`    | no (`other`) | `male` \| `female` \| `other`                                                 |
+| `birthDate` | no           | `YYYY-MM-DD` (alineado con `Person.birthDate?` opcional, AUD-HIGH-06)         |
+| `deathDate` | no           | `YYYY-MM-DD` (≥ `birthDate`)                                                  |
+| `photoUrl`  | no           | `https://…` o ruta `/…` (se rechaza `javascript:`, `data:`, etc., AUD-MED-07) |
+| `bio`       | no           | texto libre (máx. recomendado 2000 car.)                                      |
 
 ## `uniones.csv`
 
-| Columna | Requerida | Valores |
-|---|---|---|
-| `id` | no | texto único |
-| `partner1Id` | **sí** | `id` existente en personas |
-| `partner2Id` | **sí** | `id` existente, distinto de `partner1Id` |
-| `unionType` | no (`partnership`) | `marriage` \| `partnership` \| `domestic` |
-| `startDate` / `endDate` | no | `YYYY-MM-DD` (`endDate` ≥ `startDate` si ambos presentes) |
+| Columna                 | Requerida          | Valores                                                   |
+| ----------------------- | ------------------ | --------------------------------------------------------- |
+| `id`                    | no                 | texto único                                               |
+| `partner1Id`            | **sí**             | `id` existente en personas                                |
+| `partner2Id`            | **sí**             | `id` existente, distinto de `partner1Id`                  |
+| `unionType`             | no (`partnership`) | `marriage` \| `partnership` \| `domestic`                 |
+| `startDate` / `endDate` | no                 | `YYYY-MM-DD` (`endDate` ≥ `startDate` si ambos presentes) |
 
 ## `relaciones.csv`
 
-| Columna | Requerida | Valores |
-|---|---|---|
-| `id` | no | texto único |
-| `childId` | **sí** | `id` existente en personas |
-| `unionId` | condicional | `id` existente en uniones **o** vacío si hay `singleParentId` |
-| `singleParentId` | condicional | `id` existente si no hay `unionId` (excluyentes) |
-| `type` | no (`biological`) | `biological` \| `adopted` \| `step` |
+| Columna          | Requerida         | Valores                                                       |
+| ---------------- | ----------------- | ------------------------------------------------------------- |
+| `id`             | no                | texto único                                                   |
+| `childId`        | **sí**            | `id` existente en personas                                    |
+| `unionId`        | condicional       | `id` existente en uniones **o** vacío si hay `singleParentId` |
+| `singleParentId` | condicional       | `id` existente si no hay `unionId` (excluyentes)              |
+| `type`           | no (`biological`) | `biological` \| `adopted` \| `step`                           |
 
 ## Reglas y errores
 

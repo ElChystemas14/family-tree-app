@@ -23,7 +23,7 @@ import type { PosOverrides } from "./storage";
 export function getParentIds(
   childId: string,
   unions: Union[],
-  relationships: ChildRelationship[],
+  relationships: ChildRelationship[]
 ): string[] {
   const ids = new Set<string>();
   relationships
@@ -44,7 +44,7 @@ export function isAncestorOf(
   ancestorId: string,
   descendantId: string,
   unions: Union[],
-  relationships: ChildRelationship[],
+  relationships: ChildRelationship[]
 ): boolean {
   const visited = new Set<string>([descendantId]);
   const queue = [descendantId];
@@ -87,7 +87,7 @@ const newId = (prefix: string) => `${prefix}-${crypto.randomUUID()}`;
 /** Añadir persona o vincular existente (reglas actuales del canvas). */
 export function applyAddPerson(
   state: FamilyTreeData,
-  args: AddPersonArgs,
+  args: AddPersonArgs
 ): { state: FamilyTreeData; result: AddPersonResult } {
   const { personInput, existingId, relationship, anchorId, unionId } = args;
   const personId = existingId ?? newId("person");
@@ -115,7 +115,7 @@ export function applyAddPerson(
       unions.some(
         (item) =>
           [item.partner1Id, item.partner2Id].includes(anchorId) &&
-          [item.partner1Id, item.partner2Id].includes(personId),
+          [item.partner1Id, item.partner2Id].includes(personId)
       )
     )
       return {
@@ -189,8 +189,7 @@ export function applyAddPerson(
     const union = unionId
       ? unions.find((item) => item.id === unionId)
       : unions.find(
-          (item) =>
-            item.partner1Id === anchorId || item.partner2Id === anchorId,
+          (item) => item.partner1Id === anchorId || item.partner2Id === anchorId
         );
     if (unionId && !union)
       return {
@@ -220,7 +219,7 @@ export function applyAddPerson(
 export function applyConnectUnion(
   state: FamilyTreeData,
   sourceId: string,
-  targetId: string,
+  targetId: string
 ): { state: FamilyTreeData; result: ActionResult } {
   if (sourceId === targetId)
     return {
@@ -234,7 +233,7 @@ export function applyConnectUnion(
     state.unions.some(
       (union) =>
         [union.partner1Id, union.partner2Id].includes(sourceId) &&
-        [union.partner1Id, union.partner2Id].includes(targetId),
+        [union.partner1Id, union.partner2Id].includes(targetId)
     )
   )
     return {
@@ -267,23 +266,22 @@ export function applyConnectUnion(
 /** Eliminar/desvincular persona (bloqueado si tiene pareja o hijos). */
 export function applyRemovePerson(
   state: FamilyTreeData,
-  personId: string,
+  personId: string
 ): { state: FamilyTreeData; result: ActionResult } {
   const hasPartners = state.unions.some(
-    (union) => union.partner1Id === personId || union.partner2Id === personId,
+    (union) => union.partner1Id === personId || union.partner2Id === personId
   );
   const hasChildren = state.relationships.some((rel) =>
     getParentIds(rel.childId, state.unions, state.relationships).includes(
-      personId,
-    ),
+      personId
+    )
   );
   if (hasPartners || hasChildren)
     return {
       state,
       result: {
         ok: false,
-        error:
-          "No se puede eliminar: primero desvincula a su pareja e hijos.",
+        error: "No se puede eliminar: primero desvincula a su pareja e hijos.",
       },
     };
   return {
@@ -291,10 +289,10 @@ export function applyRemovePerson(
       persons: state.persons.filter((person) => person.id !== personId),
       unions: state.unions.filter(
         (union) =>
-          union.partner1Id !== personId && union.partner2Id !== personId,
+          union.partner1Id !== personId && union.partner2Id !== personId
       ),
       relationships: state.relationships.filter(
-        (rel) => rel.childId !== personId,
+        (rel) => rel.childId !== personId
       ),
     },
     result: { ok: true },
@@ -304,7 +302,7 @@ export function applyRemovePerson(
 /** Actualizar datos básicos de una persona (sin tocar conexiones). */
 export function applyUpdatePerson(
   state: FamilyTreeData,
-  updated: Person,
+  updated: Person
 ): { state: FamilyTreeData; result: ActionResult } {
   if (!state.persons.some((person) => person.id === updated.id))
     return {
@@ -315,7 +313,7 @@ export function applyUpdatePerson(
     state: {
       ...state,
       persons: state.persons.map((person) =>
-        person.id === updated.id ? updated : person,
+        person.id === updated.id ? updated : person
       ),
     },
     result: { ok: true },
@@ -337,7 +335,7 @@ export interface FamilyTreeStore {
 
 /** Hook React del store: estado + acciones. Persistencia desacoplada (A2). */
 export function useFamilyTree(
-  initial: FamilyTreeData = familyTreeData,
+  initial: FamilyTreeData = familyTreeData
 ): FamilyTreeStore {
   const [data, setData] = useState<FamilyTreeData>(initial);
   const [posOverrides, setPosOverrides] = useState<PosOverrides>({});
@@ -349,7 +347,7 @@ export function useFamilyTree(
       if (result.ok && state !== data) setData(state);
       return result;
     },
-    [data],
+    [data]
   );
 
   const connectUnion = useCallback(
@@ -358,7 +356,7 @@ export function useFamilyTree(
       if (result.ok) setData(state);
       return result;
     },
-    [data],
+    [data]
   );
 
   const removePerson = useCallback(
@@ -367,7 +365,7 @@ export function useFamilyTree(
       if (result.ok) setData(state);
       return result;
     },
-    [data],
+    [data]
   );
 
   const updatePerson = useCallback(
@@ -376,14 +374,14 @@ export function useFamilyTree(
       if (result.ok) setData(state);
       return result;
     },
-    [data],
+    [data]
   );
 
   const moveNode = useCallback(
     (nodeId: string, position: { x: number; y: number }) => {
       setPosOverrides((prev) => ({ ...prev, [nodeId]: position }));
     },
-    [],
+    []
   );
 
   const setLayout = useCallback((mode: LayoutMode) => {
@@ -400,7 +398,7 @@ export function useFamilyTree(
       });
       setPosOverrides(overrides);
     },
-    [],
+    []
   );
 
   const store: FamilyTreeStore = {

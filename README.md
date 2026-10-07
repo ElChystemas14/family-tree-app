@@ -22,12 +22,14 @@ y sobreviven recargas.
 
 ## Scripts
 
-| Script | Qué hace |
-|---|---|
-| `pnpm dev` | Servidor de desarrollo |
-| `pnpm build` / `pnpm start` | Build de producción / servirlo |
-| `pnpm lint` | ESLint |
-| `pnpm test` | Vitest (lógica de fechas, validación, persistencia) |
+| Script                              | Qué hace                                            |
+| ----------------------------------- | --------------------------------------------------- |
+| `pnpm dev`                          | Servidor de desarrollo                              |
+| `pnpm build` / `pnpm start`         | Build de producción / servirlo                      |
+| `pnpm lint`                         | ESLint                                              |
+| `pnpm typecheck`                    | `tsc --noEmit`                                      |
+| `pnpm test`                         | Vitest (lógica de fechas, validación, persistencia) |
+| `pnpm format` / `pnpm format:check` | Formatear con Prettier / comprobar formato          |
 
 ## Estructura de `src/`
 
@@ -52,7 +54,7 @@ y sobreviven recargas.
 - **ChildRelationship**: `id`, `childId`, `unionId` **o** `singleParentId`
   (excluyentes), `type` (`biological` | `adopted` | `step`).
 - **Formato canónico JSON**: `{ version: 1, persons, unions, relationships,
-  posOverrides? }` — es lo que se guarda en local y lo que se exporta/importa
+posOverrides? }` — es lo que se guarda en local y lo que se exporta/importa
   (`arbol-AAAA-MM-DD.json`).
 
 ## Documentación del proyecto

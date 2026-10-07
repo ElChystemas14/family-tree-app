@@ -9,7 +9,8 @@ type TestGraph = ReturnType<typeof transformFamilyToGraph>;
 
 function personData(graph: TestGraph, id: string) {
   const node = graph.nodes.find((n) => n.id === id);
-  if (!node || !("generation" in node.data)) throw new Error(`no es persona: ${id}`);
+  if (!node || !("generation" in node.data))
+    throw new Error(`no es persona: ${id}`);
   return node.data;
 }
 
@@ -19,7 +20,12 @@ function generationOf(graph: TestGraph, id: string): number {
 
 describe("transformFamilyToGraph (B2)", () => {
   it("genera nodos y aristas esperados del dataset Hawthorne", () => {
-    const graph = transformFamilyToGraph(persons, unions, relationships, "vertical");
+    const graph = transformFamilyToGraph(
+      persons,
+      unions,
+      relationships,
+      "vertical"
+    );
     // 16 personas + 5 uniones; aristas: 5 uniones × 2 + 10 relaciones.
     expect(graph.nodes).toHaveLength(21);
     expect(graph.edges).toHaveLength(20);
@@ -31,7 +37,12 @@ describe("transformFamilyToGraph (B2)", () => {
   });
 
   it("calcula generaciones por linaje", () => {
-    const graph = transformFamilyToGraph(persons, unions, relationships, "vertical");
+    const graph = transformFamilyToGraph(
+      persons,
+      unions,
+      relationships,
+      "vertical"
+    );
     expect(generationOf(graph, "ruth")).toBe(0);
     expect(generationOf(graph, "walter")).toBe(0);
     expect(generationOf(graph, "james")).toBe(0); // sin padres registrados
@@ -49,7 +60,7 @@ describe("transformFamilyToGraph (B2)", () => {
       unions,
       relationships,
       "vertical",
-      "lucy",
+      "lucy"
     );
     expect(personData(graph, "lucy").isSelected).toBe(true);
     expect(personData(graph, "ruth").isPathHighlighted).toBe(true);
@@ -74,7 +85,7 @@ describe("transformFamilyToGraph (B2)", () => {
       data.persons,
       data.unions,
       data.relationships,
-      "vertical",
+      "vertical"
     );
     const edge = graph.edges.find((e) => e.id === "r-solo");
     expect(edge).toMatchObject({ source: "james", target: "henry" });
@@ -94,22 +105,37 @@ describe("transformFamilyToGraph (B2)", () => {
       ],
       relationships: [
         ...relationships,
-        { id: "r-ciclo", childId: "lucy", unionId: "u-ciclo", type: "biological" },
+        {
+          id: "r-ciclo",
+          childId: "lucy",
+          unionId: "u-ciclo",
+          type: "biological",
+        },
       ],
     };
     const graph = transformFamilyToGraph(
       cyclic.persons,
       cyclic.unions,
       cyclic.relationships,
-      "vertical",
+      "vertical"
     );
     expect(graph.nodes).toHaveLength(22);
     expect(generationOf(graph, "lucy")).toBeGreaterThanOrEqual(0);
   });
 
   it("layout horizontal produce el mismo grafo con posiciones distintas", () => {
-    const vertical = transformFamilyToGraph(persons, unions, relationships, "vertical");
-    const horizontal = transformFamilyToGraph(persons, unions, relationships, "horizontal");
+    const vertical = transformFamilyToGraph(
+      persons,
+      unions,
+      relationships,
+      "vertical"
+    );
+    const horizontal = transformFamilyToGraph(
+      persons,
+      unions,
+      relationships,
+      "horizontal"
+    );
     expect(horizontal.nodes).toHaveLength(vertical.nodes.length);
     const vRuth = vertical.nodes.find((n) => n.id === "ruth");
     const hRuth = horizontal.nodes.find((n) => n.id === "ruth");

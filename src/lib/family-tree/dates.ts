@@ -9,7 +9,8 @@ const ISO_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export function parseISODateLocal(iso: string): Date {
   const match = ISO_DATE_RE.exec(iso.trim());
-  if (!match) throw new Error(`Fecha inválida (se esperaba YYYY-MM-DD): ${iso}`);
+  if (!match)
+    throw new Error(`Fecha inválida (se esperaba YYYY-MM-DD): ${iso}`);
   const year = Number(match[1]);
   const month = Number(match[2]);
   const day = Number(match[3]);

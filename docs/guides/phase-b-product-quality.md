@@ -37,13 +37,12 @@ Roadmap: ítems B1–B6 (`../roadmap.md`).
 - Aceptación: `pnpm test` verde; los tests cubren A1–A3.
   34/34 en `America/Lima` y `Pacific/Kiritimati`.
 
-## B3 — CI + formato (AUD-LOW-02, AUD-LOW-04)
+## B3 — CI + formato (AUD-LOW-02, AUD-LOW-04) — hecho 2026-10-07
 
-- [ ] GitHub Actions: `pnpm install --frozen-lockfile`, `tsc --noEmit`, `eslint`, `test`, `build`.
-      Recomendado adelantar `tsc + eslint + build` ya en Fase A si se quiere feedback
-      temprano (el `test` se suma cuando exista A1).
-- [ ] Prettier (config + `format` script) y formateo único de los archivos kilométricos v0
-      (cambios solo de formato, commit separado).
+- [x] GitHub Actions (`.github/workflows/ci.yml`): `pnpm install --frozen-lockfile`,
+      `format:check`, `typecheck` (`tsc --noEmit`), `lint`, `test` (con `TZ: America/Lima`), `build`.
+- [x] Prettier (`.prettierrc.json` + scripts `format` / `format:check`, `.prettierignore`)
+      y formateo único de los archivos kilométricos v0 (cambios solo de formato, commit separado).
 - Aceptación: cada push/PR futuro corre el pipeline.
 
 ## B4 — Pulido (AUD-MED-02, AUD-MED-05, AUD-MED-06, AUD-LOW-01)

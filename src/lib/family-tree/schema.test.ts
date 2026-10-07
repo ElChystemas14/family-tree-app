@@ -36,10 +36,10 @@ describe("validatePersonForm (A3)", () => {
 
   it("rechaza fechas con mal formato, inexistentes e incoherentes", () => {
     expect(
-      validatePersonForm({ ...base, birthDate: "02/05/1970" }).errors.birthDate,
+      validatePersonForm({ ...base, birthDate: "02/05/1970" }).errors.birthDate
     ).toContain("AAAA-MM-DD");
     expect(
-      validatePersonForm({ ...base, birthDate: "2024-02-30" }).errors.birthDate,
+      validatePersonForm({ ...base, birthDate: "2024-02-30" }).errors.birthDate
     ).toContain("no existe");
     const inverted = validatePersonForm({
       ...base,
@@ -52,18 +52,18 @@ describe("validatePersonForm (A3)", () => {
 
   it("solo acepta fotos https:// o ruta /", () => {
     expect(
-      validatePersonForm({ ...base, photoUrl: "https://x.com/f.jpg" }).ok,
+      validatePersonForm({ ...base, photoUrl: "https://x.com/f.jpg" }).ok
     ).toBe(true);
     expect(validatePersonForm({ ...base, photoUrl: "/foto.jpg" }).ok).toBe(
-      true,
+      true
     );
     expect(
       validatePersonForm({ ...base, photoUrl: "javascript:alert(1)" }).errors
-        .photoUrl,
+        .photoUrl
     ).toContain("https://");
     expect(
       validatePersonForm({ ...base, photoUrl: "http://x.com/f.jpg" }).errors
-        .photoUrl,
+        .photoUrl
     ).toContain("https://");
   });
 });
