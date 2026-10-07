@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { FamilyTreeData } from "@/types/family-tree";
 import { familyTreeData } from "./mock-data";
-import { transformFamilyToGraph } from "./transform";
+import {
+  layoutFamilyToGraph,
+  transformFamilyToGraph,
+  withGraphSelection,
+} from "./transform";
 
 const { persons, unions, relationships } = familyTreeData;
 
@@ -121,6 +125,54 @@ describe("transformFamilyToGraph (B2)", () => {
     );
     expect(graph.nodes).toHaveLength(22);
     expect(generationOf(graph, "lucy")).toBeGreaterThanOrEqual(0);
+  });
+
+  it("layout + resaltado separados: seleccionar no mueve nodos (B5)", () => {
+    const base = layoutFamilyToGraph(
+      persons,
+      unions,
+      relationships,
+      "vertical"
+    );
+    expect(base.nodes).toHaveLength(21);
+    const source = { unions, relationships };
+    const asLucy = withGraphSelection(base, source, {
+      layout: "vertical",
+      selectedId: "lucy",
+    });
+    const asRuth = withGraphSelection(base, source, {
+      layout: "vertical",
+      selectedId: "ruth",
+    });
+    // Mismas posiciones (dagre no se re-ejecuta), distinto resaltado.
+    expect(asRuth.nodes.map((n) => n.position)).toEqual(
+      asLucy.nodes.map((n) => n.position)
+    );
+    expect(personData(asLucy, "lucy").isSelected).toBe(true);
+    expect(personData(asRuth, "lucy").isSelected).toBe(false);
+  });
+
+  it("la búsqueda resalta sin mover nodos (B5)", () => {
+    const base = layoutFamilyToGraph(
+      persons,
+      unions,
+      relationships,
+      "vertical"
+    );
+    const source = { unions, relationships };
+    const plain = withGraphSelection(base, source, {
+      layout: "vertical",
+      search: "",
+    });
+    const searched = withGraphSelection(base, source, {
+      layout: "vertical",
+      search: "margaret",
+    });
+    expect(searched.nodes.map((n) => n.position)).toEqual(
+      plain.nodes.map((n) => n.position)
+    );
+    expect(personData(searched, "margaret").isSearchFocused).toBe(true);
+    expect(personData(plain, "margaret").isSearchFocused).toBe(false);
   });
 
   it("layout horizontal produce el mismo grafo con posiciones distintas", () => {

@@ -19,7 +19,7 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 | Fase                      | Estado                             | Guía                                                       | Criterio de salida                                                       |
 | ------------------------- | ---------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------ |
 | A — Integridad de datos   | hecho (A1–A5, 2026-10-07)          | `guides/phase-a-data-integrity.md`                         | Fechas correctas + persistencia local + validación base + repo higiénico |
-| B — Calidad de producto   | en curso (B1–B4 hechos 2026-10-07) | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
+| B — Calidad de producto   | en curso (B1–B5 hechos 2026-10-07) | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
 | C — Intercambio de datos  | pendiente                          | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV                     |
 | D — Puerta a multiusuario | pendiente (diseño)                 | (se creará `guides/phase-d-multiuser.md`)                  | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
 
@@ -50,7 +50,8 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 - [x] **B4** Pulido: dark persistente, quitar solo `Geist Sans`, táctil, OG mínimo →
       `AUD-MED-02`, `AUD-MED-05`, `AUD-MED-06`, `AUD-LOW-01` (hecho 2026-10-07;
       checklist manual pendiente)
-- [ ] **B5** Memoizar layout por estructura+modo (resaltado aparte) → `AUD-MED-04`
+- [x] **B5** Memoizar layout por estructura+modo (resaltado aparte) → `AUD-MED-04`
+      (hecho 2026-10-07)
 - [ ] **B6** Vaciar dataset Hawthorne → árbol vacío + onboarding "crea tu primera persona"
 - Detalle paso a paso: `guides/phase-b-product-quality.md`.
 

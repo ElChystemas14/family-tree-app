@@ -61,10 +61,16 @@ Roadmap: ítems B1–B6 (`../roadmap.md`).
   Pendiente de verificación manual: alternar tema y recargar (persiste);
   arrastrar en táctil no propone unión; `/robots.txt` y `/sitemap.xml` en verde.
 
-## B5 — Rendimiento de layout (AUD-MED-04)
+## B5 — Rendimiento de layout (AUD-MED-04) — hecho 2026-10-07
 
-- [ ] Memoizar dagre por (estructura + modo); derivar resaltado/búsqueda sin re-layout.
+- [x] Memoizar dagre por (estructura + modo); derivar resaltado/búsqueda sin re-layout.
+      `transform.ts` dividido en `layoutFamilyToGraph` (dagre + generaciones) y
+      `withGraphSelection` (resaltado/búsqueda/callbacks); el canvas memoiza el
+      layout con deps `[data, layout]` y deriva selección/búsqueda aparte.
+      `transformFamilyToGraph` se conserva como envoltorio (tests intactos).
 - Aceptación: seleccionar/buscar no re-ejecuta dagre (verificable con contador en dev).
+  En dev cada layout registra `[layout] dagre ejecutado (N)` en consola;
+  tests que comparan posiciones entre selecciones/búsquedas (`transform.test.ts`).
 
 ## B6 — Vaciar dataset de prueba
 

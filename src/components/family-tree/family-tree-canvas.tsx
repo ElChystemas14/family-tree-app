@@ -17,7 +17,10 @@ import { UnionNode } from "./union-node";
 import { TreeControls } from "./tree-controls";
 import { PersonDetailSheet } from "./person-detail-sheet";
 import { AddRelativeModal } from "./add-relative-modal";
-import { transformFamilyToGraph } from "@/lib/family-tree/transform";
+import {
+  layoutFamilyToGraph,
+  withGraphSelection,
+} from "@/lib/family-tree/transform";
 import { getParentIds, useFamilyTree } from "@/lib/family-tree/store";
 import {
   buildExportFilename,
@@ -137,39 +140,48 @@ function FlowInner() {
     },
     [storeConnectUnion, notify]
   );
-  const graph = useMemo(
+  // dagre solo se re-ejecuta si cambian estructura o modo (B5, AUD-MED-04);
+  // seleccionar/buscar solo re-deriva resaltado (ver `[layout] dagre…` en dev).
+  const layoutGraph = useMemo(
     () =>
-      transformFamilyToGraph(
+      layoutFamilyToGraph(
         data.persons,
         data.unions,
         data.relationships,
-        layout,
-        selected?.id,
-        (id, action) => openRelationship(action, id),
-        (id) => openRelationship("child", undefined, id)
+        layout
       ),
-    [data, layout, selected, openRelationship]
+    [data, layout]
+  );
+  const graph = useMemo(
+    () =>
+      withGraphSelection(
+        layoutGraph,
+        { unions: data.unions, relationships: data.relationships },
+        {
+          layout,
+          selectedId: selected?.id,
+          search,
+          onPersonAction: (id, action) => openRelationship(action, id),
+          onUnionChild: (id) => openRelationship("child", undefined, id),
+        }
+      ),
+    [
+      layoutGraph,
+      data.unions,
+      data.relationships,
+      layout,
+      selected?.id,
+      search,
+      openRelationship,
+    ]
   );
   const nodes = useMemo(
     () =>
       graph.nodes.map((node) => ({
         ...node,
         position: posOverrides[node.id] ?? node.position,
-        data:
-          node.type === "person" &&
-          "firstName" in node.data &&
-          "lastName" in node.data
-            ? {
-                ...node.data,
-                isSearchFocused:
-                  !!search &&
-                  `${node.data.firstName} ${node.data.lastName}`
-                    .toLowerCase()
-                    .includes(search.toLowerCase()),
-              }
-            : node.data,
       })),
-    [graph.nodes, search, posOverrides]
+    [graph.nodes, posOverrides]
   ) as unknown as Node[];
   const focusLineage = useCallback(
     (personId: string) => {

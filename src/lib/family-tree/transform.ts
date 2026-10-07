@@ -7,26 +7,63 @@ import type {
   Union,
 } from "@/types/family-tree";
 
-export function transformFamilyToGraph(
-  persons: Person[],
-  unions: Union[],
-  relationships: ChildRelationship[],
-  layout: LayoutMode = "vertical",
-  selectedId?: string,
+/** Nodo con posición calculada por dagre, sin resaltado ni callbacks. */
+export interface LayoutPersonNode {
+  id: string;
+  type: "person";
+  position: { x: number; y: number };
+  width: number;
+  height: number;
+  data: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    birthDate?: string;
+    deathDate?: string;
+    gender: Person["gender"];
+    photoUrl?: string;
+    generation: number;
+    layout: LayoutMode;
+  };
+}
+
+/** Nodo de unión con posición calculada por dagre, sin resaltado. */
+export interface LayoutUnionNode {
+  id: string;
+  type: "union";
+  position: { x: number; y: number };
+  width: number;
+  height: number;
+  data: {
+    id: string;
+    partner1Id: string;
+    partner2Id: string;
+    layout: LayoutMode;
+  };
+}
+
+export interface FamilyLayout {
+  nodes: Array<LayoutPersonNode | LayoutUnionNode>;
+  edges: Array<{ id: string; source: string; target: string }>;
+}
+
+export interface SelectionOptions {
+  layout: LayoutMode;
+  selectedId?: string;
+  search?: string;
   onPersonAction?: (
     personId: string,
     action: "parent" | "spouse" | "child"
-  ) => void,
-  onUnionChild?: (unionId: string) => void
-): GraphData {
-  const graph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  graph.setGraph({
-    rankdir: layout === "vertical" ? "TB" : "LR",
-    nodesep: 90,
-    ranksep: 150,
-    marginx: 80,
-    marginy: 70,
-  });
+  ) => void;
+  onUnionChild?: (unionId: string) => void;
+}
+
+let layoutRuns = 0;
+
+function buildParentsByChild(
+  unions: Union[],
+  relationships: ChildRelationship[]
+): Map<string, string[]> {
   const parentsByChild = new Map<string, string[]>();
   relationships.forEach((relationship) => {
     const union = unions.find((item) => item.id === relationship.unionId);
@@ -39,6 +76,28 @@ export function transformFamilyToGraph(
           : []
     );
   });
+  return parentsByChild;
+}
+
+/**
+ * Ejecuta dagre una sola vez por (estructura + modo). El canvas memoiza su
+ * resultado excluyendo selección/búsqueda (Fase B5, AUD-MED-04).
+ */
+export function layoutFamilyToGraph(
+  persons: Person[],
+  unions: Union[],
+  relationships: ChildRelationship[],
+  layoutMode: LayoutMode = "vertical"
+): FamilyLayout {
+  const graph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+  graph.setGraph({
+    rankdir: layoutMode === "vertical" ? "TB" : "LR",
+    nodesep: 90,
+    ranksep: 150,
+    marginx: 80,
+    marginy: 70,
+  });
+  const parentsByChild = buildParentsByChild(unions, relationships);
   const generations = new Map<string, number>();
   const getGeneration = (id: string, visiting = new Set<string>()): number => {
     if (generations.has(id)) return generations.get(id)!;
@@ -68,6 +127,80 @@ export function transformFamilyToGraph(
     if (source) graph.setEdge(source, relationship.childId);
   });
   dagre.layout(graph);
+  layoutRuns += 1;
+  if (process.env.NODE_ENV === "development") {
+    console.debug(`[layout] dagre ejecutado (${layoutRuns})`);
+  }
+
+  const nodes: FamilyLayout["nodes"] = persons.map((person) => {
+    const point = graph.node(person.id);
+    return {
+      id: person.id,
+      type: "person" as const,
+      data: {
+        id: person.id,
+        firstName: person.firstName,
+        lastName: person.lastName,
+        birthDate: person.birthDate,
+        deathDate: person.deathDate,
+        gender: person.gender,
+        photoUrl: person.photoUrl,
+        generation: generations.get(person.id) ?? 0,
+        layout: layoutMode,
+      },
+      position: { x: point.x - 130, y: point.y - 58 },
+      width: 260,
+      height: 116,
+    };
+  });
+  const unionNodes: LayoutUnionNode[] = unions.map((union) => {
+    const point = graph.node(union.id);
+    return {
+      id: union.id,
+      type: "union" as const,
+      data: {
+        id: union.id,
+        partner1Id: union.partner1Id,
+        partner2Id: union.partner2Id,
+        layout: layoutMode,
+      },
+      position: { x: point.x - 11, y: point.y - 11 },
+      width: 22,
+      height: 22,
+    };
+  });
+  const edges: FamilyLayout["edges"] = [
+    ...unions.flatMap((u) => [
+      { id: `${u.id}-${u.partner1Id}`, source: u.partner1Id, target: u.id },
+      { id: `${u.id}-${u.partner2Id}`, source: u.partner2Id, target: u.id },
+    ]),
+    ...relationships.map((r) => ({
+      id: r.id,
+      source: r.unionId ?? r.singleParentId ?? "",
+      target: r.childId,
+    })),
+  ];
+  return { nodes: [...nodes, ...unionNodes], edges };
+}
+
+/**
+ * Deriva resaltado/búsqueda/callbacks sobre un layout ya calculado, sin
+ * re-ejecutar dagre. Barato: se re-ejecuta al seleccionar o buscar.
+ */
+export function withGraphSelection(
+  base: FamilyLayout,
+  source: { unions: Union[]; relationships: ChildRelationship[] },
+  opts: SelectionOptions
+): GraphData {
+  const { unions, relationships } = source;
+  const {
+    layout,
+    selectedId,
+    search = "",
+    onPersonAction,
+    onUnionChild,
+  } = opts;
+  const parentsByChild = buildParentsByChild(unions, relationships);
   const ancestors = new Set<string>();
   const descendants = new Set<string>();
   const partners = new Set<string>();
@@ -102,55 +235,41 @@ export function transformFamilyToGraph(
       ancestors.has(id) ||
       descendants.has(id) ||
       partners.has(id));
-  const nodes = persons.map((person) => {
-    const point = graph.node(person.id);
+  const matchesSearch = (firstName: string, lastName: string) =>
+    !!search &&
+    `${firstName} ${lastName}`.toLowerCase().includes(search.toLowerCase());
+
+  const nodes: GraphData["nodes"] = base.nodes.map((node) => {
+    if (node.type === "union") {
+      const highlighted =
+        isHighlighted(node.data.partner1Id) ||
+        isHighlighted(node.data.partner2Id);
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          layout,
+          isDimmed: !!selectedId && !highlighted,
+          isPathHighlighted: highlighted,
+          onAddChild: () => onUnionChild?.(node.id),
+        },
+      };
+    }
     return {
-      id: person.id,
-      type: "person" as const,
+      ...node,
       data: {
-        id: person.id,
-        firstName: person.firstName,
-        lastName: person.lastName,
-        birthDate: person.birthDate,
-        deathDate: person.deathDate,
-        gender: person.gender,
-        photoUrl: person.photoUrl,
-        generation: generations.get(person.id) ?? 0,
+        ...node.data,
         layout,
-        isSelected: person.id === selectedId,
-        isSearchFocused: false,
-        isDimmed: !!selectedId && !isHighlighted(person.id),
-        isPathHighlighted: isHighlighted(person.id),
+        isSelected: node.id === selectedId,
+        isSearchFocused: matchesSearch(node.data.firstName, node.data.lastName),
+        isDimmed: !!selectedId && !isHighlighted(node.id),
+        isPathHighlighted: isHighlighted(node.id),
         onQuickAction: (action: "parent" | "spouse" | "child") =>
-          onPersonAction?.(person.id, action),
+          onPersonAction?.(node.id, action),
       },
-      position: { x: point.x - 130, y: point.y - 58 },
-      width: 260,
-      height: 116,
     };
   });
-  const unionNodes = unions.map((union) => {
-    const point = graph.node(union.id);
-    const highlighted =
-      isHighlighted(union.partner1Id) || isHighlighted(union.partner2Id);
-    return {
-      id: union.id,
-      type: "union" as const,
-      data: {
-        id: union.id,
-        partner1Id: union.partner1Id,
-        partner2Id: union.partner2Id,
-        layout,
-        isDimmed: !!selectedId && !highlighted,
-        isPathHighlighted: highlighted,
-        onAddChild: () => onUnionChild?.(union.id),
-      },
-      position: { x: point.x - 11, y: point.y - 11 },
-      width: 22,
-      height: 22,
-    };
-  });
-  const edges = [
+  const edges: GraphData["edges"] = [
     ...unions.flatMap((u) => [
       {
         id: `${u.id}-${u.partner1Id}`,
@@ -172,5 +291,24 @@ export function transformFamilyToGraph(
       animated: isHighlighted(r.childId),
     })),
   ];
-  return { nodes: [...nodes, ...unionNodes], edges };
+  return { nodes, edges };
+}
+
+export function transformFamilyToGraph(
+  persons: Person[],
+  unions: Union[],
+  relationships: ChildRelationship[],
+  layout: LayoutMode = "vertical",
+  selectedId?: string,
+  onPersonAction?: (
+    personId: string,
+    action: "parent" | "spouse" | "child"
+  ) => void,
+  onUnionChild?: (unionId: string) => void
+): GraphData {
+  return withGraphSelection(
+    layoutFamilyToGraph(persons, unions, relationships, layout),
+    { unions, relationships },
+    { layout, selectedId, search: "", onPersonAction, onUnionChild }
+  );
 }
