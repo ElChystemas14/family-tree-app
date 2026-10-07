@@ -8,12 +8,11 @@ export interface Person {
   firstName: string
   lastName: string
   gender: 'male' | 'female' | 'other'
-  birthDate: string // ISO 8601 date string
+  birthDate?: string // ISO 8601 date string (YYYY-MM-DD), opcional (AUD-HIGH-06)
   deathDate?: string // ISO 8601 date string, optional for living persons
-  photoUrl?: string
+  photoUrl?: string // solo https:// o ruta / (validado en A3)
   bio?: string
   attributes?: {
-    adopted?: boolean
     [key: string]: unknown
   }
 }
@@ -48,7 +47,7 @@ export interface PersonNodeData {
   id: string
   firstName: string
   lastName: string
-  birthDate: string
+  birthDate?: string
   deathDate?: string
   gender: 'male' | 'female' | 'other'
   photoUrl?: string
