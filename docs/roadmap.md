@@ -19,7 +19,7 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 | Fase | Estado | Guía | Criterio de salida |
 |---|---|---|---|
 | A — Integridad de datos | hecho (A1–A5, 2026-10-07) | `guides/phase-a-data-integrity.md` | Fechas correctas + persistencia local + validación base + repo higiénico |
-| B — Calidad de producto | pendiente | `guides/phase-b-product-quality.md` | Store extraído + tests + CI + dataset de prueba limpio |
+| B — Calidad de producto | en curso (B1 hecho 2026-10-07) | `guides/phase-b-product-quality.md` | Store extraído + tests + CI + dataset de prueba limpio |
 | C — Intercambio de datos | pendiente | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV |
 | D — Puerta a multiusuario | pendiente (diseño) | (se creará `guides/phase-d-multiuser.md`) | Modelo con `ownerId`/`treeId`, decisions actualizadas |
 
@@ -39,8 +39,9 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 ## Fase B — Calidad de producto
 
-- [ ] **B1** Extraer store (`useFamilyTree`/zustand): acciones, IDs fuera de updaters,
-      persistencia desacoplada (prepara multiusuario)
+- [x] **B1** Extraer store (`useFamilyTree`/zustand): acciones, IDs fuera de updaters,
+      persistencia desacoplada (prepara multiusuario) (hecho 2026-10-07; conteo de
+      líneas pendiente de formateo B3)
 - [ ] **B2** Ampliar tests Vitest (ya instalado en A1): `transform`, parentesco/antepasados
       con datos vivos, validaciones, serialización → `AUD-HIGH-02`, `AUD-HIGH-05`
 - [ ] **B3** CI (tsc + eslint + build + tests) + Prettier y formateo de archivos v0 →
