@@ -1,25 +1,39 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { THEME_STORAGE_KEY } from "@/lib/family-tree/theme";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
+const siteTitle = "Archivo Hawthorne — Árbol genealógico";
+const siteDescription =
+  "Explora el archivo de la familia Hawthorne a lo largo de las generaciones.";
+
+// Aplica la preferencia de tema antes del primer pintado (sin flash).
+// Debe coincidir con `src/lib/family-tree/theme.ts` (clave y oscuro por defecto).
+const themeScript = `(function(){try{var t=localStorage.getItem("${THEME_STORAGE_KEY}");if(t!=="dark"&&t!=="light")t="dark";document.documentElement.classList.toggle("dark",t==="dark");}catch(e){document.documentElement.classList.add("dark");}})();`;
+
 export const metadata: Metadata = {
-  title: "Archivo Hawthorne — Árbol genealógico",
-  description:
-    "Explora el archivo de la familia Hawthorne a lo largo de las generaciones.",
+  title: siteTitle,
+  description: siteDescription,
+  openGraph: {
+    title: siteTitle,
+    description: siteDescription,
+    type: "website",
+    locale: "es_ES",
+  },
+  twitter: {
+    card: "summary",
+    title: siteTitle,
+    description: siteDescription,
+  },
   icons: {
     icon: [
       {
@@ -51,16 +65,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es"
+      suppressHydrationWarning
       className={cn(
         "h-full",
         "antialiased",
-        geistSans.variable,
         geistMono.variable,
         "font-sans",
         inter.variable
       )}
     >
       <body className="min-h-full flex flex-col">
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {children}
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>

@@ -45,13 +45,21 @@ Roadmap: ítems B1–B6 (`../roadmap.md`).
       y formateo único de los archivos kilométricos v0 (cambios solo de formato, commit separado).
 - Aceptación: cada push/PR futuro corre el pipeline.
 
-## B4 — Pulido (AUD-MED-02, AUD-MED-05, AUD-MED-06, AUD-LOW-01)
+## B4 — Pulido (AUD-MED-02, AUD-MED-05, AUD-MED-06, AUD-LOW-01) — hecho 2026-10-07
 
-- [ ] Dark persistente (preferencia guardada, sin flash inicial).
-- [ ] Quitar solo `Geist Sans` sin uso; conservar `Geist_Mono` (AUD-MED-02 corregida).
-- [ ] Táctil: resolver drag-connect vs pan (modo conectar explícito o gesto alternativo).
-- [ ] OG/Twitter cards mínimas + `robots`/`sitemap` básicos.
+- [x] Dark persistente (preferencia guardada, sin flash inicial).
+      Clave `hawthorne-theme` (`theme.ts` + tests); script bloqueante en el layout
+      aplica la clase antes del primer pintado; oscuro por defecto (sin regresión).
+- [x] Quitar solo `Geist Sans` sin uso; conservar `Geist_Mono` (AUD-MED-02 corregida).
+- [x] Táctil: resolver drag-connect vs pan (modo conectar explícito o gesto alternativo).
+      En táctil (`pointerType: touch` o puntero grueso) arrastrar solo mueve;
+      la pareja se crea desde ⋯ → "Añadir pareja" (documentado en la ayuda).
+- [x] OG/Twitter cards mínimas + `robots`/`sitemap` básicos.
+      (`openGraph`/`twitter` en `layout.tsx`; `src/app/robots.ts` + `sitemap.ts`;
+      dominio vía `NEXT_PUBLIC_SITE_URL`, `localhost` por defecto.)
 - Aceptación: checklist manual claro/oscuro × móvil/escritorio sin regresiones.
+  Pendiente de verificación manual: alternar tema y recargar (persiste);
+  arrastrar en táctil no propone unión; `/robots.txt` y `/sitemap.xml` en verde.
 
 ## B5 — Rendimiento de layout (AUD-MED-04)
 

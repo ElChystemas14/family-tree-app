@@ -28,6 +28,7 @@ import {
   type ImportResult,
 } from "@/lib/family-tree/storage";
 import { validatePersonForm } from "@/lib/family-tree/schema";
+import { readStoredTheme, writeStoredTheme } from "@/lib/family-tree/theme";
 import type { LayoutMode, Person } from "@/types/family-tree";
 import { Button } from "@/components/ui/button";
 import {
@@ -65,7 +66,9 @@ function FlowInner() {
   } = useFamilyTree();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Person>();
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState<boolean>(
+    () => readStoredTheme() !== "light"
+  );
   const [modal, setModal] = useState<ModalState>();
   const [createPersonOpen, setCreatePersonOpen] = useState(false);
   const [pendingUnion, setPendingUnion] = useState<{
@@ -290,6 +293,7 @@ function FlowInner() {
   }, [importPreview, storeImportData, notify]);
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
+    writeStoredTheme(dark ? "dark" : "light");
   }, [dark]);
   /* eslint-disable react-hooks/set-state-in-effect -- hidratación post-montaje
      intencionada desde localStorage; en render rompería la hidratación SSR (AUD-MED-08). */
@@ -420,9 +424,18 @@ function FlowInner() {
             if (data.persons.some((item) => item.id === node.id))
               focusLineage(node.id);
           }}
-          onNodeDragStop={(_, node) => {
+          onNodeDragStop={(event, node) => {
             moveNode(node.id, node.position);
             if (node.type !== "person") return;
+            // En táctil arrastrar compite con el pan: no se propone unión
+            // (la pareja se crea desde el menú ⋯ → "Añadir pareja").
+            const pointerType = (event as unknown as { pointerType?: string })
+              .pointerType;
+            const coarse =
+              typeof window !== "undefined" &&
+              typeof window.matchMedia === "function" &&
+              window.matchMedia("(pointer: coarse)").matches;
+            if (pointerType === "touch" || (!pointerType && coarse)) return;
             const target = getIntersectingNodes(node).find(
               (item) => item.type === "person" && item.id !== node.id
             );
@@ -598,9 +611,12 @@ function FlowInner() {
               <section>
                 <h3 className="font-semibold">Conectar parejas arrastrando</h3>
                 <p className="text-muted-foreground">
-                  Arrastra una tarjeta sobre otra para proponer una unión;
-                  siempre pide confirmación. Mover nodos no altera al resto:
-                  cada posición que cambies se conserva.
+                  En escritorio, arrastra una tarjeta sobre otra para proponer
+                  una unión; siempre pide confirmación. En táctil, arrastrar
+                  solo mueve (para no chocar con el desplazamiento): crea la
+                  pareja desde el menú ⋯ → &quot;Añadir pareja&quot;. Mover
+                  nodos no altera al resto: cada posición que cambies se
+                  conserva.
                 </p>
               </section>
               <section>
