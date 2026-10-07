@@ -27,8 +27,9 @@ Roadmap: ítems C1–C4 (`../roadmap.md`). Spec: [`csv-format.md`](csv-format.md
 - [ ] Aviso de privacidad si hay personas vivas incluidas.
 - Aceptación: round-trip JSON y CSV verificados por test.
 
-## C4 — Infra i18n
+## C4 — Infra i18n (opcional, no bloquea v1.0)
 
 - [ ] Instalar `next-intl`, mover cadenas ES a catálogo `es`, locale por defecto `es`.
-- [ ] `en` como locale pendiente (no bloquea v1.0).
+- [ ] `en` como locale pendiente (no bloquea v1.0). Si urge v1.0, puede moverse a post-v1.0
+      sin afectar C1–C3.
 - Aceptación: la app funciona igual con cadenas externalizadas; añadir un idioma = añadir un archivo.

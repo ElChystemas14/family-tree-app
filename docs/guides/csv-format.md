@@ -1,7 +1,9 @@
 # Especificación CSV v1.0 (borrador) — importación
 
-Estado: **borrador** (se congela en Fase C, ítem C1). Codificación UTF-8, separador `,`,
-cabecera obligatoria, fechas `YYYY-MM-DD`. Los `id` son estables y los generan quien
+Estado: **borrador** (se congela en Fase C, ítem C1). Codificación UTF-8
+(recomendado con BOM para Excel ES), separador `,` con quoting RFC 4180
+(nota: en Excel español puede requerir `;` — documentar conversión), cabecera
+obligatoria, fechas `YYYY-MM-DD`. Los `id` son estables y los generan quien
 importa (`crypto.randomUUID()` recomendado); vacíos = se generan al importar.
 
 ## `personas.csv`
@@ -12,10 +14,10 @@ importa (`crypto.randomUUID()` recomendado); vacíos = se generan al importar.
 | `firstName` | **sí** | texto no vacío |
 | `lastName` | **sí** | texto no vacío |
 | `gender` | no (`other`) | `male` \| `female` \| `other` |
-| `birthDate` | no | `YYYY-MM-DD` |
+| `birthDate` | no | `YYYY-MM-DD` (alineado con `Person.birthDate?` opcional, AUD-HIGH-06) |
 | `deathDate` | no | `YYYY-MM-DD` (≥ `birthDate`) |
-| `photoUrl` | no | URL `https://` o ruta local |
-| `bio` | no | texto libre |
+| `photoUrl` | no | `https://…` o ruta `/…` (se rechaza `javascript:`, `data:`, etc., AUD-MED-07) |
+| `bio` | no | texto libre (máx. recomendado 2000 car.) |
 
 ## `uniones.csv`
 
@@ -25,7 +27,7 @@ importa (`crypto.randomUUID()` recomendado); vacíos = se generan al importar.
 | `partner1Id` | **sí** | `id` existente en personas |
 | `partner2Id` | **sí** | `id` existente, distinto de `partner1Id` |
 | `unionType` | no (`partnership`) | `marriage` \| `partnership` \| `domestic` |
-| `startDate` / `endDate` | no | `YYYY-MM-DD` |
+| `startDate` / `endDate` | no | `YYYY-MM-DD` (`endDate` ≥ `startDate` si ambos presentes) |
 
 ## `relaciones.csv`
 

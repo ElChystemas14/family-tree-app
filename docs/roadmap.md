@@ -4,7 +4,7 @@ Objetivo: pasar de prototipo a **v1.0 usable por la familia** (local-first, en e
 canvas como pantalla principal) dejando el cimiento para intercambio de datos (CSV/export)
 y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación contraria.
 
-- Auditoría origen: [`audit.md`](audit.md) (los ítems citan IDs `AUD-*`).
+- Auditoría origen: [`audit.md`](audit.md) (los ítems citan IDs `AUD-*`; revisada 2026-10-07).
 - Ideas aparcadas (no comprometidas): [`ideas.md`](ideas.md) (IDs `IDEA-*`).
 - Decisiones tomadas: [`decisions.md`](decisions.md).
 - Guías de ejecución: [`guides/`](guides/) (una por fase + especificación CSV).
@@ -25,11 +25,14 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 ## Fase A — Integridad de datos
 
-- [ ] **A1** Fix fechas UTC→local + tests con TZ fija → `AUD-CRIT-01`
-- [ ] **A2** Persistencia `localStorage` versionada + export/import JSON → `AUD-CRIT-02`
-- [ ] **A3** Esquema zod Persona/Unión/Relación + validación en formularios → `AUD-HIGH-03`
+- [ ] **A1** Fix fechas UTC→local + instalar `vitest` + tests con TZ fija → `AUD-CRIT-01`
+- [ ] **A2** Persistencia `localStorage` versionada (`{ version, … }`, lectura en `useEffect`,
+      `try/catch` de cupo) + export/import JSON → `AUD-CRIT-02`, `AUD-MED-08`
+- [ ] **A3** Esquema zod Persona/Unión/Relación + validación en formularios +
+      `birthDate?` opcional + `photoUrl` validada + `getFamilyRelationships(id, data)` pura →
+      `AUD-HIGH-03`, `AUD-HIGH-05`, `AUD-HIGH-06`, `AUD-MED-07`
 - [ ] **A4** Higiene de repo: borrar `package-lock.json`, `shadcn` a devDeps, limpiar
-      SVGs sin uso y config de imágenes, verificar atribución XYFlow →
+      SVGs sin uso y config de imágenes; atribución XYFlow ya verificada (sin acción) →
       `AUD-HIGH-01`, `AUD-MED-01`, `AUD-MED-03`, `AUD-LOW-03`
 - [ ] **A5** README real (setup, scripts, modelo de datos, enlaces a docs) → `AUD-HIGH-04`
 - Detalle paso a paso: `guides/phase-a-data-integrity.md`.
@@ -38,10 +41,11 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 - [ ] **B1** Extraer store (`useFamilyTree`/zustand): acciones, IDs fuera de updaters,
       persistencia desacoplada (prepara multiusuario)
-- [ ] **B2** Vitest: `transform`, parentesco/antepasados, validaciones, serialización → `AUD-HIGH-02`
+- [ ] **B2** Ampliar tests Vitest (ya instalado en A1): `transform`, parentesco/antepasados
+      con datos vivos, validaciones, serialización → `AUD-HIGH-02`, `AUD-HIGH-05`
 - [ ] **B3** CI (tsc + eslint + build + tests) + Prettier y formateo de archivos v0 →
       `AUD-LOW-02`, `AUD-LOW-04`
-- [ ] **B4** Pulido: dark persistente, quitar fuente sin uso, táctil, OG mínimo →
+- [ ] **B4** Pulido: dark persistente, quitar solo `Geist Sans`, táctil, OG mínimo →
       `AUD-MED-02`, `AUD-MED-05`, `AUD-MED-06`, `AUD-LOW-01`
 - [ ] **B5** Memoizar layout por estructura+modo (resaltado aparte) → `AUD-MED-04`
 - [ ] **B6** Vaciar dataset Hawthorne → árbol vacío + onboarding "crea tu primera persona"
@@ -53,7 +57,7 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
       relaciones + plantilla descargable
 - [ ] **C2** Importador con reporte de errores por fila (usa validación de Fase A) → `AUD-HIGH-03`
 - [ ] **C3** Exportación JSON (formato canónico) + CSV espejo del formato de importación
-- [ ] **C4** Infra i18n (`next-intl`) con `es` por defecto, `en` pendiente
+- [ ] **C4** Infra i18n (`next-intl`) con `es` por defecto, `en` pendiente (opcional, no bloquea v1.0)
 - Detalle paso a paso: `guides/phase-c-data-exchange.md`.
 
 ## Fase D — Puerta a multiusuario (diseño, sin código aún)
@@ -70,9 +74,11 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 | AUD-CRIT-01, AUD-CRIT-02 | A1, A2 |
 | AUD-HIGH-01, AUD-HIGH-03, AUD-HIGH-04 | A4, A3/C2, A5 |
 | AUD-HIGH-02 | B2 |
+| AUD-HIGH-05, AUD-HIGH-06 | A3 (+ B1/B2) |
 | AUD-MED-01, AUD-MED-03 | A4 |
 | AUD-MED-02, AUD-MED-04, AUD-MED-05, AUD-MED-06 | B4, B5, B4, B4 |
-| AUD-LOW-01, AUD-LOW-02, AUD-LOW-03, AUD-LOW-04 | B4, B3, A4, B3 |
+| AUD-MED-07, AUD-MED-08 | A3, A2 |
+| AUD-LOW-01, AUD-LOW-02, AUD-LOW-03, AUD-LOW-04 | B4, B3, A4 (verificado), B3 |
 
 ## Cómo se avanza
 

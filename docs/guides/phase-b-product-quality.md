@@ -16,15 +16,20 @@ Roadmap: ítems B1–B6 (`../roadmap.md`).
 
 ## B2 — Tests Vitest (AUD-HIGH-02)
 
-- [ ] Instalar `vitest` (+ script `test`); fijar `TZ=America/Lima` en los tests de fechas.
+- [ ] `vitest` ya instalado en A1; aquí ampliar cobertura (no reinstalar).
+      Fijar `TZ=America/Lima` en los tests de fechas.
 - [ ] `transform`: generaciones, nodos/aristas esperados, anti-ciclos.
-- [ ] Parentesco: `getParentIds`/`isAncestorOf`, защита contra uniones inválidas.
-- [ ] Validaciones zod (casos válidos + inválidos) y serialización export/import.
+- [ ] Parentesco: `getParentIds`/`isAncestorOf` y `getFamilyRelationships(id, data)`
+      con datos vivos (AUD-HIGH-05), protección contra uniones inválidas.
+- [ ] Validaciones zod (casos válidos + inválidos, incluye `birthDate` opcional y
+      `photoUrl` de AUD-HIGH-06/MED-07) y serialización export/import.
 - Aceptación: `pnpm test` verde; los tests cubren A1–A3.
 
 ## B3 — CI + formato (AUD-LOW-02, AUD-LOW-04)
 
 - [ ] GitHub Actions: `pnpm install --frozen-lockfile`, `tsc --noEmit`, `eslint`, `test`, `build`.
+      Recomendado adelantar `tsc + eslint + build` ya en Fase A si se quiere feedback
+      temprano (el `test` se suma cuando exista A1).
 - [ ] Prettier (config + `format` script) y formateo único de los archivos kilométricos v0
       (cambios solo de formato, commit separado).
 - Aceptación: cada push/PR futuro corre el pipeline.
@@ -32,7 +37,7 @@ Roadmap: ítems B1–B6 (`../roadmap.md`).
 ## B4 — Pulido (AUD-MED-02, AUD-MED-05, AUD-MED-06, AUD-LOW-01)
 
 - [ ] Dark persistente (preferencia guardada, sin flash inicial).
-- [ ] Quitar fuente Geist Sans sin uso (o darle uso).
+- [ ] Quitar solo `Geist Sans` sin uso; conservar `Geist_Mono` (AUD-MED-02 corregida).
 - [ ] Táctil: resolver drag-connect vs pan (modo conectar explícito o gesto alternativo).
 - [ ] OG/Twitter cards mínimas + `robots`/`sitemap` básicos.
 - Aceptación: checklist manual claro/oscuro × móvil/escritorio sin regresiones.

@@ -18,3 +18,6 @@ relevante futura (formato: fecha, decisión, contexto, consecuencias).
 | 2026-09 | Dataset Hawthorne como datos de prueba | Se usa para validar nodos/movimientos; se vacía en Fase B (B6). |
 | 2026-09 | Modelo con `unionId`/`singleParentId` | Soporta parejas, monoparentalidad y adopción; hermanos/hermanastros se derivan (IDEA-01). |
 | 2026-09 | Todo local, sin push | Repo y commits en local hasta indicación contraria. |
+| 2026-10-07 | Revisión auditoría 2026-10-07 | Corregidos MED-02/LOW-03, añadidos HIGH-05/06 y MED-07/08; `vitest` se instala ya en A1; C4 no bloquea v1.0. Sin cambio de alcance de fases. |
+| 2026-10-07 | `birthDate` opcional, `photoUrl` validada | `Person.birthDate?`; solo `https://` o `/`; adopción vive en `relationship.type` (se retira `attributes.adopted`). |
+| 2026-10-07 | Persistencia con `version` + lectura en `useEffect` | Evita mismatch de hidratación; `try/catch` de cupo/modo privado. |

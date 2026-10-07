@@ -1,7 +1,10 @@
 # Auditoría inicial — family-tree-app
 
-- **Fecha**: 2026-09-20
-- **Alcance**: código en `master` hasta `38967f8`, configuración, documentación y repo.
+- **Fecha**: 2026-09-20 (revisada 2026-10-07 hasta `d270057`)
+- **Alcance**: código en `master` hasta `d270057`, configuración, documentación y repo.
+- **Revisión 2026-10-07**: corroborada contra código actual. Corregidos `AUD-MED-02`
+  (matiz Geist Mono) y `AUD-LOW-03` (sin `hideAttribution` en código); añadidos
+  `AUD-HIGH-05`, `AUD-HIGH-06`, `AUD-MED-07`, `AUD-MED-08`.
 - **Método**: lectura de fuentes, ejecución (`tsc`, `eslint`, `build`), pruebas de comportamiento (p. ej. parseo de fechas con TZ) e inspección de dependencias instaladas.
 - **Veredicto**: prototipo avanzado (6.4/10), no producto. Ver `roadmap.md` para el plan de cierre de brechas.
 
@@ -66,15 +69,39 @@ HIGH (deuda que frena el desarrollo), MED (mejora con coste bajo), LOW (higiene)
 - **Fix**: documentar setup (pnpm), scripts, estructura, modelo de datos y enlaces a `docs/`.
 - **Roadmap**: Fase A.
 
+#### AUD-HIGH-05 — `getFamilyRelationships` lee el dataset estático, no el estado vivo (nuevo 2026-10-07)
+- **Ubicación**: `src/lib/family-tree/mock-data.ts:46-47` (`const { persons, unions,
+  relationships } = familyTreeData`), consumido en
+  `src/components/family-tree/person-detail-sheet.tsx:9,15`.
+- **Evidencia**: tras `addPerson`/`connectPeople` en `family-tree-canvas.tsx` el
+  `PersonDetailSheet` sigue mostrando padres/parejas/hijos del dataset Hawthorne
+  original, no los recién creados.
+- **Fix**: hacer la función pura (`getFamilyRelationships(personId, data)`) y pasarle
+  el estado del store; a largo plazo moverla junto al store (B1).
+- **Roadmap**: Fase A (hacerla pura + tests) y Fase B (moverla al store).
+
+#### AUD-HIGH-06 — `Person.birthDate` requerido en tipos pero opcional en UI/CSV (nuevo 2026-10-07)
+- **Ubicación**: `src/types/family-tree.ts:11` (`birthDate: string` obligatorio) vs
+  `src/components/family-tree/add-relative-modal.tsx:23` (permite `''`) y
+  `guides/csv-format.md` (`birthDate` no requerida).
+- **Impacto**: el tipo miente; zod/A3 debe decidir la fuente de verdad.
+- **Fix (recomendado)**: `birthDate?: string` opcional en `Person` + validación
+  `YYYY-MM-DD` cuando esté presente; alinear CSV y formularios.
+- **Roadmap**: Fase A (dentro de A3).
+
+### Medios
+
 ### Medios
 
 #### AUD-MED-01 — CLI `shadcn` en `dependencies`
 - **Ubicación**: `package.json:22`. Lastra la instalación de producción.
 - **Fix**: mover a `devDependencies`. **Roadmap**: Fase A.
 
-#### AUD-MED-02 — Fuente Geist Sans descargada sin uso
-- **Ubicación**: `src/app/layout.tsx` la carga, pero el tema resuelve `--font-sans` a Inter.
-- **Fix**: quitarla o darle uso real. **Roadmap**: Fase B.
+#### AUD-MED-02 — Fuente Geist Sans descargada sin uso (Geist Mono sí se usa)
+- **Ubicación**: `src/app/layout.tsx:9-17` carga `Geist`, `Geist_Mono` e `Inter`;
+  `src/app/globals.css:8-9` mapea `--font-mono` a `--font-geist-mono` (usada) pero
+  `--font-geist-sans` no se referencia en ningún sitio (`--font-sans` resuelve a Inter).
+- **Fix**: quitar solo `Geist Sans`, conservar `Geist_Mono` + `Inter`. **Roadmap**: Fase B.
 
 #### AUD-MED-03 — Configuración de imágenes muerta
 - **Ubicación**: `next.config.ts` (`remotePatterns: images.unsplash.com`).
@@ -98,6 +125,24 @@ HIGH (deuda que frena el desarrollo), MED (mejora con coste bajo), LOW (higiene)
 - **Fix**: modo "conectar" explícito o desactivar drag-connect en táctil.
 - **Roadmap**: Fase B.
 
+#### AUD-MED-07 — `photoUrl` sin validar + flag `adopted` duplicado (nuevo 2026-10-07)
+- **Ubicación**: `add-relative-modal.tsx:19` (texto libre `https://...`),
+  `person-detail-sheet.tsx:14` (`AvatarImage src` directo), `mock-data.ts:17`
+  (`attributes: { adopted: true }` en Nora cuando ya existe
+  `relationships[].type: 'adopted'`).
+- **Impacto**: URLs `javascript:`/rotas rompen avatar; doble fuente de verdad para adopción.
+- **Fix**: en zod/A3 aceptar solo `https://` o ruta `/`; fuente de verdad = `relationship.type`,
+  eliminar `attributes.adopted` (mantener `attributes` libre para ocupación, etc.).
+- **Roadmap**: Fase A (dentro de A3).
+
+#### AUD-MED-08 — Persistencia: hidratación SSR y cupo no especificados (nuevo 2026-10-07)
+- **Ubicación**: futura A2 sobre `family-tree-canvas.tsx:47` (`useState(familyTreeData)`).
+- **Impacto**: leer `localStorage` en render rompe hidratación; `QuotaExceededError`
+  y modo privado deben manejarse sin crash.
+- **Fix**: leer en `useEffect` tras montaje (estado inicial = Hawthorne), guardar con
+  debounce + `try/catch` de cupo, avisar sin bloquear.
+- **Roadmap**: Fase A (dentro de A2).
+
 ### Bajos
 
 #### AUD-LOW-01 — Sin Open Graph, sitemap ni robots
@@ -107,9 +152,12 @@ HIGH (deuda que frena el desarrollo), MED (mejora con coste bajo), LOW (higiene)
 - **Fix**: GitHub Actions con `tsc` + `eslint` + `build` (+ tests en Fase B).
 - **Roadmap**: Fase B.
 
-#### AUD-LOW-03 — Verificar atribución XYFlow
-- Se usa `proOptions={{ hideAttribution: true }}`; revisar términos para el caso de uso.
-- **Roadmap**: Fase A (una línea de verificación, coste ~0).
+#### AUD-LOW-03 — Atribución XYFlow visible (corrección 2026-10-07)
+- **Ubicación**: `src/components/family-tree/family-tree-canvas.tsx` — verificado el
+  2026-10-07: **no** existe `proOptions` ni `hideAttribution` en `src/`; la atribución
+  por defecto queda visible, que es lo correcto para la licencia.
+- **Fix**: ninguno requerido; no ocultar la atribución sin licencia Pro.
+- **Roadmap**: Fase A (solo verificación, coste ~0 — ya cumplido).
 
 #### AUD-LOW-04 — Archivos de una sola línea kilométrica (herencia v0)
 - Dificultan revisión y debug. **Fix**: Prettier + formateo. **Roadmap**: Fase B.
