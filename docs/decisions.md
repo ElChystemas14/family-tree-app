@@ -21,3 +21,5 @@ relevante futura (formato: fecha, decisión, contexto, consecuencias).
 | 2026-10-07 | Revisión auditoría 2026-10-07                       | Corregidos MED-02/LOW-03, añadidos HIGH-05/06 y MED-07/08; `vitest` se instala ya en A1; C4 no bloquea v1.0. Sin cambio de alcance de fases. |
 | 2026-10-07 | `birthDate` opcional, `photoUrl` validada           | `Person.birthDate?`; solo `https://` o `/`; adopción vive en `relationship.type` (se retira `attributes.adopted`).                           |
 | 2026-10-07 | Persistencia con `version` + lectura en `useEffect` | Evita mismatch de hidratación; `try/catch` de cupo/modo privado.                                                                             |
+| 2026-10-07 | Arranque vacío + onboarding (B6)                    | `emptyTreeData` inicial; Hawthorne solo fixture de tests. Sin regresión: lo guardado en local se sigue cargando.                             |
+| 2026-10-07 | Fase B cerrada (B1–B6)                              | Store + 41 tests + CI + Prettier + pulido + layout memoizado. CI correrá al hacer push.                                                      |

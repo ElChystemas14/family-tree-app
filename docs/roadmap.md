@@ -16,12 +16,12 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 ## Estado general
 
-| Fase                      | Estado                             | Guía                                                       | Criterio de salida                                                       |
-| ------------------------- | ---------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------ |
-| A — Integridad de datos   | hecho (A1–A5, 2026-10-07)          | `guides/phase-a-data-integrity.md`                         | Fechas correctas + persistencia local + validación base + repo higiénico |
-| B — Calidad de producto   | en curso (B1–B5 hechos 2026-10-07) | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
-| C — Intercambio de datos  | pendiente                          | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV                     |
-| D — Puerta a multiusuario | pendiente (diseño)                 | (se creará `guides/phase-d-multiuser.md`)                  | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
+| Fase                      | Estado                    | Guía                                                       | Criterio de salida                                                       |
+| ------------------------- | ------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------ |
+| A — Integridad de datos   | hecho (A1–A5, 2026-10-07) | `guides/phase-a-data-integrity.md`                         | Fechas correctas + persistencia local + validación base + repo higiénico |
+| B — Calidad de producto   | hecho (B1–B6, 2026-10-07) | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
+| C — Intercambio de datos  | pendiente                 | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV                     |
+| D — Puerta a multiusuario | pendiente (diseño)        | (se creará `guides/phase-d-multiuser.md`)                  | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
 
 ## Fase A — Integridad de datos
 
@@ -52,7 +52,8 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
       checklist manual pendiente)
 - [x] **B5** Memoizar layout por estructura+modo (resaltado aparte) → `AUD-MED-04`
       (hecho 2026-10-07)
-- [ ] **B6** Vaciar dataset Hawthorne → árbol vacío + onboarding "crea tu primera persona"
+- [x] **B6** Vaciar dataset Hawthorne → árbol vacío + onboarding "crea tu primera persona"
+      (hecho 2026-10-07)
 - Detalle paso a paso: `guides/phase-b-product-quality.md`.
 
 ## Fase C — Intercambio de datos

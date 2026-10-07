@@ -62,8 +62,8 @@ posOverrides? }` — es lo que se guarda en local y lo que se exporta/importa
 El mapa completo está en [`docs/`](docs/):
 
 - [`docs/audit.md`](docs/audit.md) — auditoría inicial y hallazgos (`AUD-*`).
-- [`docs/roadmap.md`](docs/roadmap.md) — plan por fases con seguimiento (Fase A
-  hecha; siguiente: Fase B — calidad de producto).
+- [`docs/roadmap.md`](docs/roadmap.md) — plan por fases con seguimiento (Fases A y
+  B hechas; siguiente: Fase C — intercambio de datos).
 - [`docs/ideas.md`](docs/ideas.md) — ideas futuras aparcadas (`IDEA-*`).
 - [`docs/decisions.md`](docs/decisions.md) — decisiones tomadas.
 - [`docs/guides/`](docs/guides/) — guías de ejecución por fase y formato CSV.

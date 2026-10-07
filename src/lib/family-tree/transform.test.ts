@@ -193,4 +193,22 @@ describe("transformFamilyToGraph (B2)", () => {
     const hRuth = horizontal.nodes.find((n) => n.id === "ruth");
     expect(hRuth?.position).not.toEqual(vRuth?.position);
   });
+
+  it("árbol vacío: sin nodos ni aristas y sin errores (B6)", () => {
+    const graph = transformFamilyToGraph([], [], [], "vertical");
+    expect(graph.nodes).toHaveLength(0);
+    expect(graph.edges).toHaveLength(0);
+    const base = layoutFamilyToGraph([], [], [], "horizontal");
+    const selected = withGraphSelection(
+      base,
+      { unions: [], relationships: [] },
+      {
+        layout: "horizontal",
+        selectedId: "nadie",
+        search: "nadie",
+      }
+    );
+    expect(selected.nodes).toHaveLength(0);
+    expect(selected.edges).toHaveLength(0);
+  });
 });

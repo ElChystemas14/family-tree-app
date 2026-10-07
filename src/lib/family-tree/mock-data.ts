@@ -5,6 +5,17 @@ import type {
   Union,
 } from "@/types/family-tree";
 
+/** Árbol vacío: estado inicial de la app desde B6. */
+export const emptyTreeData: FamilyTreeData = {
+  persons: [],
+  unions: [],
+  relationships: [],
+};
+
+/**
+ * Dataset Hawthorne. Desde B6 es solo fixture de tests (B2): la app arranca
+ * vacía con onboarding y nunca lo usa como estado inicial.
+ */
 export const familyTreeData: FamilyTreeData = {
   persons: [
     {

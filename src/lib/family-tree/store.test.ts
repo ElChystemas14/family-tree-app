@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { FamilyTreeData, Person } from "@/types/family-tree";
-import { familyTreeData } from "./mock-data";
+import { emptyTreeData, familyTreeData } from "./mock-data";
 import {
   applyAddPerson,
   applyConnectUnion,
@@ -29,6 +29,22 @@ const empty: FamilyTreeData = {
 };
 
 describe("applyAddPerson (B1)", () => {
+  it("crea la primera persona desde el árbol vacío (B6)", () => {
+    expect(emptyTreeData.persons).toHaveLength(0);
+    const { state, result } = applyAddPerson(emptyTreeData, {
+      personInput: {
+        firstName: "Primera",
+        lastName: "Persona",
+        gender: "female",
+      },
+    });
+    expect(result.ok).toBe(true);
+    expect(result.person?.id).toBeTruthy();
+    expect(state.persons).toHaveLength(1);
+    expect(state.unions).toHaveLength(0);
+    expect(state.relationships).toHaveLength(0);
+  });
+
   it("crea persona suelta sin relaciones", () => {
     const { state, result } = applyAddPerson(empty, {
       personInput: {

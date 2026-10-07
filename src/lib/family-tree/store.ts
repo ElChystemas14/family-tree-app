@@ -17,7 +17,7 @@ import type {
   Person,
   Union,
 } from "@/types/family-tree";
-import { familyTreeData } from "./mock-data";
+import { emptyTreeData } from "./mock-data";
 import type { PosOverrides } from "./storage";
 
 export function getParentIds(
@@ -335,7 +335,7 @@ export interface FamilyTreeStore {
 
 /** Hook React del store: estado + acciones. Persistencia desacoplada (A2). */
 export function useFamilyTree(
-  initial: FamilyTreeData = familyTreeData
+  initial: FamilyTreeData = emptyTreeData
 ): FamilyTreeStore {
   const [data, setData] = useState<FamilyTreeData>(initial);
   const [posOverrides, setPosOverrides] = useState<PosOverrides>({});

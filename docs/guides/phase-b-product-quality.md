@@ -72,8 +72,11 @@ Roadmap: ítems B1–B6 (`../roadmap.md`).
   En dev cada layout registra `[layout] dagre ejecutado (N)` en consola;
   tests que comparan posiciones entre selecciones/búsquedas (`transform.test.ts`).
 
-## B6 — Vaciar dataset de prueba
+## B6 — Vaciar dataset de prueba — hecho 2026-10-07
 
-- [ ] Sustituir Hawthorne por árbol vacío + onboarding ("crea tu primera persona").
-- [ ] Conservar dataset como fixture de tests (`B2`), no como estado inicial.
+- [x] Sustituir Hawthorne por árbol vacío + onboarding ("crea tu primera persona").
+      `emptyTreeData` como estado inicial del store; tarjeta de bienvenida sobre el
+      canvas (crear o importar) visible tras hidratar si no hay personas.
+- [x] Conservar dataset como fixture de tests (`B2`), no como estado inicial.
+      `familyTreeData` documentado como fixture; los 41 tests lo siguen usando.
 - Aceptación: primer arranque limpio; tests usan el fixture.

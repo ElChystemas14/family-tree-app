@@ -468,6 +468,34 @@ function FlowInner() {
             nodeColor="var(--primary)"
           />
         </ReactFlow>
+        {hydrated && data.persons.length === 0 && (
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-6">
+            <div className="pointer-events-auto flex max-w-sm flex-col items-center gap-3 rounded-2xl border bg-card p-6 text-center shadow-lg">
+              <div className="flex size-11 items-center justify-center rounded-xl bg-primary text-lg font-bold text-primary-foreground">
+                H
+              </div>
+              <h2 className="text-lg font-semibold tracking-tight">
+                Empieza tu árbol
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Aún no hay personas en este archivo. Crea la primera o importa
+                un archivo JSON.
+              </p>
+              <div className="mt-1 flex flex-wrap justify-center gap-2">
+                <Button size="sm" onClick={() => setCreatePersonOpen(true)}>
+                  Crea tu primera persona
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  Importar JSON
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
       <PersonDetailSheet
         person={selected}
