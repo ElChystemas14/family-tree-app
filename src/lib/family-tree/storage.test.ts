@@ -3,6 +3,7 @@ import { familyTreeData } from "./mock-data";
 import {
   STORAGE_VERSION,
   buildExportFilename,
+  buildExportPayload,
   parseImportedJson,
   validateStoredTree,
 } from "./storage";
@@ -106,5 +107,20 @@ describe("parseImportedJson / export filename", () => {
       "arbol-2026-10-07.json",
     );
     expect(buildExportFilename()).toMatch(/^arbol-\d{4}-\d{2}-\d{2}\.json$/);
+  });
+
+  it("round-trip export→import restaura datos idénticos (B2)", () => {
+    const payload = buildExportPayload(
+      {
+        persons: familyTreeData.persons,
+        unions: familyTreeData.unions,
+        relationships: familyTreeData.relationships,
+      },
+      { ruth: { x: 10, y: 20 } },
+    );
+    const res = parseImportedJson(JSON.parse(JSON.stringify(payload)));
+    expect(res.ok).toBe(true);
+    expect(res.data).toEqual(payload);
+    expect(res.data?.posOverrides).toEqual({ ruth: { x: 10, y: 20 } });
   });
 });

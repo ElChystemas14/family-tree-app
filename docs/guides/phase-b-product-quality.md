@@ -21,18 +21,21 @@ Roadmap: ítems B1–B6 (`../roadmap.md`).
   `eslint-disable` justificado); el conteo de líneas queda pendiente del formateo B3
   (el fichero sigue con líneas kilométricas v0: 130 líneas / 18 kB).
 
-## B2 — Tests Vitest (AUD-HIGH-02)
+## B2 — Tests Vitest (AUD-HIGH-02) — hecho 2026-10-07
 
-- [ ] `vitest` ya instalado en A1; aquí ampliar cobertura (no reinstalar).
+- [x] `vitest` ya instalado en A1; aquí ampliar cobertura (no reinstalar).
       Fijar `TZ=America/Lima` en los tests de fechas.
-- [ ] `transform`: generaciones, nodos/aristas esperados, anti-ciclos.
-- [ ] Parentesco: `getParentIds`/`isAncestorOf` y `getFamilyRelationships(id, data)`
+- [x] `transform`: generaciones, nodos/aristas esperados, anti-ciclos.
+      (`transform.test.ts`, 6 tests: 21 nodos/20 aristas, generaciones 0–2,
+      resaltado/dimmed, monoparental, ciclo sin cuelgue, vertical vs horizontal.)
+- [x] Parentesco: `getParentIds`/`isAncestorOf` y `getFamilyRelationships(id, data)`
       con datos vivos (AUD-HIGH-05), protección contra uniones inválidas.
-      (Nota: `store.test.ts` ya cubre parentesco y acciones con 8 tests; aquí ampliar
-      con `transform` y serialización.)
-- [ ] Validaciones zod (casos válidos + inválidos, incluye `birthDate` opcional y
+      (Cubierto en `store.test.ts` + `relationships.test.ts` desde B1/A3.)
+- [x] Validaciones zod (casos válidos + inválidos, incluye `birthDate` opcional y
       `photoUrl` de AUD-HIGH-06/MED-07) y serialización export/import.
+      (Cubierto en `schema.test.ts`; round-trip JSON idéntico en `storage.test.ts`.)
 - Aceptación: `pnpm test` verde; los tests cubren A1–A3.
+  34/34 en `America/Lima` y `Pacific/Kiritimati`.
 
 ## B3 — CI + formato (AUD-LOW-02, AUD-LOW-04)
 
