@@ -31,19 +31,21 @@ Roadmap: ítems A1–A5 (`../roadmap.md`).
 - [x] Importar: selector de archivo + validación + resumen (N personas, M uniones, K errores) antes de aplicar.
 - Aceptación: recargar conserva cambios; export→vaciar→import restaura idéntico.
 
-## A3 — Esquema zod + validación en formularios (AUD-HIGH-03)
+## A3 — Esquema zod + validación en formularios (AUD-HIGH-03) — hecho 2026-10-07
 
-- [ ] Dependencia `zod`; esquemas en `src/lib/family-tree/schema.ts` para los 3 tipos
+- [x] Dependencia `zod`; esquemas en `src/lib/family-tree/schema.ts` para los 3 tipos
       (enums de `gender`, `unionType`, `relationship`; fechas `YYYY-MM-DD` opcionales).
-- [ ] Reglas de coherencia: muerte ≥ nacimiento; IDs únicos; `unionId`/`singleParentId`
-      mutuamente excluyentes; referencias existentes.
-- [ ] Alinear tipo `Person.birthDate` a opcional (`birthDate?: string`, AUD-HIGH-06);
+- [x] Reglas de coherencia: muerte ≥ nacimiento; IDs únicos; `unionId`/`singleParentId`
+      mutuamente excluyentes; referencias existentes (`validateFamilyTreeData`, que
+      `storage.ts` reutiliza para carga/importación).
+- [x] Alinear tipo `Person.birthDate` a opcional (`birthDate?: string`, AUD-HIGH-06);
       `photoUrl` solo `https://` o ruta `/`; eliminar `attributes.adopted` (la adopción
-      vive en `relationship.type`, AUD-MED-07).
-- [ ] Hacer `getFamilyRelationships(personId, data)` pura (no leer el dataset
-      importado) + tests con datos vivos (AUD-HIGH-05).
-- [ ] Aplicar en: modal crear/vincular, edición de ficha e importación (A2/C2).
-- [ ] Mensajes de error en español junto a cada campo.
+      vive en `relationship.type`, AUD-MED-07; la ficha lo deriva de los padres).
+- [x] Hacer `getFamilyRelationships(personId, data)` pura (no leer el dataset
+      importado) + tests con datos vivos (AUD-HIGH-05). `PersonDetailSheet` recibe `data`.
+- [x] Aplicar en: modal crear/vincular, edición de ficha e importación (A2/C2).
+- [x] Mensajes de error en español junto a cada campo (modal con `role="alert"`;
+      edición con aviso y sin cerrar).
 - Aceptación: imposible guardar persona sin nombre ni fechas incoherentes.
 
 ## A4 — Higiene de repo (AUD-HIGH-01, AUD-MED-01, AUD-MED-03, AUD-LOW-03)

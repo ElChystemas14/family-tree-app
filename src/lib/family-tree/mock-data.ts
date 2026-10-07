@@ -14,7 +14,7 @@ export const familyTreeData: FamilyTreeData = {
     { id: 'lucy', firstName: 'Lucy', lastName: 'Hawthorne', gender: 'female', birthDate: '1981-07-04', photoUrl: '/placeholder-user.jpg', bio: 'Lucy lives in Copenhagen with her family and works in community design.', attributes: { occupation: 'Designer' } },
     { id: 'ben', firstName: 'Benjamin', lastName: 'Hawthorne', gender: 'male', birthDate: '1984-10-19', bio: 'Ben is a teacher, amateur chef, and the family’s most enthusiastic group-chat participant.' },
     { id: 'olivia', firstName: 'Olivia', lastName: 'Reed', gender: 'female', birthDate: '1987-09-28', bio: 'Olivia is a marine biologist based in Wellington.' },
-    { id: 'nora', firstName: 'Nora', lastName: 'Hawthorne', gender: 'female', birthDate: '1991-01-16', attributes: { adopted: true }, bio: 'Nora joined the Hawthorne family at age two. She is a ceramic artist and storyteller.' },
+    { id: 'nora', firstName: 'Nora', lastName: 'Hawthorne', gender: 'female', birthDate: '1991-01-16', bio: 'Nora joined the Hawthorne family at age two. She is a ceramic artist and storyteller.' },
     { id: 'william', firstName: 'William', lastName: 'Vale', gender: 'male', birthDate: '1980-05-30', bio: 'William restores vintage bicycles and knows every back road in the county.' },
     { id: 'clara', firstName: 'Clara', lastName: 'Vale', gender: 'female', birthDate: '2010-04-25', bio: 'Clara is a keen climber and aspiring astronomer.' },
     { id: 'henry', firstName: 'Henry', lastName: 'Vale', gender: 'male', birthDate: '2013-11-07', bio: 'Henry loves puzzles, insects, and building elaborate blanket forts.' },
@@ -42,8 +42,8 @@ export const getPersonName = (person: { firstName: string; lastName: string }) =
 export interface RelativePerson { person: Person; relationship: ChildRelationship['type'] | 'partner'; union?: Union }
 export interface FamilyRelationships { parents: RelativePerson[]; partners: RelativePerson[]; children: RelativePerson[] }
 
-export function getFamilyRelationships(personId: string): FamilyRelationships {
-  const { persons, unions, relationships } = familyTreeData
+export function getFamilyRelationships(personId: string, data: FamilyTreeData = familyTreeData): FamilyRelationships {
+  const { persons, unions, relationships } = data
   const personById = new Map(persons.map((person) => [person.id, person]))
   const addUnique = (items: RelativePerson[], relative: RelativePerson) => items.some((item) => item.person.id === relative.person.id) ? items : [...items, relative]
   let parents: RelativePerson[] = [], partners: RelativePerson[] = [], children: RelativePerson[] = []
@@ -60,8 +60,8 @@ export function getFamilyRelationships(personId: string): FamilyRelationships {
   return { parents, partners, children }
 }
 
-export function getImmediateRelatives(personId: string) {
-  const { parents, partners, children } = getFamilyRelationships(personId)
+export function getImmediateRelatives(personId: string, data: FamilyTreeData = familyTreeData) {
+  const { parents, partners, children } = getFamilyRelationships(personId, data)
   return [...parents, ...partners, ...children].map((relative) => relative.person)
 }
 

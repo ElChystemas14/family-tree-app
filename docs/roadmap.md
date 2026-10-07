@@ -18,7 +18,7 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 | Fase | Estado | Guía | Criterio de salida |
 |---|---|---|---|
-| A — Integridad de datos | en curso (A1–A2 hechos) | `guides/phase-a-data-integrity.md` | Fechas correctas + persistencia local + validación base + repo higiénico |
+| A — Integridad de datos | en curso (A1–A3 hechos) | `guides/phase-a-data-integrity.md` | Fechas correctas + persistencia local + validación base + repo higiénico |
 | B — Calidad de producto | pendiente | `guides/phase-b-product-quality.md` | Store extraído + tests + CI + dataset de prueba limpio |
 | C — Intercambio de datos | pendiente | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV |
 | D — Puerta a multiusuario | pendiente (diseño) | (se creará `guides/phase-d-multiuser.md`) | Modelo con `ownerId`/`treeId`, decisions actualizadas |
@@ -28,9 +28,9 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 - [x] **A1** Fix fechas UTC→local + instalar `vitest` + tests con TZ fija → `AUD-CRIT-01` (hecho 2026-10-07)
 - [x] **A2** Persistencia `localStorage` versionada (`{ version, … }`, lectura en `useEffect`,
       `try/catch` de cupo) + export/import JSON → `AUD-CRIT-02`, `AUD-MED-08` (hecho 2026-10-07)
-- [ ] **A3** Esquema zod Persona/Unión/Relación + validación en formularios +
+- [x] **A3** Esquema zod Persona/Unión/Relación + validación en formularios +
       `birthDate?` opcional + `photoUrl` validada + `getFamilyRelationships(id, data)` pura →
-      `AUD-HIGH-03`, `AUD-HIGH-05`, `AUD-HIGH-06`, `AUD-MED-07`
+      `AUD-HIGH-03`, `AUD-HIGH-05`, `AUD-HIGH-06`, `AUD-MED-07` (hecho 2026-10-07)
 - [ ] **A4** Higiene de repo: borrar `package-lock.json`, `shadcn` a devDeps, limpiar
       SVGs sin uso y config de imágenes, verificar atribución XYFlow →
       `AUD-HIGH-01`, `AUD-MED-01`, `AUD-MED-03`, `AUD-LOW-03`
