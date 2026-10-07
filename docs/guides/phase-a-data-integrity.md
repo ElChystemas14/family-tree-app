@@ -4,17 +4,19 @@ Objetivo: datos correctos, persistentes y validados + repo higiénico.
 Criterio de salida: A1–A5 completos y `tsc` + `eslint` + `build` en verde.
 Roadmap: ítems A1–A5 (`../roadmap.md`).
 
-## A1 — Fix fechas UTC→local (AUD-CRIT-01)
+## A1 — Fix fechas UTC→local (AUD-CRIT-01) — hecho 2026-10-07
 
-- [ ] Instalar ya aquí `vitest` (+ script `test`) — A1 lo necesita; B2 lo amplía.
+- [x] Instalar ya aquí `vitest` (+ script `test`) — A1 lo necesita; B2 lo amplía.
       Fijar `TZ=America/Lima` en los tests de fechas.
-- [ ] Crear helper `parseISODateLocal(iso: string): Date` en `src/lib/family-tree/dates.ts`:
+- [x] Crear helper `parseISODateLocal(iso: string): Date` en `src/lib/family-tree/dates.ts`:
       construir con `new Date(y, m - 1, d)` (nunca `new Date("YYYY-MM-DD")`).
-- [ ] Reescribir `formatDate`/`formatYear` sobre ese helper (zona `es-ES`).
-- [ ] Añadir tests que fijen `TZ` (p. ej. `America/Lima`) y cubran el borde 1 de enero
+- [x] Reescribir `formatDate`/`formatYear` sobre ese helper (zona `es-ES`).
+      (`mock-data.ts` re-exporta desde `dates.ts`, sin duplicar lógica.)
+- [x] Añadir tests que fijen `TZ` (p. ej. `America/Lima`) y cubran el borde 1 de enero
       (`formatYear("2000-01-01")` debe dar `2000`, hoy daría `1999` en UTC-5).
-- [ ] Verificar visualmente la ficha de Margaret (1954-08-17 → "17 ago 1954").
+- [x] Verificar visualmente la ficha de Margaret (1954-08-17 → "17 ago 1954").
 - Aceptación: tests en verde en al menos 2 zonas horarias distintas.
+  Verificado en 3: `America/Lima`, `Pacific/Kiritimati`, `America/New_York` (6 tests).
 
 ## A2 — Persistencia local + export/import JSON (AUD-CRIT-02)
 

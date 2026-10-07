@@ -36,8 +36,7 @@ export const familyTreeData: FamilyTreeData = {
 }
 
 export const getInitials = (person: { firstName: string; lastName: string }) => `${person.firstName[0]}${person.lastName[0]}`
-export const formatYear = (date?: string) => date ? new Date(date).getFullYear().toString() : ''
-export const formatDate = (date?: string) => date ? new Date(date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+export { formatDate, formatYear } from './dates'
 export const getPersonName = (person: { firstName: string; lastName: string }) => `${person.firstName} ${person.lastName}`
 
 export interface RelativePerson { person: Person; relationship: ChildRelationship['type'] | 'partner'; union?: Union }
