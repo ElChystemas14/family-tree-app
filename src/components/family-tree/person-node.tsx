@@ -15,12 +15,12 @@ import type { PersonNodeData } from "@/types/family-tree";
 export function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
   return (
     <div
-      className={`person-node group relative w-[260px] rounded-xl border bg-card p-3 shadow-sm transition-all ${data.isDimmed ? "opacity-25" : "opacity-100"} ${data.isPathHighlighted ? "border-primary shadow-lg ring-1 ring-primary/30" : data.isSelected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""} ${data.isSearchFocused ? "border-primary shadow-lg" : "border-border"}`}
+      className={`person-node group relative w-65 rounded-xl border bg-card p-3 shadow-sm transition-all ${data.isDimmed ? "opacity-25" : "opacity-100"} ${data.isPathHighlighted ? "border-primary shadow-lg ring-1 ring-primary/30" : data.isSelected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""} ${data.isSearchFocused ? "border-primary shadow-lg" : "border-border"}`}
     >
       <Handle
         type="target"
         position={data.layout === "horizontal" ? Position.Left : Position.Top}
-        className="!size-2 !border-0 !bg-primary"
+        className="size-2! border-0! bg-primary!"
       />
       <div className="flex items-center gap-3">
         <Avatar className="size-11 shrink-0 border border-border">
@@ -77,7 +77,7 @@ export function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
         position={
           data.layout === "horizontal" ? Position.Right : Position.Bottom
         }
-        className="!size-2 !border-0 !bg-primary"
+        className="size-2! border-0! bg-primary!"
       />
     </div>
   );

@@ -433,7 +433,7 @@ function FlowInner() {
           maxZoom={1.5}
         >
           <Background gap={24} size={1} className="opacity-60" />
-          <Controls className="!bottom-5 !left-5" showInteractive={false} />
+          <Controls className="bottom-5! left-5!" showInteractive={false} />
           <MiniMap
             pannable
             zoomable
