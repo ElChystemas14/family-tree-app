@@ -19,8 +19,8 @@ Valor: S/M/L. Esfuerzo: S/M/L.
 
 ## Colaboración (puerta a multiusuario)
 
-- **IDEA-08** Roles editor/lector + historial de cambios + deshacer global. Valor L, esfuerzo L. `propuesta`.
-- **IDEA-09** Invitaciones por enlace revocable; árboles privados por defecto. Valor L, esfuerzo M. `propuesta`.
+- **IDEA-08** Roles editor/lector + historial de cambios + deshacer global. Valor L, esfuerzo L. `aceptada` (→ Fase D, diseño 2026-10-07).
+- **IDEA-09** Invitaciones por enlace revocable; árboles privados por defecto. Valor L, esfuerzo M. `aceptada` (→ Fase D, diseño 2026-10-07).
 - **IDEA-10** Comentarios por persona. Valor S, esfuerzo M. `propuesta`.
 
 ## Exploración y salida

@@ -14,7 +14,8 @@ el qué sigue y cómo avanzarlo**.
 | [`guides/phase-a-data-integrity.md`](guides/phase-a-data-integrity.md)   | Guía de ejecución: Fase A (integridad)                                           |
 | [`guides/phase-b-product-quality.md`](guides/phase-b-product-quality.md) | Guía de ejecución: Fase B (calidad)                                              |
 | [`guides/phase-c-data-exchange.md`](guides/phase-c-data-exchange.md)     | Guía de ejecución: Fase C (intercambio)                                          |
-| [`guides/csv-format.md`](guides/csv-format.md)                           | Especificación v1.0 (borrador) del formato CSV de importación                    |
+| [`guides/csv-format.md`](guides/csv-format.md)                           | Especificación v1.0 (congelada) del formato CSV de importación                   |
+| [`guides/phase-d-multiuser.md`](guides/phase-d-multiuser.md)             | Diseño multiusuario: modelo, Supabase, flujos y aceptación (sin código)          |
 
 ## Cómo se relacionan
 

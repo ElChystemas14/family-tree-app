@@ -25,3 +25,7 @@ relevante futura (formato: fecha, decisión, contexto, consecuencias).
 | 2026-10-07 | Fase B cerrada (B1–B6)                              | Store + 41 tests + CI + Prettier + pulido + layout memoizado. CI correrá al hacer push.                                                      |
 | 2026-10-07 | i18n con `next-intl`, sin routing (C4)              | `es` por defecto vía provider; `en` pendiente. UI externalizada; mensajes de `lib/` en español hasta post-v1.0.                              |
 | 2026-10-07 | Fase C cerrada (C1–C4)                              | CSV v1.0 congelado + importador con reporte + export JSON/CSV + i18n.                                                                        |
+| 2026-10-07 | Backend multiusuario: **Supabase** (D2)             | Auth (email + Google) + Postgres con RLS + Storage privado. Un proveedor, free tier suficiente; capa adapter para no casarse.                |
+| 2026-10-07 | Colaboración: cuentas + roles e invitaciones (D)    | Roles owner/editor/viewer + enlaces revocables; varios árboles por usuario (`IDEA-08`, `IDEA-09` aceptadas).                                 |
+| 2026-10-07 | Sync offline-first + `treeId`/`updatedAt` (D1)      | Lo local manda sin red; last-write-wins por fila; posiciones por usuario y árbol. Sin código aún.                                            |
+| 2026-10-07 | Fase D cerrada (diseño)                             | Modelo, RLS, flujos y aceptación en `guides/phase-d-multiuser.md`.                                                                           |

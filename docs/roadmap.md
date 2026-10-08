@@ -21,7 +21,7 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 | A — Integridad de datos   | hecho (A1–A5, 2026-10-07) | `guides/phase-a-data-integrity.md`                         | Fechas correctas + persistencia local + validación base + repo higiénico |
 | B — Calidad de producto   | hecho (B1–B6, 2026-10-07) | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
 | C — Intercambio de datos  | hecho (C1–C4, 2026-10-07) | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV                     |
-| D — Puerta a multiusuario | pendiente (diseño)        | (se creará `guides/phase-d-multiuser.md`)                  | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
+| D — Puerta a multiusuario | hecho (diseño 2026-10-07) | `guides/phase-d-multiuser.md`                              | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
 
 ## Fase A — Integridad de datos
 
@@ -68,12 +68,15 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
       (hecho 2026-10-07)
 - Detalle paso a paso: `guides/phase-c-data-exchange.md`.
 
-## Fase D — Puerta a multiusuario (diseño, sin código aún)
+## Fase D — Puerta a multiusuario (diseño, sin código aún) — hecho 2026-10-07
 
-- [ ] **D1** Añadir `ownerId`/`treeId` al modelo (sin backend todavía)
-- [ ] **D2** Decidir stack (Auth + BD + storage de fotos) y registrarlo en `decisions.md`
-- [ ] **D3** Crear `guides/phase-d-multiuser.md` con criterios de aceptación
-- Ideas relacionadas: `IDEA-03` (roles), `IDEA-04` (invitaciones), `IDEA-09` (PWA/offline).
+- [x] **D1** Añadir `ownerId`/`treeId` al modelo (sin backend todavía).
+      Propuesta en `guides/phase-d-multiuser.md` (tablas `trees`, `tree_memberships`,
+      `tree_invites`, `user_tree_settings`; `treeId` + `updatedAt` en entidades).
+- [x] **D2** Decidir stack (Auth + BD + storage de fotos) y registrarlo en `decisions.md`.
+      Supabase (Auth email + Google, Postgres con RLS, Storage privado).
+- [x] **D3** Crear `guides/phase-d-multiuser.md` con criterios de aceptación.
+- Ideas relacionadas: `IDEA-08` (roles), `IDEA-09` (invitaciones), `IDEA-14` (PWA/offline, sinergia con sync).
 
 ## Trazabilidad auditoría → roadmap
 
