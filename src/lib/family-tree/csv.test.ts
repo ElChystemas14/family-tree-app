@@ -4,9 +4,11 @@ import { familyTreeData } from "./mock-data";
 import { validateFamilyTreeData } from "./schema";
 import {
   CsvParseError,
+  buildCsvFilename,
   buildPersonTemplate,
   buildRelationshipTemplate,
   buildUnionTemplate,
+  hasLivingPersons,
   parseCsvText,
   personToCsvRow,
   personsFromCsvRows,
@@ -133,5 +135,27 @@ describe("plantillas v1.0 (C1)", () => {
     const result = validateFamilyTreeData({ persons, unions, relationships });
     expect(result.errors).toEqual([]);
     expect(result.ok).toBe(true);
+  });
+});
+
+describe("exportación CSV espejo (C3)", () => {
+  it("nombres personas|uniones|relaciones-AAAA-MM-DD.csv con fecha local", () => {
+    expect(buildCsvFilename("personas", new Date(2026, 9, 7))).toBe(
+      "personas-2026-10-07.csv"
+    );
+    expect(buildCsvFilename("uniones")).toMatch(
+      /^uniones-\d{4}-\d{2}-\d{2}\.csv$/
+    );
+    expect(buildCsvFilename("relaciones")).toMatch(
+      /^relaciones-\d{4}-\d{2}-\d{2}\.csv$/
+    );
+  });
+
+  it("detecta personas vivas para el aviso de privacidad", () => {
+    expect(hasLivingPersons(familyTreeData.persons)).toBe(true);
+    expect(
+      hasLivingPersons(familyTreeData.persons.filter((p) => p.deathDate))
+    ).toBe(false);
+    expect(hasLivingPersons([])).toBe(false);
   });
 });

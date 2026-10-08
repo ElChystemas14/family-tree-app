@@ -33,7 +33,16 @@ import {
 import { validatePersonForm } from "@/lib/family-tree/schema";
 import { readStoredTheme, writeStoredTheme } from "@/lib/family-tree/theme";
 import {
+  PERSON_CSV_HEADERS,
+  RELATIONSHIP_CSV_HEADERS,
+  UNION_CSV_HEADERS,
+  buildCsvFilename,
+  hasLivingPersons,
+  personToCsvRow,
   planCsvImport,
+  relationshipToCsvRow,
+  serializeCsv,
+  unionToCsvRow,
   type CsvFileKind,
   type CsvImportPlan,
 } from "@/lib/family-tree/csv";
@@ -274,25 +283,57 @@ function FlowInner() {
     setEditing(undefined);
     notify("Datos de la persona actualizados.");
   };
-  const handleExport = useCallback(() => {
+  const [exportOpen, setExportOpen] = useState(false);
+  const downloadTextFile = (text: string, filename: string, mime: string) => {
+    const blob = new Blob([text], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+  const handleExportJson = useCallback(() => {
     try {
       const payload = buildExportPayload(data, posOverrides);
-      const blob = new Blob([JSON.stringify(payload, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = buildExportFilename();
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      downloadTextFile(
+        JSON.stringify(payload, null, 2),
+        buildExportFilename(),
+        "application/json"
+      );
       notify("Archivo exportado como copia de seguridad.");
     } catch {
       notify("No se pudo exportar el archivo.");
     }
   }, [data, posOverrides, notify]);
+  const handleExportCsv = useCallback(
+    (kind: CsvFileKind) => {
+      try {
+        const text =
+          kind === "personas"
+            ? serializeCsv(
+                [...PERSON_CSV_HEADERS],
+                data.persons.map(personToCsvRow)
+              )
+            : kind === "uniones"
+              ? serializeCsv(
+                  [...UNION_CSV_HEADERS],
+                  data.unions.map(unionToCsvRow)
+                )
+              : serializeCsv(
+                  [...RELATIONSHIP_CSV_HEADERS],
+                  data.relationships.map(relationshipToCsvRow)
+                );
+        downloadTextFile(text, buildCsvFilename(kind), "text/csv");
+        notify(`Archivo ${kind}.csv exportado.`);
+      } catch {
+        notify("No se pudo exportar el CSV.");
+      }
+    },
+    [data, notify]
+  );
   const handleImportFile = useCallback(
     (file: File) => {
       const reader = new FileReader();
@@ -407,8 +448,12 @@ function FlowInner() {
         <div className="hidden items-center gap-5 text-xs text-muted-foreground sm:flex">
           <span>{data.persons.length} personas</span>
           <span>{data.unions.length} uniones</span>
-          <Button size="sm" variant="outline" onClick={handleExport}>
-            Exportar JSON
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setExportOpen(true)}
+          >
+            Exportar
           </Button>
           <Button
             size="sm"
@@ -434,8 +479,8 @@ function FlowInner() {
         <Button
           size="icon"
           variant="outline"
-          onClick={handleExport}
-          aria-label="Exportar árbol como JSON"
+          onClick={() => setExportOpen(true)}
+          aria-label="Exportar árbol"
         >
           <Download className="size-4" />
         </Button>
@@ -903,6 +948,61 @@ function FlowInner() {
                 }
               >
                 Aplicar válidas
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+      {exportOpen && (
+        <Dialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setExportOpen(false);
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Exportar árbol</DialogTitle>
+              <DialogDescription>
+                JSON canónico (copia de seguridad) o CSV espejo v1.0 (personas,
+                uniones, relaciones).
+              </DialogDescription>
+            </DialogHeader>
+            {hasLivingPersons(data.persons) && (
+              <p
+                role="note"
+                className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs leading-5"
+              >
+                Aviso de privacidad: el archivo incluye personas vivas (sin
+                fecha de fallecimiento). Compártelo solo con tu familia.
+              </p>
+            )}
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" onClick={handleExportJson}>
+                JSON canónico
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleExportCsv("personas")}
+              >
+                personas.csv
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleExportCsv("uniones")}
+              >
+                uniones.csv
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleExportCsv("relaciones")}
+              >
+                relaciones.csv
+              </Button>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setExportOpen(false)}>
+                Cerrar
               </Button>
             </div>
           </DialogContent>

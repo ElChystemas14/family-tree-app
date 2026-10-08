@@ -30,11 +30,16 @@ Roadmap: ítems C1–C4 (`../roadmap.md`). Spec: [`csv-format.md`](csv-format.md
 - Aceptación: importar el dataset Hawthorne en CSV reproduce el árbol de prueba.
   Verificado por test (`csv-import.test.ts`: 16+5+10 aplicados, 0 rechazados).
 
-## C3 — Exportación
+## C3 — Exportación — hecho 2026-10-07
 
-- [ ] JSON canónico (= shape del store, con `version` de formato).
-- [ ] CSV espejo del formato de importación (round-trip: export→import idéntico).
-- [ ] Aviso de privacidad si hay personas vivas incluidas.
+- [x] JSON canónico (= shape del store, con `version` de formato).
+      Ya existía desde A2 (`buildExportPayload` + round-trip en `storage.test.ts`).
+- [x] CSV espejo del formato de importación (round-trip: export→import idéntico).
+      Diálogo "Exportar" (desktop + móvil) con JSON + 3 CSV (`buildCsvFilename`,
+      `personas|uniones|relaciones-AAAA-MM-DD.csv`); round-trip verificado en
+      `csv.test.ts` (Hawthorne) y `csv-import.test.ts` (aceptación C2).
+- [x] Aviso de privacidad si hay personas vivas incluidas.
+      (`hasLivingPersons`: sin `deathDate`; aviso en el diálogo.)
 - Aceptación: round-trip JSON y CSV verificados por test.
 
 ## C4 — Infra i18n (opcional, no bloquea v1.0)

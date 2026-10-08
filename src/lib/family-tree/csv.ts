@@ -711,3 +711,19 @@ function finishPlan(
     },
   };
 }
+
+// --- Exportación CSV espejo v1.0 (C3) ---
+
+/** `personas-AAAA-MM-DD.csv` (fecha local, como el export JSON). */
+export function buildCsvFilename(
+  kind: CsvFileKind,
+  from: Date = new Date()
+): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${kind}-${from.getFullYear()}-${pad(from.getMonth() + 1)}-${pad(from.getDate())}.csv`;
+}
+
+/** ¿Hay personas vivas (sin `deathDate`)? Para el aviso de privacidad (C3). */
+export function hasLivingPersons(persons: Person[]): boolean {
+  return persons.some((person) => !person.deathDate);
+}
