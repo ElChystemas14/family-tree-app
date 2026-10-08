@@ -29,3 +29,4 @@ relevante futura (formato: fecha, decisión, contexto, consecuencias).
 | 2026-10-07 | Colaboración: cuentas + roles e invitaciones (D)    | Roles owner/editor/viewer + enlaces revocables; varios árboles por usuario (`IDEA-08`, `IDEA-09` aceptadas).                                 |
 | 2026-10-07 | Sync offline-first + `treeId`/`updatedAt` (D1)      | Lo local manda sin red; last-write-wins por fila; posiciones por usuario y árbol. Sin código aún.                                            |
 | 2026-10-07 | Fase D cerrada (diseño)                             | Modelo, RLS, flujos y aceptación en `guides/phase-d-multiuser.md`.                                                                           |
+| 2026-10-07 | Revisión final: v1.0 lista con reservas             | 55/55 tests en 2 TZ + checks verdes; `AUD-LOW-05` e `IDEA-17/18` a post-v1.0; CI y matriz manual al hacer push.                              |

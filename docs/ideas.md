@@ -35,6 +35,13 @@ Valor: S/M/L. Esfuerzo: S/M/L.
 - **IDEA-15** Vista móvil de lista/perfiles como alternativa al canvas. Valor M, esfuerzo M. `propuesta`.
 - **IDEA-16** API pública documentada. Valor S, esfuerzo L. `propuesta`.
 
+## Deuda post-v1.0 (revisión final 2026-10-07)
+
+- **IDEA-17** Extraer los diálogos del canvas a componentes (exportar, importar
+  JSON/CSV, edición, ayuda, onboarding). Valor M, esfuerzo M. `propuesta`.
+- **IDEA-18** Endurecer export CSV contra inyección de fórmulas (`AUD-LOW-05`).
+  Valor M, esfuerzo S. `propuesta`.
+
 ## Mapeo a fases
 
 | Idea              | Destino previsto                                               |
@@ -43,3 +50,4 @@ Valor: S/M/L. Esfuerzo: S/M/L.
 | IDEA-05, IDEA-06  | Explícitamente aparcadas hasta consolidar modelo + importación |
 | IDEA-08 – IDEA-10 | Fase D (multiusuario)                                          |
 | IDEA-11 – IDEA-16 | Post-v1.0 según prioridad                                      |
+| IDEA-17 – IDEA-18 | Deuda post-v1.0 (revisión final)                               |

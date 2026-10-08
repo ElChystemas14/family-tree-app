@@ -592,7 +592,7 @@ function FlowInner() {
           <MiniMap
             pannable
             zoomable
-            ariaLabel="Miniatura del árbol genealógico"
+            ariaLabel={tHeader("minimapLabel")}
             bgColor="var(--card)"
             maskColor="color-mix(in oklch, var(--foreground) 16%, transparent)"
             nodeColor="var(--primary)"

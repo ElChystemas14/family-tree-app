@@ -1,23 +1,24 @@
-# Auditoría inicial — family-tree-app
+# Auditoría — family-tree-app (inicial + revisión final)
 
-- **Fecha**: 2026-09-20 (revisada 2026-10-07 hasta `d270057`)
-- **Alcance**: código en `master` hasta `d270057`, configuración, documentación y repo.
-- **Revisión 2026-10-07**: corroborada contra código actual. Corregidos `AUD-MED-02`
-  (matiz Geist Mono) y `AUD-LOW-03` (sin `hideAttribution` en código); añadidos
-  `AUD-HIGH-05`, `AUD-HIGH-06`, `AUD-MED-07`, `AUD-MED-08`.
-- **Método**: lectura de fuentes, ejecución (`tsc`, `eslint`, `build`), pruebas de comportamiento (p. ej. parseo de fechas con TZ) e inspección de dependencias instaladas.
-- **Veredicto**: prototipo avanzado (6.4/10), no producto. Ver `roadmap.md` para el plan de cierre de brechas.
+- **Fecha**: 2026-09-20; revisión intermedia 2026-10-07; **revisión final 2026-10-07** (esta).
+- **Alcance final**: código en `master` hasta `5700a33` (40 commits), configuración, documentación y repo.
+- **Método**: lectura de fuentes, ejecución (`tsc`, `eslint`, `build`, `test` en 2 TZ),
+  pruebas de comportamiento, greps de verificación (claves i18n, literales, TODOs) e
+  inspección de dependencias instaladas.
+- **Veredicto final**: v1.0 local-first lista (~8.2/10). Pendiente: push + CI en remoto,
+  matriz manual completa y endurecimiento `AUD-LOW-05`. Detalle en
+  [`#revisión-final-2026-10-07-estado`](#revisión-final-2026-10-07-estado).
 
-## Notas por área
+## Notas por área (revisión final)
 
-| Área                 | Nota | Resumen                                                                       |
-| -------------------- | ---- | ----------------------------------------------------------------------------- |
-| Arquitectura         | 6/10 | Estructura Next.js correcta, pero sin capa de datos ni persistencia           |
-| Diseño UI/UX         | 7/10 | Tema coherente y flujo usable; mezcla de estilos shadcn y detalles pendientes |
-| Calidad de código    | 6/10 | Tipos y lint en verde, cero tests, archivos monolíticos estilo v0             |
-| Configuración/DevOps | 5/10 | Build verde; lockfiles duplicados, README genérico, sin CI                    |
-| Seguridad/Privacidad | 6/10 | Correcto para fase local; sin auth ni persistencia aún                        |
-| Rendimiento          | 7/10 | Sin problemas a escala familiar; recomputos evitables y una fuente de más     |
+| Área                 | Inicial | Final | Resumen final                                                               |
+| -------------------- | ------- | ----- | --------------------------------------------------------------------------- |
+| Arquitectura         | 6/10    | 8/10  | Store extraído, layout memoizado, adapter previsto en diseño D; sin backend |
+| Diseño UI/UX         | 7/10    | 8/10  | Onboarding, dark persistente sin flash, táctil resuelto, i18n UI            |
+| Calidad de código    | 6/10    | 8/10  | 55 tests, tipos+lint verdes, Prettier; canvas grande (1020 líneas)          |
+| Configuración/DevOps | 5/10    | 7/10  | pnpm único, README real, CI creada sin ejecutar (sin remoto)                |
+| Seguridad/Privacidad | 6/10    | 7/10  | Validación + RLS diseñado; `AUD-LOW-05` pendiente; sin auth por diseño      |
+| Rendimiento          | 7/10    | 8/10  | dagre por estructura+modo; sin problemas a escala familiar                  |
 
 ## Hallazgos
 
@@ -96,8 +97,6 @@ relationships } = familyTreeData`), consumido en
 - **Fix (recomendado)**: `birthDate?: string` opcional en `Person` + validación
   `YYYY-MM-DD` cuando esté presente; alinear CSV y formularios.
 - **Roadmap**: Fase A (dentro de A3).
-
-### Medios
 
 ### Medios
 
@@ -184,10 +183,53 @@ relationships } = familyTreeData`), consumido en
 
 - Dificultan revisión y debug. **Fix**: Prettier + formateo. **Roadmap**: Fase B.
 
-## Mapa de archivos revisados
+#### AUD-LOW-05 — Export CSV sin neutralizar fórmulas (nuevo, revisión final)
 
-- `src/components/family-tree/*` (6 archivos), `src/lib/family-tree/*`,
-  `src/types/family-tree.ts`, `src/app/*`, `src/components/ui/*` (17 primitivas).
-- `package.json`, `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`,
-  `postcss.config.mjs`, `components.json`, `pnpm-workspace.yaml`, `.gitignore`, `README.md`.
-- Estado de git: `master` limpio, 16 commits, todo local sin push.
+- **Ubicación**: `src/lib/family-tree/serializeCsv` en `csv.ts` (solo entrecomilla;
+  no trata celdas que empiezan por `=`, `+`, `-` o `@`).
+- **Impacto**: bajo (requiere abrir el CSV en hoja de cálculo y una bio maliciosa
+  o accidental tipo `=1+1`); inyección de fórmulas al exportar.
+- **Fix propuesto**: al exportar, prefijar con `'` (o tab) las celdas que empiecen
+  por esos caracteres y deshacerlo al importar; test con bio `=2+2`.
+- **Roadmap**: post-v1.0 (`IDEA-18`).
+
+## Revisión final 2026-10-07 — estado
+
+Verificado con `pnpm install --frozen-lockfile`, `test` 55/55 en
+`America/Lima` y `Pacific/Kiritimati`, `typecheck`, `lint`, `format:check` y
+`build` en verde; greps de claves i18n (todas resuelven en `es.json`), cero
+TODOs y resto de literales revisado.
+
+| Hallazgo                                         | Estado                                              | Fase      |
+| ------------------------------------------------ | --------------------------------------------------- | --------- |
+| AUD-CRIT-01, AUD-CRIT-02                         | resuelto                                            | A1, A2    |
+| AUD-HIGH-01, AUD-HIGH-04, AUD-MED-01, AUD-MED-03 | resuelto                                            | A4        |
+| AUD-HIGH-02                                      | resuelto (55 tests)                                 | A1, B2    |
+| AUD-HIGH-03                                      | resuelto                                            | A3, C2    |
+| AUD-HIGH-05, AUD-HIGH-06, AUD-MED-07             | resuelto                                            | A3 (+ B1) |
+| AUD-MED-02                                       | resuelto (solo `Geist Sans` fuera)                  | B4        |
+| AUD-MED-04                                       | resuelto (layout+resaltado separados)               | B5        |
+| AUD-MED-05, AUD-MED-06                           | resuelto y verificado manual                        | B4        |
+| AUD-MED-08                                       | resuelto                                            | A2        |
+| AUD-LOW-01                                       | resuelto                                            | B4        |
+| AUD-LOW-02                                       | parcial (workflow creado, sin ejecutar: sin remoto) | B3        |
+| AUD-LOW-03                                       | resuelto (atribución visible)                       | A4        |
+| AUD-LOW-04                                       | resuelto (Prettier)                                 | B3        |
+| AUD-LOW-05                                       | pendiente post-v1.0                                 | `IDEA-18` |
+
+Desviaciones aceptadas: B1 pedía canvas < ~150 líneas y está en 1020 legibles
+(lógica en el store; extraer diálogos → `IDEA-17`); C4 deja en español los
+mensajes de `lib/` y el "Close" de primitivas shadcn. Residual pre-push:
+ejecutar la CI en remoto, matriz manual claro/oscuro × móvil/escritorio y
+flujo export→vaciar→import manual. `getImmediateRelatives` queda sin uso
+(higiene menor, no bloquea).
+
+## Mapa de archivos revisados (final)
+
+- `src/components/family-tree/*` (6 archivos), `src/lib/family-tree/*` (9 módulos
+  - 8 ficheros de test), `src/i18n/*`, `src/types/family-tree.ts`, `src/app/*`
+    (incluye `robots.ts`, `sitemap.ts`), `src/components/ui/*` (17 primitivas).
+- `package.json` (scripts `typecheck`/`test`/`format`), `next.config.ts` (plugin
+  next-intl), `.prettierrc.json`, `.github/workflows/ci.yml`, `public/`
+  (plantillas CSV, sin SVGs de demo), `pnpm-workspace.yaml`, `.gitignore`, `README.md`.
+- Estado de git: `master` hasta `5700a33` (40 commits), todo local sin push.

@@ -17,7 +17,8 @@
     "importJsonLabel": "Importar árbol desde JSON",
     "importCsvLabel": "Importar desde CSV",
     "selectJsonFileLabel": "Seleccionar archivo JSON para importar",
-    "helpLabel": "Cómo usar el árbol genealógico"
+    "helpLabel": "Cómo usar el árbol genealógico",
+    "minimapLabel": "Miniatura del árbol genealógico"
   },
   "onboarding": {
     "title": "Empieza tu árbol",

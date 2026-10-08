@@ -80,16 +80,17 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 ## Trazabilidad auditoría → roadmap
 
-| Hallazgo                                       | Fase/Ítem      |
-| ---------------------------------------------- | -------------- |
-| AUD-CRIT-01, AUD-CRIT-02                       | A1, A2         |
-| AUD-HIGH-01, AUD-HIGH-03, AUD-HIGH-04          | A4, A3/C2, A5  |
-| AUD-HIGH-02                                    | B2             |
-| AUD-HIGH-05, AUD-HIGH-06                       | A3 (+ B1/B2)   |
-| AUD-MED-01, AUD-MED-03                         | A4             |
-| AUD-MED-02, AUD-MED-04, AUD-MED-05, AUD-MED-06 | B4, B5, B4, B4 |
-| AUD-MED-07, AUD-MED-08                         | A3, A2         |
-| AUD-LOW-01, AUD-LOW-02, AUD-LOW-03, AUD-LOW-04 | B4, B3, A4, B3 |
+| Hallazgo                                       | Fase/Ítem             |
+| ---------------------------------------------- | --------------------- |
+| AUD-CRIT-01, AUD-CRIT-02                       | A1, A2                |
+| AUD-HIGH-01, AUD-HIGH-03, AUD-HIGH-04          | A4, A3/C2, A5         |
+| AUD-HIGH-02                                    | B2                    |
+| AUD-HIGH-05, AUD-HIGH-06                       | A3 (+ B1/B2)          |
+| AUD-MED-01, AUD-MED-03                         | A4                    |
+| AUD-MED-02, AUD-MED-04, AUD-MED-05, AUD-MED-06 | B4, B5, B4, B4        |
+| AUD-MED-07, AUD-MED-08                         | A3, A2                |
+| AUD-LOW-01, AUD-LOW-02, AUD-LOW-03, AUD-LOW-04 | B4, B3, A4, B3        |
+| AUD-LOW-05                                     | post-v1.0 (`IDEA-18`) |
 
 ## Cómo se avanza
 
