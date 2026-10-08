@@ -16,12 +16,12 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 ## Estado general
 
-| Fase                      | Estado                         | Guía                                                       | Criterio de salida                                                       |
-| ------------------------- | ------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------------ |
-| A — Integridad de datos   | hecho (A1–A5, 2026-10-07)      | `guides/phase-a-data-integrity.md`                         | Fechas correctas + persistencia local + validación base + repo higiénico |
-| B — Calidad de producto   | hecho (B1–B6, 2026-10-07)      | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
-| C — Intercambio de datos  | en curso (C1 hecho 2026-10-07) | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV                     |
-| D — Puerta a multiusuario | pendiente (diseño)             | (se creará `guides/phase-d-multiuser.md`)                  | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
+| Fase                      | Estado                             | Guía                                                       | Criterio de salida                                                       |
+| ------------------------- | ---------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------ |
+| A — Integridad de datos   | hecho (A1–A5, 2026-10-07)          | `guides/phase-a-data-integrity.md`                         | Fechas correctas + persistencia local + validación base + repo higiénico |
+| B — Calidad de producto   | hecho (B1–B6, 2026-10-07)          | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
+| C — Intercambio de datos  | en curso (C1–C2 hechos 2026-10-07) | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV                     |
+| D — Puerta a multiusuario | pendiente (diseño)                 | (se creará `guides/phase-d-multiuser.md`)                  | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
 
 ## Fase A — Integridad de datos
 
@@ -60,7 +60,8 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 - [x] **C1** Congelar especificación CSV (`guides/csv-format.md` v1.0): personas, uniones,
       relaciones + plantilla descargable (hecho 2026-10-07)
-- [ ] **C2** Importador con reporte de errores por fila (usa validación de Fase A) → `AUD-HIGH-03`
+- [x] **C2** Importador con reporte de errores por fila (usa validación de Fase A) → `AUD-HIGH-03`
+      (hecho 2026-10-07)
 - [ ] **C3** Exportación JSON (formato canónico) + CSV espejo del formato de importación
 - [ ] **C4** Infra i18n (`next-intl`) con `es` por defecto, `en` pendiente (opcional, no bloquea v1.0)
 - Detalle paso a paso: `guides/phase-c-data-exchange.md`.

@@ -32,6 +32,11 @@ import {
 } from "@/lib/family-tree/storage";
 import { validatePersonForm } from "@/lib/family-tree/schema";
 import { readStoredTheme, writeStoredTheme } from "@/lib/family-tree/theme";
+import {
+  planCsvImport,
+  type CsvFileKind,
+  type CsvImportPlan,
+} from "@/lib/family-tree/csv";
 import type { LayoutMode, Person } from "@/types/family-tree";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +49,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CircleHelp, Download, Upload } from "lucide-react";
+import { CircleHelp, Download, FileUp, Upload } from "lucide-react";
 
 const nodeTypes = { person: PersonNode, union: UnionNode };
 type ModalState = {
@@ -86,6 +91,24 @@ function FlowInner() {
     ImportResult & { fileName: string }
   >();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [csvOpen, setCsvOpen] = useState(false);
+  const [csvTexts, setCsvTexts] = useState<
+    Partial<Record<CsvFileKind, string>>
+  >({});
+  const csvPlan: CsvImportPlan | undefined = useMemo(
+    () =>
+      csvOpen && csvTexts.personas
+        ? planCsvImport(
+            {
+              personasText: csvTexts.personas,
+              unionesText: csvTexts.uniones,
+              relacionesText: csvTexts.relaciones,
+            },
+            data
+          )
+        : undefined,
+    [csvOpen, csvTexts, data]
+  );
 
   const notify = useCallback((message: string) => {
     setToast(message);
@@ -303,6 +326,38 @@ function FlowInner() {
     setImportPreview(undefined);
     if (fileRef.current) fileRef.current.value = "";
   }, [importPreview, storeImportData, notify]);
+  const readCsvFile = useCallback(
+    (file: File, kind: CsvFileKind) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCsvTexts((prev) => ({
+          ...prev,
+          [kind]: String(reader.result ?? ""),
+        }));
+      };
+      reader.onerror = () => notify("No se pudo leer el archivo CSV.");
+      reader.readAsText(file);
+    },
+    [notify]
+  );
+  const closeCsvDialog = useCallback(() => {
+    setCsvOpen(false);
+    setCsvTexts({});
+  }, []);
+  const applyCsvImport = useCallback(() => {
+    if (!csvPlan) return;
+    const { applied } = csvPlan;
+    storeImportData({
+      persons: [...data.persons, ...applied.persons],
+      unions: [...data.unions, ...applied.unions],
+      relationships: [...data.relationships, ...applied.relationships],
+    });
+    setSelected(undefined);
+    notify(
+      `CSV importado: ${applied.persons.length} personas, ${applied.unions.length} uniones, ${applied.relationships.length} relaciones.`
+    );
+    closeCsvDialog();
+  }, [csvPlan, data, storeImportData, notify, closeCsvDialog]);
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     writeStoredTheme(dark ? "dark" : "light");
@@ -362,6 +417,9 @@ function FlowInner() {
           >
             Importar JSON
           </Button>
+          <Button size="sm" variant="outline" onClick={() => setCsvOpen(true)}>
+            Importar CSV
+          </Button>
           <Button size="sm" onClick={() => setCreatePersonOpen(true)}>
             Crear nueva persona
           </Button>
@@ -388,6 +446,14 @@ function FlowInner() {
           aria-label="Importar árbol desde JSON"
         >
           <Upload className="size-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => setCsvOpen(true)}
+          aria-label="Importar desde CSV"
+        >
+          <FileUp className="size-4" />
         </Button>
         <input
           ref={fileRef}
@@ -718,6 +784,126 @@ function FlowInner() {
                 Cancelar
               </Button>
               <Button onClick={applyImport}>Aplicar importación</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+      {csvOpen && (
+        <Dialog
+          open
+          onOpenChange={(open) => {
+            if (!open) closeCsvDialog();
+          }}
+        >
+          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Importar CSV</DialogTitle>
+              <DialogDescription>
+                Sube personas.csv (obligatorio) y, si quieres, uniones.csv y
+                relaciones.csv. Las filas válidas se aplican y las inválidas se
+                listan. Plantillas:{" "}
+                <a
+                  className="underline"
+                  href="/plantilla-personas.csv"
+                  download
+                >
+                  personas
+                </a>
+                {", "}
+                <a className="underline" href="/plantilla-uniones.csv" download>
+                  uniones
+                </a>
+                {", "}
+                <a
+                  className="underline"
+                  href="/plantilla-relaciones.csv"
+                  download
+                >
+                  relaciones
+                </a>
+                .
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-4">
+              {(
+                [
+                  ["personas", "personas.csv (obligatorio)"],
+                  ["uniones", "uniones.csv (opcional)"],
+                  ["relaciones", "relaciones.csv (opcional)"],
+                ] as Array<[CsvFileKind, string]>
+              ).map(([kind, label]) => (
+                <div key={kind} className="flex flex-col gap-2">
+                  <Label htmlFor={`csv-${kind}`}>{label}</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id={`csv-${kind}`}
+                      type="file"
+                      accept=".csv,text/csv"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (file) readCsvFile(file, kind);
+                        event.target.value = "";
+                      }}
+                    />
+                    {csvTexts[kind] && (
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        Cargado
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {csvPlan && (
+                <div className="flex flex-col gap-2 text-sm">
+                  <p>
+                    Se aplicarán: {csvPlan.applied.persons.length} personas ·{" "}
+                    {csvPlan.applied.unions.length} uniones ·{" "}
+                    {csvPlan.applied.relationships.length} relaciones.
+                  </p>
+                  {csvPlan.rejected.length > 0 ? (
+                    <div className="flex flex-col gap-1">
+                      <p className="font-semibold">
+                        Filas rechazadas ({csvPlan.rejected.length}):
+                      </p>
+                      <ul className="max-h-48 overflow-y-auto rounded-xl border p-3 text-xs leading-5">
+                        {csvPlan.rejected.slice(0, 100).map((error, index) => (
+                          <li key={index}>
+                            {error.file}.csv · línea {error.line}
+                            {error.field ? ` · ${error.field}` : ""}:{" "}
+                            {error.message}
+                          </li>
+                        ))}
+                      </ul>
+                      {csvPlan.rejected.length > 100 && (
+                        <p className="text-xs text-muted-foreground">
+                          … y {csvPlan.rejected.length - 100} más.
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      Todas las filas son válidas.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={closeCsvDialog}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={applyCsvImport}
+                disabled={
+                  !csvPlan ||
+                  csvPlan.applied.persons.length +
+                    csvPlan.applied.unions.length +
+                    csvPlan.applied.relationships.length ===
+                    0
+                }
+              >
+                Aplicar válidas
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

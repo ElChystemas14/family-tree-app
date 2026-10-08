@@ -17,13 +17,18 @@ Roadmap: ítems C1–C4 (`../roadmap.md`). Spec: [`csv-format.md`](csv-format.md
 - Aceptación: la plantilla importa sin errores en árbol vacío.
   Verificado por test (3 personas + unión + relación válidas; Hawthorne→CSV→import idéntico).
 
-## C2 — Importador con reporte por fila (AUD-HIGH-03)
+## C2 — Importador con reporte por fila (AUD-HIGH-03) — hecho 2026-10-07
 
-- [ ] Subida de 1–3 CSV (personas, uniones, relaciones) con vista previa antes de aplicar.
-- [ ] Validación con zod (A3): por cada fila errónea, nº de línea + campo + motivo; las
+- [x] Subida de 1–3 CSV (personas, uniones, relaciones) con vista previa antes de aplicar.
+      Botón "Importar CSV" (desktop + móvil); diálogo con 3 ficheros, enlaces a
+      plantillas, resumen y lista de errores; "Aplicar válidas" fusiona con el árbol.
+- [x] Validación con zod (A3): por cada fila errónea, nº de línea + campo + motivo; las
       válidas se aplican, las inválidas se listan sin bloquear el resto (modo parcial decidido en C1).
-- [ ] Detección de IDs duplicados intra-archivo y contra el árbol actual.
+      `planCsvImport` en `csv.ts` (puro y testeado): formularios A3 por fila,
+      referencias contra archivo + árbol, anti-parientes y anti-duplicados.
+- [x] Detección de IDs duplicados intra-archivo y contra el árbol actual.
 - Aceptación: importar el dataset Hawthorne en CSV reproduce el árbol de prueba.
+  Verificado por test (`csv-import.test.ts`: 16+5+10 aplicados, 0 rechazados).
 
 ## C3 — Exportación
 
