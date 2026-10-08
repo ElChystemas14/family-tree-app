@@ -1,0 +1,4 @@
+id,firstName,lastName,gender,birthDate,deathDate,photoUrl,bio,attributes
+p1,Ana,Ruiz,female,1970-05-02,,,Madre de Sofía,
+p2,Luis,Ruiz,male,1968-11-19,,,Padre de Sofía,
+p3,Sofía,Ruiz,female,1998-02-10,,,Hija de Ana y Luis,

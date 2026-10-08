@@ -5,18 +5,23 @@ Requiere Fases A (validación) y B (tests) cerradas.
 Criterio de salida: C1–C4 completos con la spec congelada.
 Roadmap: ítems C1–C4 (`../roadmap.md`). Spec: [`csv-format.md`](csv-format.md).
 
-## C1 — Congelar especificación CSV v1.0
+## C1 — Congelar especificación CSV v1.0 — hecho 2026-10-07
 
-- [ ] Revisar `csv-format.md` (borrador) con datos reales de prueba; congelar como v1.0
+- [x] Revisar `csv-format.md` (borrador) con datos reales de prueba; congelar como v1.0
       (cambios posteriores = v1.1 con notas de migración).
-- [ ] Publicar plantilla descargable (`plantilla-personas.csv`, etc.) generada desde la spec.
+      Decisiones: columna `attributes` (JSON, round-trip idéntico), autodetección
+      `;` (Excel ES) y modo parcial (las válidas se aplican, las inválidas se listan).
+- [x] Publicar plantilla descargable (`plantilla-personas.csv`, etc.) generada desde la spec.
+      Builders en `src/lib/family-tree/csv.ts` (`parseCsvText`/`serializeCsv` RFC 4180);
+      test que exige `public/` byte-idéntico a los builders.
 - Aceptación: la plantilla importa sin errores en árbol vacío.
+  Verificado por test (3 personas + unión + relación válidas; Hawthorne→CSV→import idéntico).
 
 ## C2 — Importador con reporte por fila (AUD-HIGH-03)
 
 - [ ] Subida de 1–3 CSV (personas, uniones, relaciones) con vista previa antes de aplicar.
 - [ ] Validación con zod (A3): por cada fila errónea, nº de línea + campo + motivo; las
-      válidas se aplican, las inválidas se listan sin bloquear el resto (o modo estricto, a decidir).
+      válidas se aplican, las inválidas se listan sin bloquear el resto (modo parcial decidido en C1).
 - [ ] Detección de IDs duplicados intra-archivo y contra el árbol actual.
 - Aceptación: importar el dataset Hawthorne en CSV reproduce el árbol de prueba.
 
