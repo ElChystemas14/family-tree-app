@@ -59,9 +59,25 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CircleHelp, Download, FileUp, Upload } from "lucide-react";
+import {
+  CircleHelp,
+  Download,
+  FileUp,
+  LogIn,
+  LogOut,
+  Upload,
+} from "lucide-react";
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
+import {
+  createSupabaseBrowserClient,
+  isSupabaseConfigured,
+} from "@/lib/supabase/client";
+import { LoginDialog } from "@/components/auth/login-dialog";
 
 const nodeTypes = { person: PersonNode, union: UnionNode };
+
+// Sin entorno Supabase la app sigue 100% local (sin login ni nube).
+const SUPABASE_ENABLED = isSupabaseConfigured();
 type ModalState = {
   relationship?: "parent" | "spouse" | "child";
   personId?: string;
@@ -90,6 +106,7 @@ function FlowInner() {
   const tImportJson = useTranslations("importJson");
   const tImportCsv = useTranslations("importCsv");
   const tExport = useTranslations("exportDialog");
+  const tAuth = useTranslations("auth");
   const tToasts = useTranslations("toasts");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Person>();
@@ -442,6 +459,36 @@ function FlowInner() {
     }, 500);
     return () => window.clearTimeout(timer);
   }, [data, posOverrides, hydrated, notify]);
+  const [user, setUser] = useState<User | null>(null);
+  const [loginOpen, setLoginOpen] = useState(false);
+  useEffect(() => {
+    if (!SUPABASE_ENABLED) return;
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth
+      .getSession()
+      .then(({ data }: { data: { session: Session | null } }) =>
+        setUser(data.session?.user ?? null)
+      );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        setUser(session?.user ?? null);
+      }
+    );
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+  const handleSignOut = useCallback(async () => {
+    try {
+      await createSupabaseBrowserClient().auth.signOut();
+      setUser(null);
+      notify(tAuth("signedOut"));
+    } catch {
+      notify(tAuth("signOutError"));
+    }
+  }, [notify, tAuth]);
   const pendingSource = pendingUnion
     ? data.persons.find((person) => person.id === pendingUnion.sourceId)
     : undefined;
@@ -487,6 +534,23 @@ function FlowInner() {
           <Button size="sm" onClick={() => setCreatePersonOpen(true)}>
             {tHeader("create")}
           </Button>
+          {SUPABASE_ENABLED &&
+            (user ? (
+              <>
+                <span className="max-w-40 truncate">{user.email}</span>
+                <Button size="sm" variant="outline" onClick={handleSignOut}>
+                  {tAuth("signOut")}
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setLoginOpen(true)}
+              >
+                {tAuth("signIn")}
+              </Button>
+            ))}
         </div>
         <Button
           size="sm"
@@ -530,6 +594,26 @@ function FlowInner() {
             if (file) handleImportFile(file);
           }}
         />
+        {SUPABASE_ENABLED &&
+          (user ? (
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={handleSignOut}
+              aria-label={tAuth("signOut")}
+            >
+              <LogOut className="size-4" />
+            </Button>
+          ) : (
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => setLoginOpen(true)}
+              aria-label={tAuth("signIn")}
+            >
+              <LogIn className="size-4" />
+            </Button>
+          ))}
         <Button
           size="icon"
           variant="outline"
@@ -998,6 +1082,9 @@ function FlowInner() {
             </div>
           </DialogContent>
         </Dialog>
+      )}
+      {SUPABASE_ENABLED && (
+        <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
       )}
       {toast && (
         <div

@@ -16,12 +16,13 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 ## Estado general
 
-| Fase                      | Estado                    | Guía                                                       | Criterio de salida                                                       |
-| ------------------------- | ------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------ |
-| A — Integridad de datos   | hecho (A1–A5, 2026-10-07) | `guides/phase-a-data-integrity.md`                         | Fechas correctas + persistencia local + validación base + repo higiénico |
-| B — Calidad de producto   | hecho (B1–B6, 2026-10-07) | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
-| C — Intercambio de datos  | hecho (C1–C4, 2026-10-07) | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV                     |
-| D — Puerta a multiusuario | hecho (diseño 2026-10-07) | `guides/phase-d-multiuser.md`                              | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
+| Fase                            | Estado                         | Guía                                                       | Criterio de salida                                                       |
+| ------------------------------- | ------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------------ |
+| A — Integridad de datos         | hecho (A1–A5, 2026-10-07)      | `guides/phase-a-data-integrity.md`                         | Fechas correctas + persistencia local + validación base + repo higiénico |
+| B — Calidad de producto         | hecho (B1–B6, 2026-10-07)      | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
+| C — Intercambio de datos        | hecho (C1–C4, 2026-10-07)      | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV                     |
+| D — Puerta a multiusuario       | hecho (diseño 2026-10-07)      | `guides/phase-d-multiuser.md`                              | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
+| E — Implementación multiusuario | en curso (E1 hecho 2026-10-08) | (esta fase vive en el roadmap)                             | Auth + sync contra Supabase sin romper local-first                       |
 
 ## Fase A — Integridad de datos
 
@@ -74,9 +75,24 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
       Propuesta en `guides/phase-d-multiuser.md` (tablas `trees`, `tree_memberships`,
       `tree_invites`, `user_tree_settings`; `treeId` + `updatedAt` en entidades).
 - [x] **D2** Decidir stack (Auth + BD + storage de fotos) y registrarlo en `decisions.md`.
-      Supabase (Auth email + Google, Postgres con RLS, Storage privado).
+      Supabase (Auth email magic-link —Google aparcado—, Postgres con RLS, Storage privado).
 - [x] **D3** Crear `guides/phase-d-multiuser.md` con criterios de aceptación.
 - Ideas relacionadas: `IDEA-08` (roles), `IDEA-09` (invitaciones), `IDEA-14` (PWA/offline, sinergia con sync).
+
+## Fase E — Implementación multiusuario (en curso)
+
+Implementa el diseño de Fase D sin romper el modo local-first: sin entorno
+Supabase la app funciona igual que en v1.0 (sin login ni nube).
+
+- [x] **E1** Base: `NEXT_PUBLIC_SUPABASE_URL/ANON_KEY` (`.env`, gitignorado) +
+      clientes browser/server (`src/lib/supabase/`) + `src/proxy.ts` (refresco
+      de sesión, convención Next 16) + migración SQL (`supabase/migrations/`) +
+      login por email en el header (hecho 2026-10-08).
+      **Pendiente del usuario**: ejecutar `0001_multiuser.sql` en el SQL editor
+      del dashboard y verificar Site URL/redirects (`http://localhost:3000`).
+- [ ] **E2** Adapter + sync: repositorio sobre `useFamilyTree`, subida/bajada
+      por árbol (last-write-wins), selector de árboles y semilla desde JSON local.
+- [ ] **E3** Invitaciones + roles + fotos: enlaces, matriz en UI y Storage privado.
 
 ## Trazabilidad auditoría → roadmap
 

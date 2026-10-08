@@ -1,8 +1,8 @@
 # Archivo Hawthorne — Árbol genealógico (`family-tree-app`)
 
-App local-first (sin backend) para explorar y editar el árbol genealógico familiar
-en un canvas interactivo. Interfaz en español, canvas como pantalla principal y
-datos de prueba de la familia Hawthorne.
+App local-first para explorar y editar el árbol genealógico familiar en un
+canvas interactivo, con nube opcional (Supabase) para multiusuario. Interfaz en
+español, canvas como pantalla principal y arranque vacío con onboarding.
 
 ## Requisitos
 
@@ -16,9 +16,21 @@ pnpm install
 pnpm dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000). La primera carga muestra el
-dataset Hawthorne; tus cambios se guardan en `localStorage` (`hawthorne-tree-v1`)
+Abre [http://localhost:3000](http://localhost:3000). La primera carga arranca
+vacía con onboarding; tus cambios se guardan en `localStorage` (`hawthorne-tree-v1`)
 y sobreviven recargas.
+
+## Nube opcional (Supabase, Fase E)
+
+Sin esto la app es 100% local. Para el login multiusuario, crea `.env` con:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_publishable_key
+```
+
+(sin comillas; está gitignorado) y ejecuta `supabase/migrations/0001_multiuser.sql`
+en el SQL editor del dashboard. La `DB_PASSWORD` no la usa la app: guárdala aparte.
 
 ## Scripts
 
@@ -65,7 +77,7 @@ El mapa completo está en [`docs/`](docs/):
 
 - [`docs/audit.md`](docs/audit.md) — auditoría inicial y hallazgos (`AUD-*`).
 - [`docs/roadmap.md`](docs/roadmap.md) — plan por fases con seguimiento (Fases A–D
-  hechas; D solo diseño, v1.0 local-first lista).
+  hechas; E en curso: multiusuario con Supabase).
 - [`docs/ideas.md`](docs/ideas.md) — ideas futuras aparcadas (`IDEA-*`).
 - [`docs/decisions.md`](docs/decisions.md) — decisiones tomadas.
 - [`docs/guides/`](docs/guides/) — guías de ejecución por fase y formato CSV.

@@ -16,6 +16,7 @@ const EXPECTED_NAMESPACES = [
   "importJson",
   "importCsv",
   "exportDialog",
+  "auth",
   "toasts",
 ];
 

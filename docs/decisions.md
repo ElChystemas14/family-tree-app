@@ -30,3 +30,5 @@ relevante futura (formato: fecha, decisión, contexto, consecuencias).
 | 2026-10-07 | Sync offline-first + `treeId`/`updatedAt` (D1)      | Lo local manda sin red; last-write-wins por fila; posiciones por usuario y árbol. Sin código aún.                                            |
 | 2026-10-07 | Fase D cerrada (diseño)                             | Modelo, RLS, flujos y aceptación en `guides/phase-d-multiuser.md`.                                                                           |
 | 2026-10-07 | Revisión final: v1.0 lista con reservas             | 55/55 tests en 2 TZ + checks verdes; `AUD-LOW-05` e `IDEA-17/18` a post-v1.0; CI y matriz manual al hacer push.                              |
+| 2026-10-08 | Supabase: solo email + `.env` local (E1)            | Magic-link sin Google; `NEXT_PUBLIC_SUPABASE_URL/ANON_KEY` en `.env` gitignorado (tolera comillas); sin env la app sigue local.              |
+| 2026-10-08 | Sesión vía `src/proxy.ts` (E1)                      | Convención Next 16 (no `middleware.ts`); refresco de cookies en cada request; tipos explícitos por genéricos `any` de supabase-js 2.117.     |

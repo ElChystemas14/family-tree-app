@@ -167,6 +167,22 @@
     "json": "JSON canónico",
     "close": "Cerrar"
   },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "title": "Iniciar sesión",
+    "description": "Te enviamos un enlace mágico a tu correo. Sin contraseñas.",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "tu@correo.com",
+    "send": "Enviar enlace",
+    "sending": "Enviando…",
+    "sentTitle": "Revisa tu correo",
+    "sentBody": "Si {email} existe, recibirás un enlace para entrar.",
+    "sendError": "No se pudo enviar el enlace. Revisa el correo.",
+    "signedOut": "Sesión cerrada.",
+    "signOutError": "No se pudo cerrar la sesión.",
+    "close": "Cerrar"
+  },
   "toasts": {
     "exported": "Archivo exportado como copia de seguridad.",
     "exportError": "No se pudo exportar el archivo.",
