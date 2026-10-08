@@ -43,6 +43,8 @@ y sobreviven recargas.
   versionada + export/import JSON), `transform.ts` (dagre → grafo),
   `mock-data.ts` (dataset Hawthorne + relaciones).
 - `types/family-tree.ts` — `Person`, `Union`, `ChildRelationship`, `FamilyTreeData`.
+- `i18n/` — `config.ts` (locales, `es` por defecto) y `messages/es.json` (catálogo
+  `next-intl`; añadir idioma = añadir archivo).
 
 ## Modelo de datos (resumen)
 
@@ -62,8 +64,8 @@ posOverrides? }` — es lo que se guarda en local y lo que se exporta/importa
 El mapa completo está en [`docs/`](docs/):
 
 - [`docs/audit.md`](docs/audit.md) — auditoría inicial y hallazgos (`AUD-*`).
-- [`docs/roadmap.md`](docs/roadmap.md) — plan por fases con seguimiento (Fases A y
-  B hechas; siguiente: Fase C — intercambio de datos).
+- [`docs/roadmap.md`](docs/roadmap.md) — plan por fases con seguimiento (Fases A–C
+  hechas; siguiente: Fase D — puerta a multiusuario, solo diseño).
 - [`docs/ideas.md`](docs/ideas.md) — ideas futuras aparcadas (`IDEA-*`).
 - [`docs/decisions.md`](docs/decisions.md) — decisiones tomadas.
 - [`docs/guides/`](docs/guides/) — guías de ejecución por fase y formato CSV.

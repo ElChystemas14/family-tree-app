@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Columns3, LocateFixed, Moon, Rows3, Search, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,7 @@ export function TreeControls({
   dark,
   onTheme,
 }: TreeControlsProps) {
+  const t = useTranslations("controls");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const results = useMemo(() => {
@@ -67,22 +69,22 @@ export function TreeControls({
             onKeyDown={(event) => {
               if (event.key === "Escape") setIsSearchOpen(false);
             }}
-            placeholder="Buscar familiares"
+            placeholder={t("searchPlaceholder")}
             className="bg-card/95 pl-10 pr-16 shadow-sm backdrop-blur"
-            aria-label="Buscar familiares"
+            aria-label={t("searchLabel")}
             aria-expanded={isSearchOpen && results.length > 0}
             aria-controls="family-search-results"
           />
           {search && (
             <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
-              {results.length} encontrados
+              {t("found", { count: results.length })}
             </span>
           )}
           {isSearchOpen && search.trim() && (
             <div
               id="family-search-results"
               role="listbox"
-              aria-label="Familiares coincidentes"
+              aria-label={t("resultsLabel")}
               className="absolute inset-x-0 top-[calc(100%+0.5rem)] overflow-hidden rounded-xl border bg-card p-1.5 shadow-lg"
             >
               {results.length > 0 ? (
@@ -107,14 +109,14 @@ export function TreeControls({
                         {person.birthDate}
                         {person.deathDate
                           ? ` — ${person.deathDate}`
-                          : " — con vida"}
+                          : t("alive")}
                       </span>
                     </span>
                   </button>
                 ))
               ) : (
                 <p className="px-3 py-3 text-sm text-muted-foreground">
-                  No se encontraron familiares
+                  {t("noResults")}
                 </p>
               )}
             </div>
@@ -126,8 +128,8 @@ export function TreeControls({
         >
           <ToggleGroupItem
             value="vertical"
-            aria-label="Diseño vertical"
-            title="Diseño vertical (generaciones en filas)"
+            aria-label={t("layoutVertical")}
+            title={t("layoutVerticalTitle")}
             onClick={() => onLayout("vertical")}
             className="size-8"
           >
@@ -135,8 +137,8 @@ export function TreeControls({
           </ToggleGroupItem>
           <ToggleGroupItem
             value="horizontal"
-            aria-label="Diseño horizontal"
-            title="Diseño horizontal (generaciones en columnas)"
+            aria-label={t("layoutHorizontal")}
+            title={t("layoutHorizontalTitle")}
             onClick={() => onLayout("horizontal")}
             className="size-8"
           >
@@ -151,7 +153,7 @@ export function TreeControls({
           onClick={onNewBranch}
           className="bg-card/95 shadow-sm backdrop-blur"
         >
-          <span data-icon>+</span> Nueva rama familiar independiente
+          <span data-icon>+</span> {t("newBranch")}
         </Button>
         <Button
           variant="outline"
@@ -159,13 +161,13 @@ export function TreeControls({
           onClick={onCenter}
           className="bg-card/95 shadow-sm backdrop-blur"
         >
-          <LocateFixed data-icon="inline-start" /> Centrar vista
+          <LocateFixed data-icon="inline-start" /> {t("center")}
         </Button>
         <Button
           variant="outline"
           size="icon"
           onClick={onTheme}
-          aria-label="Cambiar tema"
+          aria-label={t("themeLabel")}
           className="bg-card/95 shadow-sm backdrop-blur"
         >
           {dark ? <Sun data-icon /> : <Moon data-icon />}

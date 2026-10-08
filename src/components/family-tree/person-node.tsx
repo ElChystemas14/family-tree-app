@@ -9,10 +9,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslations } from "next-intl";
 import { getInitials, formatYear } from "@/lib/family-tree/mock-data";
 import type { PersonNodeData } from "@/types/family-tree";
 
 export function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
+  const t = useTranslations("personNode");
   return (
     <div
       className={`person-node group relative w-65 rounded-xl border bg-card p-3 shadow-sm transition-all ${data.isDimmed ? "opacity-25" : "opacity-100"} ${data.isPathHighlighted ? "border-primary shadow-lg ring-1 ring-primary/30" : data.isSelected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""} ${data.isSearchFocused ? "border-primary shadow-lg" : "border-border"}`}
@@ -38,25 +40,27 @@ export function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {formatYear(data.birthDate)} —{" "}
-            {data.deathDate ? formatYear(data.deathDate) : "presente"}
+            {data.deathDate ? formatYear(data.deathDate) : t("present")}
           </p>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger
             className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg border border-transparent text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-accent-foreground group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
-            aria-label={`Acciones para ${data.firstName} ${data.lastName}`}
+            aria-label={t("actionsFor", {
+              name: `${data.firstName} ${data.lastName}`,
+            })}
           >
             <MoreHorizontal data-icon />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => data.onQuickAction?.("parent")}>
-              Añadir padre/madre
+              {t("addParent")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => data.onQuickAction?.("spouse")}>
-              Añadir pareja
+              {t("addSpouse")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => data.onQuickAction?.("child")}>
-              Añadir hijo/a
+              {t("addChild")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -66,10 +70,12 @@ export function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
           variant="secondary"
           className="text-[10px] uppercase tracking-wider"
         >
-          Generación {data.generation + 1}
+          {t("generation", { n: data.generation + 1 })}
         </Badge>
         {data.isSearchFocused && (
-          <span className="text-[10px] font-medium text-primary">Coincide</span>
+          <span className="text-[10px] font-medium text-primary">
+            {t("match")}
+          </span>
         )}
       </div>
       <Handle

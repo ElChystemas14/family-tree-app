@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Background,
   Controls,
@@ -81,6 +82,15 @@ function FlowInner() {
     setLayout: setStoreLayout,
     importData: storeImportData,
   } = useFamilyTree();
+  const tHeader = useTranslations("header");
+  const tOnboarding = useTranslations("onboarding");
+  const tEdit = useTranslations("editDialog");
+  const tUnion = useTranslations("unionDialog");
+  const tHelp = useTranslations("help");
+  const tImportJson = useTranslations("importJson");
+  const tImportCsv = useTranslations("importCsv");
+  const tExport = useTranslations("exportDialog");
+  const tToasts = useTranslations("toasts");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Person>();
   const [dark, setDark] = useState<boolean>(
@@ -166,11 +176,11 @@ function FlowInner() {
       const result = storeConnectUnion(sourceId, targetId);
       notify(
         result.ok
-          ? "Ramas familiares conectadas."
-          : (result.error ?? "No se pudo crear la unión.")
+          ? tToasts("connected")
+          : (result.error ?? tToasts("unionError"))
       );
     },
-    [storeConnectUnion, notify]
+    [storeConnectUnion, notify, tToasts]
   );
   // dagre solo se re-ejecuta si cambian estructura o modo (B5, AUD-MED-04);
   // seleccionar/buscar solo re-deriva resaltado (ver `[layout] dagre…` en dev).
@@ -263,7 +273,7 @@ function FlowInner() {
         validation.errors.birthDate ??
         validation.errors.deathDate ??
         validation.errors.bio ??
-        "Revisa los datos.";
+        tToasts("reviewData");
       notify(firstError);
       return;
     }
@@ -276,12 +286,12 @@ function FlowInner() {
     };
     const updateResult = storeUpdatePerson(updated);
     if (!updateResult.ok) {
-      notify(updateResult.error ?? "No se pudo guardar.");
+      notify(updateResult.error ?? tToasts("saveError"));
       return;
     }
     setSelected(updated);
     setEditing(undefined);
-    notify("Datos de la persona actualizados.");
+    notify(tToasts("updated"));
   };
   const [exportOpen, setExportOpen] = useState(false);
   const downloadTextFile = (text: string, filename: string, mime: string) => {
@@ -303,11 +313,11 @@ function FlowInner() {
         buildExportFilename(),
         "application/json"
       );
-      notify("Archivo exportado como copia de seguridad.");
+      notify(tToasts("exported"));
     } catch {
-      notify("No se pudo exportar el archivo.");
+      notify(tToasts("exportError"));
     }
-  }, [data, posOverrides, notify]);
+  }, [data, posOverrides, notify, tToasts]);
   const handleExportCsv = useCallback(
     (kind: CsvFileKind) => {
       try {
@@ -327,12 +337,12 @@ function FlowInner() {
                   data.relationships.map(relationshipToCsvRow)
                 );
         downloadTextFile(text, buildCsvFilename(kind), "text/csv");
-        notify(`Archivo ${kind}.csv exportado.`);
+        notify(tToasts("csvExported", { file: kind }));
       } catch {
-        notify("No se pudo exportar el CSV.");
+        notify(tToasts("csvExportError"));
       }
     },
-    [data, notify]
+    [data, notify, tToasts]
   );
   const handleImportFile = useCallback(
     (file: File) => {
@@ -343,30 +353,35 @@ function FlowInner() {
           const result = parseImportedJson(parsed);
           if (!result.ok) {
             notify(
-              `Archivo no válido: ${result.errors[0] ?? "revisa el formato"}`
+              tToasts("importInvalid", {
+                error: result.errors[0] ?? "revisa el formato",
+              })
             );
             return;
           }
           setImportPreview({ ...result, fileName: file.name });
         } catch {
-          notify("No se pudo leer el archivo JSON.");
+          notify(tToasts("importUnreadable"));
         }
       };
-      reader.onerror = () => notify("No se pudo leer el archivo JSON.");
+      reader.onerror = () => notify(tToasts("importUnreadable"));
       reader.readAsText(file);
     },
-    [notify]
+    [notify, tToasts]
   );
   const applyImport = useCallback(() => {
     if (!importPreview?.data) return;
     storeImportData(importPreview.data, importPreview.data.posOverrides ?? {});
     setSelected(undefined);
     notify(
-      `Archivo importado: ${importPreview.summary?.persons ?? 0} personas, ${importPreview.summary?.unions ?? 0} uniones.`
+      tToasts("imported", {
+        persons: importPreview.summary?.persons ?? 0,
+        unions: importPreview.summary?.unions ?? 0,
+      })
     );
     setImportPreview(undefined);
     if (fileRef.current) fileRef.current.value = "";
-  }, [importPreview, storeImportData, notify]);
+  }, [importPreview, storeImportData, notify, tToasts]);
   const readCsvFile = useCallback(
     (file: File, kind: CsvFileKind) => {
       const reader = new FileReader();
@@ -376,10 +391,10 @@ function FlowInner() {
           [kind]: String(reader.result ?? ""),
         }));
       };
-      reader.onerror = () => notify("No se pudo leer el archivo CSV.");
+      reader.onerror = () => notify(tToasts("csvUnreadable"));
       reader.readAsText(file);
     },
-    [notify]
+    [notify, tToasts]
   );
   const closeCsvDialog = useCallback(() => {
     setCsvOpen(false);
@@ -395,10 +410,14 @@ function FlowInner() {
     });
     setSelected(undefined);
     notify(
-      `CSV importado: ${applied.persons.length} personas, ${applied.unions.length} uniones, ${applied.relationships.length} relaciones.`
+      tToasts("csvImported", {
+        persons: applied.persons.length,
+        unions: applied.unions.length,
+        relationships: applied.relationships.length,
+      })
     );
     closeCsvDialog();
-  }, [csvPlan, data, storeImportData, notify, closeCsvDialog]);
+  }, [csvPlan, data, storeImportData, notify, tToasts, closeCsvDialog]);
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     writeStoredTheme(dark ? "dark" : "light");
@@ -438,35 +457,35 @@ function FlowInner() {
           </div>
           <div>
             <p className="text-sm font-semibold tracking-tight">
-              Archivo Hawthorne
+              {tHeader("appName")}
             </p>
             <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              Árbol genealógico / editable
+              {tHeader("subtitle")}
             </p>
           </div>
         </div>
         <div className="hidden items-center gap-5 text-xs text-muted-foreground sm:flex">
-          <span>{data.persons.length} personas</span>
-          <span>{data.unions.length} uniones</span>
+          <span>{tHeader("persons", { count: data.persons.length })}</span>
+          <span>{tHeader("unions", { count: data.unions.length })}</span>
           <Button
             size="sm"
             variant="outline"
             onClick={() => setExportOpen(true)}
           >
-            Exportar
+            {tHeader("export")}
           </Button>
           <Button
             size="sm"
             variant="outline"
             onClick={() => fileRef.current?.click()}
           >
-            Importar JSON
+            {tHeader("importJson")}
           </Button>
           <Button size="sm" variant="outline" onClick={() => setCsvOpen(true)}>
-            Importar CSV
+            {tHeader("importCsv")}
           </Button>
           <Button size="sm" onClick={() => setCreatePersonOpen(true)}>
-            Crear nueva persona
+            {tHeader("create")}
           </Button>
         </div>
         <Button
@@ -474,13 +493,13 @@ function FlowInner() {
           className="sm:hidden"
           onClick={() => setCreatePersonOpen(true)}
         >
-          Crear
+          {tHeader("createShort")}
         </Button>
         <Button
           size="icon"
           variant="outline"
           onClick={() => setExportOpen(true)}
-          aria-label="Exportar árbol"
+          aria-label={tHeader("exportLabel")}
         >
           <Download className="size-4" />
         </Button>
@@ -488,7 +507,7 @@ function FlowInner() {
           size="icon"
           variant="outline"
           onClick={() => fileRef.current?.click()}
-          aria-label="Importar árbol desde JSON"
+          aria-label={tHeader("importJsonLabel")}
         >
           <Upload className="size-4" />
         </Button>
@@ -496,7 +515,7 @@ function FlowInner() {
           size="icon"
           variant="outline"
           onClick={() => setCsvOpen(true)}
-          aria-label="Importar desde CSV"
+          aria-label={tHeader("importCsvLabel")}
         >
           <FileUp className="size-4" />
         </Button>
@@ -505,7 +524,7 @@ function FlowInner() {
           type="file"
           accept="application/json,.json"
           className="hidden"
-          aria-label="Seleccionar archivo JSON para importar"
+          aria-label={tHeader("selectJsonFileLabel")}
           onChange={(event) => {
             const file = event.target.files?.[0];
             if (file) handleImportFile(file);
@@ -515,7 +534,7 @@ function FlowInner() {
           size="icon"
           variant="outline"
           onClick={() => setHelpOpen(true)}
-          aria-label="Cómo usar el árbol genealógico"
+          aria-label={tHeader("helpLabel")}
         >
           <CircleHelp className="size-4" />
         </Button>
@@ -586,22 +605,21 @@ function FlowInner() {
                 H
               </div>
               <h2 className="text-lg font-semibold tracking-tight">
-                Empieza tu árbol
+                {tOnboarding("title")}
               </h2>
               <p className="text-sm text-muted-foreground">
-                Aún no hay personas en este archivo. Crea la primera o importa
-                un archivo JSON.
+                {tOnboarding("description")}
               </p>
               <div className="mt-1 flex flex-wrap justify-center gap-2">
                 <Button size="sm" onClick={() => setCreatePersonOpen(true)}>
-                  Crea tu primera persona
+                  {tOnboarding("create")}
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => fileRef.current?.click()}
                 >
-                  Importar JSON
+                  {tOnboarding("import")}
                 </Button>
               </div>
             </div>
@@ -619,11 +637,11 @@ function FlowInner() {
           if (!selected) return;
           const result = storeRemovePerson(selected.id);
           if (!result.ok) {
-            notify(result.error ?? "No se pudo eliminar.");
+            notify(result.error ?? tToasts("removeError"));
             return;
           }
           setSelected(undefined);
-          notify("Persona desvinculada del archivo.");
+          notify(tToasts("removed"));
         }}
       />
       <AddRelativeModal
@@ -642,16 +660,13 @@ function FlowInner() {
         <Dialog open onOpenChange={(open) => !open && setEditing(undefined)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Editar datos de la persona</DialogTitle>
-              <DialogDescription>
-                Actualiza la información básica sin cambiar las conexiones
-                familiares.
-              </DialogDescription>
+              <DialogTitle>{tEdit("title")}</DialogTitle>
+              <DialogDescription>{tEdit("description")}</DialogDescription>
             </DialogHeader>
             <form onSubmit={saveEdit} className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="edit-first">Nombre</Label>
+                  <Label htmlFor="edit-first">{tEdit("firstName")}</Label>
                   <Input
                     id="edit-first"
                     name="firstName"
@@ -659,7 +674,7 @@ function FlowInner() {
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="edit-last">Apellidos</Label>
+                  <Label htmlFor="edit-last">{tEdit("lastName")}</Label>
                   <Input
                     id="edit-last"
                     name="lastName"
@@ -668,7 +683,7 @@ function FlowInner() {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-birth">Fecha de nacimiento</Label>
+                <Label htmlFor="edit-birth">{tEdit("birth")}</Label>
                 <Input
                   id="edit-birth"
                   name="birthDate"
@@ -677,10 +692,10 @@ function FlowInner() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-bio">Biografía</Label>
+                <Label htmlFor="edit-bio">{tEdit("bio")}</Label>
                 <Textarea id="edit-bio" name="bio" defaultValue={editing.bio} />
               </div>
-              <Button type="submit">Guardar cambios</Button>
+              <Button type="submit">{tEdit("save")}</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -694,12 +709,12 @@ function FlowInner() {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Crear unión de pareja</DialogTitle>
+              <DialogTitle>{tUnion("title")}</DialogTitle>
               <DialogDescription>
-                ¿Quieres unir a {pendingSource.firstName}{" "}
-                {pendingSource.lastName} y {pendingTarget.firstName}{" "}
-                {pendingTarget.lastName} como pareja? Después podrás añadir sus
-                hijos desde el círculo de la unión.
+                {tUnion("description", {
+                  a: `${pendingSource.firstName} ${pendingSource.lastName}`,
+                  b: `${pendingTarget.firstName} ${pendingTarget.lastName}`,
+                })}
               </DialogDescription>
             </DialogHeader>
             <div className="flex justify-end gap-2">
@@ -707,7 +722,7 @@ function FlowInner() {
                 variant="outline"
                 onClick={() => setPendingUnion(undefined)}
               >
-                Cancelar
+                {tUnion("cancel")}
               </Button>
               <Button
                 onClick={() => {
@@ -715,7 +730,7 @@ function FlowInner() {
                   setPendingUnion(undefined);
                 }}
               >
-                Crear unión
+                {tUnion("confirm")}
               </Button>
             </div>
           </DialogContent>
@@ -730,61 +745,33 @@ function FlowInner() {
         >
           <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Cómo usar el árbol genealógico</DialogTitle>
-              <DialogDescription>
-                Guía rápida para ver, mover y ampliar tu familia.
-              </DialogDescription>
+              <DialogTitle>{tHelp("title")}</DialogTitle>
+              <DialogDescription>{tHelp("description")}</DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-4 text-sm leading-6">
               <section>
-                <h3 className="font-semibold">Tarjeta de persona</h3>
-                <p className="text-muted-foreground">
-                  Un clic abre su ficha con biografía y familiares. El menú ⋯
-                  permite añadir padre/madre, pareja o hijo. El doble clic
-                  centra su linaje (padres, pareja e hijos) en pantalla.
-                </p>
+                <h3 className="font-semibold">{tHelp("cardTitle")}</h3>
+                <p className="text-muted-foreground">{tHelp("cardBody")}</p>
               </section>
               <section>
-                <h3 className="font-semibold">Círculo pequeño: la unión</h3>
-                <p className="text-muted-foreground">
-                  Representa a una pareja. El botón + que aparece al pasar el
-                  cursor añade un hijo a esa pareja.
-                </p>
+                <h3 className="font-semibold">{tHelp("unionTitle")}</h3>
+                <p className="text-muted-foreground">{tHelp("unionBody")}</p>
               </section>
               <section>
-                <h3 className="font-semibold">Crear personas</h3>
-                <p className="text-muted-foreground">
-                  Usa Crear para una persona suelta o Nueva rama familiar
-                  independiente. Para vincular a alguien que ya existe, elige la
-                  pestaña Elegir existente en el formulario.
-                </p>
+                <h3 className="font-semibold">{tHelp("createTitle")}</h3>
+                <p className="text-muted-foreground">{tHelp("createBody")}</p>
               </section>
               <section>
-                <h3 className="font-semibold">Conectar parejas arrastrando</h3>
-                <p className="text-muted-foreground">
-                  En escritorio, arrastra una tarjeta sobre otra para proponer
-                  una unión; siempre pide confirmación. En táctil, arrastrar
-                  solo mueve (para no chocar con el desplazamiento): crea la
-                  pareja desde el menú ⋯ → &quot;Añadir pareja&quot;. Mover
-                  nodos no altera al resto: cada posición que cambies se
-                  conserva.
-                </p>
+                <h3 className="font-semibold">{tHelp("connectTitle")}</h3>
+                <p className="text-muted-foreground">{tHelp("connectBody")}</p>
               </section>
               <section>
-                <h3 className="font-semibold">Explorar</h3>
-                <p className="text-muted-foreground">
-                  Busca por nombre, cambia entre diseño vertical y horizontal,
-                  centra la vista o alterna claro/oscuro desde la barra superior
-                  del lienzo.
-                </p>
+                <h3 className="font-semibold">{tHelp("exploreTitle")}</h3>
+                <p className="text-muted-foreground">{tHelp("exploreBody")}</p>
               </section>
               <section>
-                <h3 className="font-semibold">Editar y eliminar</h3>
-                <p className="text-muted-foreground">
-                  Desde la ficha puedes editar datos o desvincular a la persona.
-                  Por seguridad no se puede eliminar a quien tenga pareja o
-                  hijos: desvincúlalos primero.
-                </p>
+                <h3 className="font-semibold">{tHelp("editTitle")}</h3>
+                <p className="text-muted-foreground">{tHelp("editBody")}</p>
               </section>
             </div>
           </DialogContent>
@@ -802,20 +789,21 @@ function FlowInner() {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Importar archivo JSON</DialogTitle>
+              <DialogTitle>{tImportJson("title")}</DialogTitle>
               <DialogDescription>
-                Revisa el resumen de {importPreview.fileName} antes de
-                aplicarlo. Se reemplazarán los datos actuales.
+                {tImportJson("description", { file: importPreview.fileName })}
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-2 text-sm">
               <p>
-                {importPreview.summary?.persons ?? 0} personas ·{" "}
-                {importPreview.summary?.unions ?? 0} uniones ·{" "}
-                {importPreview.summary?.relationships ?? 0} relaciones
+                {tImportJson("summary", {
+                  persons: importPreview.summary?.persons ?? 0,
+                  unions: importPreview.summary?.unions ?? 0,
+                  relationships: importPreview.summary?.relationships ?? 0,
+                })}
               </p>
               <p className="text-muted-foreground">
-                El archivo es válido y conserva el formato canónico con versión.
+                {tImportJson("validNote")}
               </p>
             </div>
             <div className="flex justify-end gap-2">
@@ -826,9 +814,9 @@ function FlowInner() {
                   if (fileRef.current) fileRef.current.value = "";
                 }}
               >
-                Cancelar
+                {tImportJson("cancel")}
               </Button>
-              <Button onClick={applyImport}>Aplicar importación</Button>
+              <Button onClick={applyImport}>{tImportJson("apply")}</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -842,21 +830,19 @@ function FlowInner() {
         >
           <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Importar CSV</DialogTitle>
+              <DialogTitle>{tImportCsv("title")}</DialogTitle>
               <DialogDescription>
-                Sube personas.csv (obligatorio) y, si quieres, uniones.csv y
-                relaciones.csv. Las filas válidas se aplican y las inválidas se
-                listan. Plantillas:{" "}
+                {tImportCsv("descriptionStart")} Plantillas:{" "}
                 <a
                   className="underline"
                   href="/plantilla-personas.csv"
                   download
                 >
-                  personas
+                  {tImportCsv("templates")}
                 </a>
                 {", "}
                 <a className="underline" href="/plantilla-uniones.csv" download>
-                  uniones
+                  {tImportCsv("templatesUnions")}
                 </a>
                 {", "}
                 <a
@@ -864,7 +850,7 @@ function FlowInner() {
                   href="/plantilla-relaciones.csv"
                   download
                 >
-                  relaciones
+                  {tImportCsv("templatesRelations")}
                 </a>
                 .
               </DialogDescription>
@@ -872,9 +858,9 @@ function FlowInner() {
             <div className="flex flex-col gap-4">
               {(
                 [
-                  ["personas", "personas.csv (obligatorio)"],
-                  ["uniones", "uniones.csv (opcional)"],
-                  ["relaciones", "relaciones.csv (opcional)"],
+                  ["personas", tImportCsv("personasLabel")],
+                  ["uniones", tImportCsv("unionesLabel")],
+                  ["relaciones", tImportCsv("relacionesLabel")],
                 ] as Array<[CsvFileKind, string]>
               ).map(([kind, label]) => (
                 <div key={kind} className="flex flex-col gap-2">
@@ -892,7 +878,7 @@ function FlowInner() {
                     />
                     {csvTexts[kind] && (
                       <span className="shrink-0 text-xs text-muted-foreground">
-                        Cargado
+                        {tImportCsv("loaded")}
                       </span>
                     )}
                   </div>
@@ -901,33 +887,42 @@ function FlowInner() {
               {csvPlan && (
                 <div className="flex flex-col gap-2 text-sm">
                   <p>
-                    Se aplicarán: {csvPlan.applied.persons.length} personas ·{" "}
-                    {csvPlan.applied.unions.length} uniones ·{" "}
-                    {csvPlan.applied.relationships.length} relaciones.
+                    {tImportCsv("applying", {
+                      persons: csvPlan.applied.persons.length,
+                      unions: csvPlan.applied.unions.length,
+                      relationships: csvPlan.applied.relationships.length,
+                    })}
                   </p>
                   {csvPlan.rejected.length > 0 ? (
                     <div className="flex flex-col gap-1">
                       <p className="font-semibold">
-                        Filas rechazadas ({csvPlan.rejected.length}):
+                        {tImportCsv("rejected", {
+                          count: csvPlan.rejected.length,
+                        })}
                       </p>
                       <ul className="max-h-48 overflow-y-auto rounded-xl border p-3 text-xs leading-5">
                         {csvPlan.rejected.slice(0, 100).map((error, index) => (
                           <li key={index}>
-                            {error.file}.csv · línea {error.line}
-                            {error.field ? ` · ${error.field}` : ""}:{" "}
-                            {error.message}
+                            {tImportCsv("errorLine", {
+                              file: error.file,
+                              line: error.line,
+                              suffix: error.field ? ` · ${error.field}` : "",
+                              message: error.message,
+                            })}
                           </li>
                         ))}
                       </ul>
                       {csvPlan.rejected.length > 100 && (
                         <p className="text-xs text-muted-foreground">
-                          … y {csvPlan.rejected.length - 100} más.
+                          {tImportCsv("more", {
+                            count: csvPlan.rejected.length - 100,
+                          })}
                         </p>
                       )}
                     </div>
                   ) : (
                     <p className="text-muted-foreground">
-                      Todas las filas son válidas.
+                      {tImportCsv("allValid")}
                     </p>
                   )}
                 </div>
@@ -935,7 +930,7 @@ function FlowInner() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={closeCsvDialog}>
-                Cancelar
+                {tImportCsv("cancel")}
               </Button>
               <Button
                 onClick={applyCsvImport}
@@ -947,7 +942,7 @@ function FlowInner() {
                     0
                 }
               >
-                Aplicar válidas
+                {tImportCsv("apply")}
               </Button>
             </div>
           </DialogContent>
@@ -962,24 +957,20 @@ function FlowInner() {
         >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Exportar árbol</DialogTitle>
-              <DialogDescription>
-                JSON canónico (copia de seguridad) o CSV espejo v1.0 (personas,
-                uniones, relaciones).
-              </DialogDescription>
+              <DialogTitle>{tExport("title")}</DialogTitle>
+              <DialogDescription>{tExport("description")}</DialogDescription>
             </DialogHeader>
             {hasLivingPersons(data.persons) && (
               <p
                 role="note"
                 className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs leading-5"
               >
-                Aviso de privacidad: el archivo incluye personas vivas (sin
-                fecha de fallecimiento). Compártelo solo con tu familia.
+                {tExport("privacy")}
               </p>
             )}
             <div className="grid grid-cols-2 gap-2">
               <Button variant="outline" onClick={handleExportJson}>
-                JSON canónico
+                {tExport("json")}
               </Button>
               <Button
                 variant="outline"
@@ -1002,7 +993,7 @@ function FlowInner() {
             </div>
             <div className="flex justify-end">
               <Button variant="outline" onClick={() => setExportOpen(false)}>
-                Cerrar
+                {tExport("close")}
               </Button>
             </div>
           </DialogContent>

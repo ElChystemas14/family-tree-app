@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 import { Pencil, Trash2 } from "lucide-react";
 import {
   Sheet,
@@ -29,12 +30,15 @@ type Props = {
   onEdit?: () => void;
   onDelete?: () => void;
 };
-const relationshipLabels: Record<string, string> = {
-  biological: "Biológico/a",
-  adopted: "Adoptado/a",
-  step: "Afín",
-  partner: "Pareja",
-};
+function useRelationshipLabels(): Record<string, string> {
+  const t = useTranslations("detail");
+  return {
+    biological: t("relBiological"),
+    adopted: t("relAdopted"),
+    step: t("relStep"),
+    partner: t("relPartner"),
+  };
+}
 function RelativeCard({
   person,
   relationship,
@@ -44,6 +48,7 @@ function RelativeCard({
   relationship: string;
   onSelect: () => void;
 }) {
+  const relationshipLabels = useRelationshipLabels();
   return (
     <button
       type="button"
@@ -77,6 +82,7 @@ export function PersonDetailSheet({
   onEdit,
   onDelete,
 }: Props) {
+  const t = useTranslations("detail");
   const family = person
     ? getFamilyRelationships(person.id, data)
     : { parents: [], partners: [], children: [] };
@@ -101,17 +107,15 @@ export function PersonDetailSheet({
                 </Avatar>
                 <div className="min-w-0 pt-1">
                   <SheetTitle className="text-balance text-2xl">
-                    {person ? getPersonName(person) : "Detalle de la persona"}
+                    {person ? getPersonName(person) : t("fallbackTitle")}
                   </SheetTitle>
                   <SheetDescription>
                     {person
-                      ? `${formatDate(person.birthDate)}${person.deathDate ? ` — ${formatDate(person.deathDate)}` : " — con vida"}`
+                      ? `${formatDate(person.birthDate)}${person.deathDate ? ` — ${formatDate(person.deathDate)}` : t("alive")}`
                       : ""}
                   </SheetDescription>
                   <Badge variant="secondary" className="mt-3">
-                    {isAdopted
-                      ? "Adoptado/a en la familia"
-                      : "Miembro de la familia"}
+                    {isAdopted ? t("adopted") : t("member")}
                   </Badge>
                 </div>
               </div>
@@ -120,29 +124,28 @@ export function PersonDetailSheet({
               <div className="flex flex-col gap-6">
                 <div className="flex gap-2">
                   <Button size="sm" onClick={onEdit}>
-                    <Pencil data-icon="inline-start" /> Editar datos
+                    <Pencil data-icon="inline-start" /> {t("edit")}
                   </Button>
                   <Button size="sm" variant="outline" onClick={onDelete}>
-                    <Trash2 data-icon="inline-start" /> Eliminar / desvincular
+                    <Trash2 data-icon="inline-start" /> {t("delete")}
                   </Button>
                 </div>
                 <section className="rounded-2xl bg-muted/40 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                    Biografía
+                    {t("bio")}
                   </p>
                   <p className="mt-3 text-sm leading-6">
-                    {person.bio ?? "Aún no se ha añadido una biografía."}
+                    {person.bio ?? t("noBio")}
                   </p>
                 </section>
                 <Separator />
                 <section className="flex flex-col gap-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      Conexiones familiares
+                      {t("connections")}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Antepasados, parejas y descendientes conectados
-                      directamente con {person.firstName}.
+                      {t("connectionsDesc", { name: person.firstName })}
                     </p>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
@@ -151,28 +154,30 @@ export function PersonDetailSheet({
                         {family.parents.length}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Antepasados
+                        {t("parents")}
                       </p>
                     </div>
                     <div className="rounded-xl border p-3">
                       <p className="text-xl font-semibold">
                         {family.partners.length}
                       </p>
-                      <p className="text-xs text-muted-foreground">Parejas</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t("partners")}
+                      </p>
                     </div>
                     <div className="rounded-xl border p-3">
                       <p className="text-xl font-semibold">
                         {family.children.length}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Descendientes
+                        {t("children")}
                       </p>
                     </div>
                   </div>
                   {[
-                    ["Antepasados", family.parents],
-                    ["Parejas", family.partners],
-                    ["Descendientes", family.children],
+                    [t("parents"), family.parents],
+                    [t("partners"), family.partners],
+                    [t("children"), family.children],
                   ].map(([title, items]) => (
                     <section
                       key={String(title)}
@@ -197,7 +202,9 @@ export function PersonDetailSheet({
                         ))
                       ) : (
                         <p className="rounded-xl border border-dashed px-3 py-3 text-sm text-muted-foreground">
-                          Sin {String(title).toLowerCase()} registrados.
+                          {t("noneRegistered", {
+                            group: String(title).toLowerCase(),
+                          })}
                         </p>
                       )}
                     </section>

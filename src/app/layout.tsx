@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { NextIntlClientProvider } from "next-intl";
 import { Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { THEME_STORAGE_KEY } from "@/lib/family-tree/theme";
+import { defaultLocale, getMessages } from "@/i18n/config";
+import es from "@/i18n/messages/es.json";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -12,9 +15,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteTitle = "Archivo Hawthorne — Árbol genealógico";
-const siteDescription =
-  "Explora el archivo de la familia Hawthorne a lo largo de las generaciones.";
+const siteTitle = es.metadata.title;
+const siteDescription = es.metadata.description;
 
 // Aplica la preferencia de tema antes del primer pintado (sin flash).
 // Debe coincidir con `src/lib/family-tree/theme.ts` (clave y oscuro por defecto).
@@ -61,10 +63,11 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const messages = await getMessages(defaultLocale);
   return (
     <html
-      lang="es"
+      lang={defaultLocale}
       suppressHydrationWarning
       className={cn(
         "h-full",
@@ -76,7 +79,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        {children}
+        <NextIntlClientProvider locale={defaultLocale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>

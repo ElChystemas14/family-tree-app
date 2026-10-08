@@ -23,3 +23,5 @@ relevante futura (formato: fecha, decisión, contexto, consecuencias).
 | 2026-10-07 | Persistencia con `version` + lectura en `useEffect` | Evita mismatch de hidratación; `try/catch` de cupo/modo privado.                                                                             |
 | 2026-10-07 | Arranque vacío + onboarding (B6)                    | `emptyTreeData` inicial; Hawthorne solo fixture de tests. Sin regresión: lo guardado en local se sigue cargando.                             |
 | 2026-10-07 | Fase B cerrada (B1–B6)                              | Store + 41 tests + CI + Prettier + pulido + layout memoizado. CI correrá al hacer push.                                                      |
+| 2026-10-07 | i18n con `next-intl`, sin routing (C4)              | `es` por defecto vía provider; `en` pendiente. UI externalizada; mensajes de `lib/` en español hasta post-v1.0.                              |
+| 2026-10-07 | Fase C cerrada (C1–C4)                              | CSV v1.0 congelado + importador con reporte + export JSON/CSV + i18n.                                                                        |

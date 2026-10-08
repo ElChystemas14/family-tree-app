@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Plus, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +54,7 @@ export function AddRelativeModal({
   const [bio, setBio] = useState("");
   const [existingId, setExistingId] = useState("");
   const [errors, setErrors] = useState<PersonFormErrors>({});
+  const t = useTranslations("addRelative");
   const sortedPeople = useMemo(
     () =>
       people
@@ -112,13 +114,13 @@ export function AddRelativeModal({
     handleOpenChange(false);
   };
   const relationshipLabels: Record<Relationship, string> = {
-    parent: "padre/madre",
-    spouse: "pareja",
-    child: "hijo/a",
+    parent: t("relationParent"),
+    spouse: t("relationSpouse"),
+    child: t("relationChild"),
   };
   const heading = relationship
-    ? `Añadir ${relationshipLabels[relationship]}`
-    : "Crear una nueva persona";
+    ? t("addTitle", { relation: relationshipLabels[relationship] })
+    : t("createTitle");
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
@@ -130,9 +132,7 @@ export function AddRelativeModal({
             {heading}
           </DialogTitle>
           <DialogDescription>
-            {relationship
-              ? "Crea primero a la persona o vincúla a alguien que ya esté en el archivo familiar."
-              : "Completa el formulario antes de añadir a esta persona al archivo."}
+            {relationship ? t("addDescription") : t("createDescription")}
           </DialogDescription>
         </DialogHeader>
         <Tabs
@@ -142,13 +142,13 @@ export function AddRelativeModal({
           }
         >
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="create">Crear nueva persona</TabsTrigger>
-            <TabsTrigger value="existing">Elegir existente</TabsTrigger>
+            <TabsTrigger value="create">{t("tabCreate")}</TabsTrigger>
+            <TabsTrigger value="existing">{t("tabExisting")}</TabsTrigger>
           </TabsList>
           <TabsContent value="create" className="flex flex-col gap-4 pt-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="relative-first">Nombre</Label>
+                <Label htmlFor="relative-first">{t("firstName")}</Label>
                 <Input
                   id="relative-first"
                   value={firstName}
@@ -162,7 +162,7 @@ export function AddRelativeModal({
                 ) : null}
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="relative-last">Apellidos</Label>
+                <Label htmlFor="relative-last">{t("lastName")}</Label>
                 <Input
                   id="relative-last"
                   value={lastName}
@@ -178,7 +178,7 @@ export function AddRelativeModal({
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
-                <Label>Género</Label>
+                <Label>{t("gender")}</Label>
                 <Select
                   value={gender}
                   onValueChange={(value) =>
@@ -189,19 +189,19 @@ export function AddRelativeModal({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="female">Femenino</SelectItem>
-                    <SelectItem value="male">Masculino</SelectItem>
-                    <SelectItem value="other">Otro</SelectItem>
+                    <SelectItem value="female">{t("genderFemale")}</SelectItem>
+                    <SelectItem value="male">{t("genderMale")}</SelectItem>
+                    <SelectItem value="other">{t("genderOther")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="relative-photo">URL de foto</Label>
+                <Label htmlFor="relative-photo">{t("photo")}</Label>
                 <Input
                   id="relative-photo"
                   value={photoUrl}
                   onChange={(event) => setPhotoUrl(event.target.value)}
-                  placeholder="https://..."
+                  placeholder={t("photoPlaceholder")}
                   aria-invalid={!!errors.photoUrl}
                 />
                 {errors.photoUrl ? (
@@ -213,7 +213,7 @@ export function AddRelativeModal({
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="relative-birth">Fecha de nacimiento</Label>
+                <Label htmlFor="relative-birth">{t("birth")}</Label>
                 <Input
                   id="relative-birth"
                   type="date"
@@ -228,7 +228,7 @@ export function AddRelativeModal({
                 ) : null}
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="relative-death">Fecha de fallecimiento</Label>
+                <Label htmlFor="relative-death">{t("death")}</Label>
                 <Input
                   id="relative-death"
                   type="date"
@@ -244,12 +244,12 @@ export function AddRelativeModal({
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="relative-bio">Biografía</Label>
+              <Label htmlFor="relative-bio">{t("bio")}</Label>
               <Textarea
                 id="relative-bio"
                 value={bio}
                 onChange={(event) => setBio(event.target.value)}
-                placeholder="Una nota breve sobre esta persona"
+                placeholder={t("bioPlaceholder")}
                 aria-invalid={!!errors.bio}
               />
               {errors.bio ? (
@@ -264,21 +264,23 @@ export function AddRelativeModal({
               disabled={!firstName.trim() || !lastName.trim()}
             >
               <UserRound data-icon="inline-start" />
-              Crear persona
+              {t("createButton")}
               {relationship
-                ? ` y añadir como ${relationshipLabels[relationship]}`
+                ? t("createButtonSuffix", {
+                    relation: relationshipLabels[relationship],
+                  })
                 : ""}
             </Button>
           </TabsContent>
           <TabsContent value="existing" className="flex flex-col gap-4 pt-4">
             <div className="flex flex-col gap-2">
-              <Label>Persona del archivo</Label>
+              <Label>{t("existingLabel")}</Label>
               <Select
                 value={existingId}
                 onValueChange={(value) => setExistingId(value ?? "")}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Elige una persona" />
+                  <SelectValue placeholder={t("existingPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {sortedPeople.map((person) => (
@@ -290,8 +292,12 @@ export function AddRelativeModal({
               </Select>
             </div>
             <Button type="button" onClick={submit} disabled={!existingId}>
-              Vincular persona existente
-              {relationship ? ` como ${relationshipLabels[relationship]}` : ""}
+              {t("linkButton")}
+              {relationship
+                ? t("linkButtonSuffix", {
+                    relation: relationshipLabels[relationship],
+                  })
+                : ""}
             </Button>
           </TabsContent>
         </Tabs>

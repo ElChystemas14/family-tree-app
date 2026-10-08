@@ -42,9 +42,15 @@ Roadmap: ítems C1–C4 (`../roadmap.md`). Spec: [`csv-format.md`](csv-format.md
       (`hasLivingPersons`: sin `deathDate`; aviso en el diálogo.)
 - Aceptación: round-trip JSON y CSV verificados por test.
 
-## C4 — Infra i18n (opcional, no bloquea v1.0)
+## C4 — Infra i18n (opcional, no bloquea v1.0) — hecho 2026-10-07
 
-- [ ] Instalar `next-intl`, mover cadenas ES a catálogo `es`, locale por defecto `es`.
-- [ ] `en` como locale pendiente (no bloquea v1.0). Si urge v1.0, puede moverse a post-v1.0
-      sin afectar C1–C3.
+- [x] Instalar `next-intl`, mover cadenas ES a catálogo `es`, locale por defecto `es`.
+      Setup oficial (`next-intl/plugin` + `src/i18n/request.ts`); provider en el
+      layout con `src/i18n/messages/es.json` (15 namespaces); metadatos desde el
+      catálogo. Sin routing por idioma (una sola ruta `/`).
+- [x] `en` como locale pendiente (no bloquea v1.0). Añadir idioma =
+      crear `messages/<locale>.json` y listarlo en `src/i18n/config.ts`.
+      Alcance: UI externalizada; los mensajes de validación de `lib/`
+      (centralizados y testeados en español) se convierten a claves post-v1.0.
 - Aceptación: la app funciona igual con cadenas externalizadas; añadir un idioma = añadir un archivo.
+  Test de integridad del catálogo (`config.test.ts`); 55/55 en 2 TZ.
