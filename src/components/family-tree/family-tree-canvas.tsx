@@ -110,9 +110,16 @@ function FlowInner() {
   const tToasts = useTranslations("toasts");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Person>();
-  const [dark, setDark] = useState<boolean>(
-    () => readStoredTheme() !== "light"
-  );
+  // Oscuro en el primer render (igual que el servidor); la preferencia guardada
+  // se aplica tras montar para no romper la hidratación.
+  const [dark, setDark] = useState<boolean>(true);
+  /* eslint-disable react-hooks/set-state-in-effect -- sincronización post-montaje
+     intencionada (leer localStorage en render rompería la hidratación SSR). */
+  useEffect(() => {
+    const stored = readStoredTheme();
+    if (stored) setDark(stored === "dark");
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
   const [modal, setModal] = useState<ModalState>();
   const [createPersonOpen, setCreatePersonOpen] = useState(false);
   const [pendingUnion, setPendingUnion] = useState<{

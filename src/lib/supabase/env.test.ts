@@ -23,6 +23,23 @@ describe("getSupabaseEnv (E)", () => {
     ).toBe(true);
   });
 
+  it("sin argumento lee process.env (ruta que usa el cliente)", () => {
+    const prevUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const prevKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://xyz.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY =
+      "sb_publishable_abc123XYZ456789";
+    try {
+      expect(getSupabaseEnv()?.url).toBe("https://xyz.supabase.co");
+    } finally {
+      if (prevUrl === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+      else process.env.NEXT_PUBLIC_SUPABASE_URL = prevUrl;
+      if (prevKey === undefined)
+        delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      else process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = prevKey;
+    }
+  });
+
   it("tolera comillas y rechaza URL/key inválidas", () => {
     expect(
       getSupabaseEnv({

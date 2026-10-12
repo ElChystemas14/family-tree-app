@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { NextIntlClientProvider } from "next-intl";
 import { Geist_Mono, Inter } from "next/font/google";
@@ -82,7 +83,11 @@ export default async function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col">
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <Script
+          id="theme"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeScript }}
+        />
         <NextIntlClientProvider locale={defaultLocale} messages={messages}>
           {children}
         </NextIntlClientProvider>

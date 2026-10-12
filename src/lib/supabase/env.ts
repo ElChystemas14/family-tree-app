@@ -26,17 +26,24 @@ function clean(value: string | undefined): string | undefined {
 }
 
 export function getSupabaseEnv(
-  env: Record<string, string | undefined> = process.env
+  env?: Record<string, string | undefined>
 ): SupabaseEnv | null {
-  const url = clean(env.NEXT_PUBLIC_SUPABASE_URL);
-  const anonKey = clean(env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  // Acceso directo a process.env para que Next lo inlinee en el cliente.
+  // Pasar `process.env` como objeto llega vacío al navegador y rompía la
+  // hidratación (el servidor veía Supabase y el cliente no).
+  const source: Record<string, string | undefined> = env ?? {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  };
+  const url = clean(source.NEXT_PUBLIC_SUPABASE_URL);
+  const anonKey = clean(source.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   if (!url || !/^https:\/\/.+/.test(url)) return null;
   if (!anonKey || anonKey.length < 20) return null;
   return { url, anonKey };
 }
 
 export function isSupabaseConfigured(
-  env: Record<string, string | undefined> = process.env
+  env?: Record<string, string | undefined>
 ): boolean {
   return getSupabaseEnv(env) !== null;
 }
