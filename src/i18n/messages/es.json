@@ -183,6 +183,25 @@
     "signOutError": "No se pudo cerrar la sesión.",
     "close": "Cerrar"
   },
+  "trees": {
+    "title": "Mis árboles",
+    "description": "Tus árboles en la nube. Cambiar de árbol descarga su versión.",
+    "open": "Árboles",
+    "active": "Actual",
+    "change": "Cambiar",
+    "create": "Crear",
+    "newPlaceholder": "Nombre del árbol",
+    "defaultName": "Mi árbol",
+    "refresh": "Actualizar",
+    "cancel": "Cancelar",
+    "empty": "Aún no tienes árboles en la nube.",
+    "readOnly": "Este árbol es de solo lectura para ti.",
+    "created": "Árbol creado.",
+    "syncError": "No se pudo sincronizar: {error}",
+    "roleOwner": "Propietario",
+    "roleEditor": "Editor",
+    "roleViewer": "Lector"
+  },
   "toasts": {
     "exported": "Archivo exportado como copia de seguridad.",
     "exportError": "No se pudo exportar el archivo.",

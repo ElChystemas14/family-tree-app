@@ -31,7 +31,10 @@ import {
   saveStoredTree,
   type ImportResult,
 } from "@/lib/family-tree/storage";
-import { validatePersonForm } from "@/lib/family-tree/schema";
+import {
+  validateFamilyTreeData,
+  validatePersonForm,
+} from "@/lib/family-tree/schema";
 import { readStoredTheme, writeStoredTheme } from "@/lib/family-tree/theme";
 import {
   PERSON_CSV_HEADERS,
@@ -48,6 +51,22 @@ import {
   type CsvImportPlan,
 } from "@/lib/family-tree/csv";
 import type { LayoutMode, Person } from "@/types/family-tree";
+import {
+  loadActiveTreeId,
+  loadSyncClock,
+  mergeTrees,
+  saveActiveTreeId,
+  saveSyncClock,
+  type RowClocks,
+} from "@/lib/sync/clock";
+import {
+  createTree,
+  listTrees,
+  pullTree,
+  pushTree,
+  type RemoteTreeItem,
+} from "@/lib/sync/repository";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -65,6 +84,7 @@ import {
   FileUp,
   LogIn,
   LogOut,
+  Network,
   Upload,
 } from "lucide-react";
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
@@ -107,6 +127,7 @@ function FlowInner() {
   const tImportCsv = useTranslations("importCsv");
   const tExport = useTranslations("exportDialog");
   const tAuth = useTranslations("auth");
+  const tTrees = useTranslations("trees");
   const tToasts = useTranslations("toasts");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Person>();
@@ -134,6 +155,16 @@ function FlowInner() {
     ImportResult & { fileName: string }
   >();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [trees, setTrees] = useState<RemoteTreeItem[]>([]);
+  const [activeTreeId, setActiveTreeId] = useState<string | null>(null);
+  const [treeDialogOpen, setTreeDialogOpen] = useState(false);
+  const [newTreeName, setNewTreeName] = useState("");
+  const [syncing, setSyncing] = useState(false);
+  const [creatingTree, setCreatingTree] = useState(false);
+  const [pushToken, setPushToken] = useState(0);
+  const clockRef = useRef<RowClocks>({});
+  const tombstonesRef = useRef<RowClocks>({});
+  const syncedOnceRef = useRef(false);
   const [csvOpen, setCsvOpen] = useState(false);
   const [csvTexts, setCsvTexts] = useState<
     Partial<Record<CsvFileKind, string>>
@@ -157,6 +188,15 @@ function FlowInner() {
     setToast(message);
     window.setTimeout(() => setToast(""), 3200);
   }, []);
+  const [user, setUser] = useState<User | null>(null);
+  const [activeRole, setActiveRole] = useState<string>("owner");
+  const requireEdit = useCallback(() => {
+    if (user && activeRole === "viewer") {
+      notify(tTrees("readOnly"));
+      return false;
+    }
+    return true;
+  }, [user, activeRole, notify, tTrees]);
   const openRelationship = useCallback(
     (
       relationship: "parent" | "spouse" | "child",
@@ -167,6 +207,7 @@ function FlowInner() {
   );
   const addPerson = useCallback(
     (personInput: Omit<Person, "id">, existingId?: string) => {
+      if (!requireEdit()) return;
       const closeModal = () => {
         setModal(undefined);
         setCreatePersonOpen(false);
@@ -185,7 +226,7 @@ function FlowInner() {
       if (result.person) setSelected(result.person);
       closeModal();
     },
-    [modal, storeAddPerson, notify]
+    [modal, storeAddPerson, notify, requireEdit]
   );
   const addBranch = useCallback(() => setCreatePersonOpen(true), []);
   const changeLayout = useCallback(
@@ -197,6 +238,7 @@ function FlowInner() {
   );
   const connectPeople = useCallback(
     (sourceId: string, targetId: string) => {
+      if (!requireEdit()) return;
       const result = storeConnectUnion(sourceId, targetId);
       notify(
         result.ok
@@ -204,7 +246,7 @@ function FlowInner() {
           : (result.error ?? tToasts("unionError"))
       );
     },
-    [storeConnectUnion, notify, tToasts]
+    [storeConnectUnion, notify, tToasts, requireEdit]
   );
   // dagre solo se re-ejecuta si cambian estructura o modo (B5, AUD-MED-04);
   // seleccionar/buscar solo re-deriva resaltado (ver `[layout] dagre…` en dev).
@@ -280,6 +322,7 @@ function FlowInner() {
   const saveEdit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!editing) return;
+    if (!requireEdit()) return;
     const form = new FormData(event.currentTarget);
     const validation = validatePersonForm({
       firstName: String(form.get("firstName") ?? ""),
@@ -395,7 +438,22 @@ function FlowInner() {
   );
   const applyImport = useCallback(() => {
     if (!importPreview?.data) return;
+    if (!requireEdit()) return;
+    const previousIds = new Set(data.persons.map((person) => person.id));
     storeImportData(importPreview.data, importPreview.data.posOverrides ?? {});
+    if (activeTreeId) {
+      const now = new Date().toISOString();
+      const removed = [...previousIds].filter(
+        (id) => !importPreview.data!.persons.some((person) => person.id === id)
+      );
+      for (const id of removed) tombstonesRef.current[id] = now;
+      const stored = loadSyncClock(activeTreeId);
+      saveSyncClock(activeTreeId, {
+        rows: { ...stored.rows, ...clockRef.current },
+        deleted: { ...tombstonesRef.current },
+        pulledAt: stored.pulledAt,
+      });
+    }
     setSelected(undefined);
     notify(
       tToasts("imported", {
@@ -405,7 +463,15 @@ function FlowInner() {
     );
     setImportPreview(undefined);
     if (fileRef.current) fileRef.current.value = "";
-  }, [importPreview, storeImportData, notify, tToasts]);
+  }, [
+    importPreview,
+    storeImportData,
+    notify,
+    tToasts,
+    requireEdit,
+    data,
+    activeTreeId,
+  ]);
   const readCsvFile = useCallback(
     (file: File, kind: CsvFileKind) => {
       const reader = new FileReader();
@@ -426,6 +492,7 @@ function FlowInner() {
   }, []);
   const applyCsvImport = useCallback(() => {
     if (!csvPlan) return;
+    if (!requireEdit()) return;
     const { applied } = csvPlan;
     storeImportData({
       persons: [...data.persons, ...applied.persons],
@@ -441,7 +508,15 @@ function FlowInner() {
       })
     );
     closeCsvDialog();
-  }, [csvPlan, data, storeImportData, notify, tToasts, closeCsvDialog]);
+  }, [
+    csvPlan,
+    data,
+    storeImportData,
+    notify,
+    tToasts,
+    closeCsvDialog,
+    requireEdit,
+  ]);
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     writeStoredTheme(dark ? "dark" : "light");
@@ -466,7 +541,6 @@ function FlowInner() {
     }, 500);
     return () => window.clearTimeout(timer);
   }, [data, posOverrides, hydrated, notify]);
-  const [user, setUser] = useState<User | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
   useEffect(() => {
     if (!SUPABASE_ENABLED) return;
@@ -491,11 +565,195 @@ function FlowInner() {
     try {
       await createSupabaseBrowserClient().auth.signOut();
       setUser(null);
+      setTrees([]);
+      setActiveTreeId(null);
+      setTreeDialogOpen(false);
+      syncedOnceRef.current = false;
       notify(tAuth("signedOut"));
     } catch {
       notify(tAuth("signOutError"));
     }
   }, [notify, tAuth]);
+  const syncError = useCallback(
+    (error: unknown) =>
+      notify(
+        tTrees("syncError", {
+          error: error instanceof Error ? error.message : String(error),
+        })
+      ),
+    [notify, tTrees]
+  );
+  const pullIntoTree = useCallback(
+    async (treeId: string) => {
+      if (!user) return;
+      setSyncing(true);
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const pulled = await pullTree(supabase, user.id, treeId);
+        const now = new Date().toISOString();
+        const { merged, clock, changed } = mergeTrees(
+          data,
+          {
+            persons: pulled.persons,
+            unions: pulled.unions,
+            relationships: pulled.relationships,
+          },
+          { rows: clockRef.current, deleted: tombstonesRef.current },
+          now
+        );
+        const validation = validateFamilyTreeData(merged);
+        if (!validation.ok) {
+          throw new Error(validation.errors[0] ?? "datos remotos no válidos");
+        }
+        clockRef.current = clock;
+        saveSyncClock(treeId, {
+          rows: clock,
+          deleted: { ...tombstonesRef.current },
+          pulledAt: now,
+        });
+        if (changed) {
+          storeImportData(merged, {
+            ...pulled.posOverrides,
+            ...posOverrides,
+          });
+        }
+        syncedOnceRef.current = true;
+        setPushToken((token) => token + 1);
+      } catch (error) {
+        syncError(error);
+      } finally {
+        setSyncing(false);
+      }
+    },
+    [data, posOverrides, user, storeImportData, syncError]
+  );
+  const activateTree = useCallback(
+    async (treeId: string, role: string) => {
+      setActiveTreeId(treeId);
+      saveActiveTreeId(treeId);
+      setActiveRole(role);
+      syncedOnceRef.current = false;
+      const stored = loadSyncClock(treeId);
+      clockRef.current = stored.rows;
+      tombstonesRef.current = { ...stored.deleted };
+      await pullIntoTree(treeId);
+    },
+    [pullIntoTree]
+  );
+  const bootedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!SUPABASE_ENABLED || !user || bootedForRef.current === user.id) return;
+    bootedForRef.current = user.id;
+    (async () => {
+      setSyncing(true);
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const list = await listTrees(supabase, user.id);
+        setTrees(list);
+        const saved = loadActiveTreeId();
+        const pick = list.find((item) => item.id === saved) ?? list[0];
+        if (!pick) {
+          const name = tTrees("defaultName");
+          const id = await createTree(supabase, user.id, name);
+          setTrees([{ id, name, role: "owner" }]);
+          await activateTree(id, "owner");
+          notify(tTrees("created"));
+        } else {
+          await activateTree(pick.id, pick.role);
+        }
+      } catch (error) {
+        syncError(error);
+      } finally {
+        setSyncing(false);
+      }
+    })();
+  }, [user, activateTree, notify, syncError, tTrees]);
+  useEffect(() => {
+    if (!SUPABASE_ENABLED || !user || !activeTreeId || !syncedOnceRef.current)
+      return;
+    const timer = window.setTimeout(() => {
+      setSyncing(true);
+      (async () => {
+        try {
+          const supabase = createSupabaseBrowserClient();
+          const tombstones = { ...tombstonesRef.current };
+          const now = await pushTree(
+            supabase,
+            user.id,
+            activeTreeId,
+            data,
+            posOverrides,
+            Object.keys(tombstones)
+          );
+          const rows: RowClocks = {};
+          for (const person of data.persons) rows[person.id] = now;
+          for (const union of data.unions) rows[union.id] = now;
+          for (const relationship of data.relationships)
+            rows[relationship.id] = now;
+          clockRef.current = rows;
+          tombstonesRef.current = {};
+          saveSyncClock(activeTreeId, { rows, deleted: {}, pulledAt: now });
+        } catch (error) {
+          syncError(error);
+        } finally {
+          setSyncing(false);
+        }
+      })();
+    }, 1500);
+    return () => window.clearTimeout(timer);
+  }, [data, posOverrides, user, activeTreeId, pushToken, syncError]);
+  const handleCreateTree = useCallback(async () => {
+    if (!user || creatingTree) return;
+    setCreatingTree(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const name = newTreeName.trim() || tTrees("defaultName");
+      const id = await createTree(supabase, user.id, name);
+      setTrees((prev) => [...prev, { id, name, role: "owner" }]);
+      setNewTreeName("");
+      await activateTree(id, "owner");
+      notify(tTrees("created"));
+    } catch (error) {
+      syncError(error);
+    } finally {
+      setCreatingTree(false);
+    }
+  }, [
+    user,
+    creatingTree,
+    newTreeName,
+    activateTree,
+    notify,
+    syncError,
+    tTrees,
+  ]);
+  const handleRefreshTrees = useCallback(async () => {
+    if (!user) return;
+    setSyncing(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const list = await listTrees(supabase, user.id);
+      setTrees(list);
+      if (activeTreeId) {
+        const current = list.find((item) => item.id === activeTreeId);
+        if (current) {
+          setActiveRole(current.role);
+          await pullIntoTree(activeTreeId);
+        }
+      }
+    } catch (error) {
+      syncError(error);
+    } finally {
+      setSyncing(false);
+    }
+  }, [user, activeTreeId, pullIntoTree, syncError]);
+  const activeTreeName = trees.find((item) => item.id === activeTreeId)?.name;
+  const roleLabel =
+    activeRole === "owner"
+      ? tTrees("roleOwner")
+      : activeRole === "editor"
+        ? tTrees("roleEditor")
+        : tTrees("roleViewer");
   const pendingSource = pendingUnion
     ? data.persons.find((person) => person.id === pendingUnion.sourceId)
     : undefined;
@@ -558,6 +816,16 @@ function FlowInner() {
                 {tAuth("signIn")}
               </Button>
             ))}
+          {SUPABASE_ENABLED && user && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setTreeDialogOpen(true)}
+            >
+              {activeTreeName ?? tTrees("title")}
+              {syncing ? " …" : ""}
+            </Button>
+          )}
         </div>
         <Button
           size="sm"
@@ -621,6 +889,16 @@ function FlowInner() {
               <LogIn className="size-4" />
             </Button>
           ))}
+        {SUPABASE_ENABLED && user && (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => setTreeDialogOpen(true)}
+            aria-label={tTrees("open")}
+          >
+            <Network className="size-4" />
+          </Button>
+        )}
         <Button
           size="icon"
           variant="outline"
@@ -726,10 +1004,21 @@ function FlowInner() {
         onEdit={() => selected && setEditing(selected)}
         onDelete={() => {
           if (!selected) return;
-          const result = storeRemovePerson(selected.id);
+          if (!requireEdit()) return;
+          const removedId = selected.id;
+          const result = storeRemovePerson(removedId);
           if (!result.ok) {
             notify(result.error ?? tToasts("removeError"));
             return;
+          }
+          tombstonesRef.current[removedId] = new Date().toISOString();
+          if (activeTreeId) {
+            const stored = loadSyncClock(activeTreeId);
+            saveSyncClock(activeTreeId, {
+              rows: { ...stored.rows, ...clockRef.current },
+              deleted: { ...tombstonesRef.current },
+              pulledAt: stored.pulledAt,
+            });
           }
           setSelected(undefined);
           notify(tToasts("removed"));
@@ -1085,6 +1374,99 @@ function FlowInner() {
             <div className="flex justify-end">
               <Button variant="outline" onClick={() => setExportOpen(false)}>
                 {tExport("close")}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+      {treeDialogOpen && (
+        <Dialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setTreeDialogOpen(false);
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{tTrees("title")}</DialogTitle>
+              <DialogDescription>{tTrees("description")}</DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-3">
+              {activeTreeId && (
+                <p className="text-xs text-muted-foreground">
+                  {activeTreeName} · {roleLabel}
+                  {activeRole === "viewer" ? ` · ${tTrees("readOnly")}` : ""}
+                  {syncing ? " …" : ""}
+                </p>
+              )}
+              {trees.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {tTrees("empty")}
+                </p>
+              ) : (
+                <ul className="flex max-h-48 flex-col gap-2 overflow-y-auto">
+                  {trees.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-center justify-between gap-2 rounded-xl border p-3 text-sm"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-medium">
+                          {item.name}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">
+                          {item.role === "owner"
+                            ? tTrees("roleOwner")
+                            : item.role === "editor"
+                              ? tTrees("roleEditor")
+                              : tTrees("roleViewer")}
+                        </span>
+                      </span>
+                      {item.id === activeTreeId ? (
+                        <Badge>{tTrees("active")}</Badge>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => activateTree(item.id, item.role)}
+                        >
+                          {tTrees("change")}
+                        </Button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="flex gap-2">
+                <Input
+                  value={newTreeName}
+                  onChange={(event) => setNewTreeName(event.target.value)}
+                  placeholder={tTrees("newPlaceholder")}
+                  aria-label={tTrees("newPlaceholder")}
+                  className="flex-1"
+                />
+                <Button
+                  size="sm"
+                  onClick={handleCreateTree}
+                  disabled={creatingTree || syncing}
+                >
+                  {tTrees("create")}
+                </Button>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={handleRefreshTrees}
+                disabled={syncing}
+              >
+                {tTrees("refresh")}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setTreeDialogOpen(false)}
+              >
+                {tTrees("cancel")}
               </Button>
             </div>
           </DialogContent>

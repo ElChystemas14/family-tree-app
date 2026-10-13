@@ -16,13 +16,13 @@ y multiusuario posterior. Todo el trabajo es local; sin push hasta indicación c
 
 ## Estado general
 
-| Fase                            | Estado                         | Guía                                                       | Criterio de salida                                                       |
-| ------------------------------- | ------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------------ |
-| A — Integridad de datos         | hecho (A1–A5, 2026-10-07)      | `guides/phase-a-data-integrity.md`                         | Fechas correctas + persistencia local + validación base + repo higiénico |
-| B — Calidad de producto         | hecho (B1–B6, 2026-10-07)      | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
-| C — Intercambio de datos        | hecho (C1–C4, 2026-10-07)      | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV                     |
-| D — Puerta a multiusuario       | hecho (diseño 2026-10-07)      | `guides/phase-d-multiuser.md`                              | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
-| E — Implementación multiusuario | en curso (E1 hecho 2026-10-08) | (esta fase vive en el roadmap)                             | Auth + sync contra Supabase sin romper local-first                       |
+| Fase                            | Estado                             | Guía                                                       | Criterio de salida                                                       |
+| ------------------------------- | ---------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------ |
+| A — Integridad de datos         | hecho (A1–A5, 2026-10-07)          | `guides/phase-a-data-integrity.md`                         | Fechas correctas + persistencia local + validación base + repo higiénico |
+| B — Calidad de producto         | hecho (B1–B6, 2026-10-07)          | `guides/phase-b-product-quality.md`                        | Store extraído + tests + CI + dataset de prueba limpio                   |
+| C — Intercambio de datos        | hecho (C1–C4, 2026-10-07)          | `guides/phase-c-data-exchange.md` + `guides/csv-format.md` | Import CSV documentado funcionando + export JSON/CSV                     |
+| D — Puerta a multiusuario       | hecho (diseño 2026-10-07)          | `guides/phase-d-multiuser.md`                              | Modelo con `ownerId`/`treeId`, decisions actualizadas                    |
+| E — Implementación multiusuario | en curso (E1–E2 hechos 2026-10-08) | (esta fase vive en el roadmap)                             | Auth + sync contra Supabase sin romper local-first                       |
 
 ## Fase A — Integridad de datos
 
@@ -90,8 +90,10 @@ Supabase la app funciona igual que en v1.0 (sin login ni nube).
       login por email en el header (hecho 2026-10-08).
       **Pendiente del usuario**: ejecutar `0001_multiuser.sql` en el SQL editor
       del dashboard y verificar Site URL/redirects (`http://localhost:3000`).
-- [ ] **E2** Adapter + sync: repositorio sobre `useFamilyTree`, subida/bajada
-      por árbol (last-write-wins), selector de árboles y semilla desde JSON local.
+- [x] **E2** Adapter + sync: repositorio sobre `useFamilyTree`, subida/bajada
+      por árbol (last-write-wins), selector de árboles y semilla desde JSON local
+      (hecho 2026-10-08; sync automático con debounce, tumbas anti-zombis,
+      posiciones fusionadas, lector bloqueado en UI).
 - [ ] **E3** Invitaciones + roles + fotos: enlaces, matriz en UI y Storage privado.
 
 ## Trazabilidad auditoría → roadmap
