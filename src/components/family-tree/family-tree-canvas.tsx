@@ -297,8 +297,9 @@ function FlowInner() {
     ]
   );
   const nodes = useMemo(() => {
-    // La unión no tiene posición propia: vive en el punto medio de la pareja
-    // (así nunca queda flotando al arrastrar) y no es arrastrable.
+    // La unión no tiene posición propia: vive centrada bajo la pareja, como en
+    // los árboles clásicos (así nunca queda flotando al arrastrar), y no es
+    // arrastrable.
     const centers = new Map<string, { x: number; y: number }>();
     for (const node of graph.nodes) {
       if (node.type === "person") {
@@ -318,7 +319,10 @@ function FlowInner() {
           draggable: false,
           position:
             a && b
-              ? { x: (a.x + b.x) / 2 - 11, y: (a.y + b.y) / 2 - 11 }
+              ? {
+                  x: (a.x + b.x) / 2 - 11,
+                  y: Math.max(a.y, b.y) + 58 + 40 - 11,
+                }
               : (posOverrides[node.id] ?? node.position),
         };
       }
@@ -975,6 +979,7 @@ function FlowInner() {
           edges={graph.edges as Edge[]}
           nodeTypes={nodeTypes}
           onNodesChange={onNodesChange}
+          defaultEdgeOptions={{ type: "smoothstep" }}
           fitView
           fitViewOptions={{ padding: 0.2 }}
           onNodeClick={(_, node) => {
