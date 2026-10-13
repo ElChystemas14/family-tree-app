@@ -11,6 +11,7 @@ import {
   useReactFlow,
   type Edge,
   type Node,
+  type NodeChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { PersonNode } from "./person-node";
@@ -229,6 +230,18 @@ function FlowInner() {
     [modal, storeAddPerson, notify, requireEdit]
   );
   const addBranch = useCallback(() => setCreatePersonOpen(true), []);
+  // Arrastre en vivo: refleja cada frame en posOverrides para que la tarjeta
+  // siga al cursor (sin esto solo saltaba a la posición final al soltar).
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      for (const change of changes) {
+        if (change.type === "position" && change.position) {
+          moveNode(change.id, change.position);
+        }
+      }
+    },
+    [moveNode]
+  );
   const changeLayout = useCallback(
     (value: LayoutMode) => {
       setStoreLayout(value);
@@ -283,14 +296,38 @@ function FlowInner() {
       openRelationship,
     ]
   );
-  const nodes = useMemo(
-    () =>
-      graph.nodes.map((node) => ({
+  const nodes = useMemo(() => {
+    // La unión no tiene posición propia: vive en el punto medio de la pareja
+    // (así nunca queda flotando al arrastrar) y no es arrastrable.
+    const centers = new Map<string, { x: number; y: number }>();
+    for (const node of graph.nodes) {
+      if (node.type === "person") {
+        const position = posOverrides[node.id] ?? node.position;
+        centers.set(node.id, {
+          x: position.x + 130,
+          y: position.y + 58,
+        });
+      }
+    }
+    return graph.nodes.map((node) => {
+      if (node.type === "union" && "partner1Id" in node.data) {
+        const a = centers.get(node.data.partner1Id);
+        const b = centers.get(node.data.partner2Id);
+        return {
+          ...node,
+          draggable: false,
+          position:
+            a && b
+              ? { x: (a.x + b.x) / 2 - 11, y: (a.y + b.y) / 2 - 11 }
+              : (posOverrides[node.id] ?? node.position),
+        };
+      }
+      return {
         ...node,
         position: posOverrides[node.id] ?? node.position,
-      })),
-    [graph.nodes, posOverrides]
-  ) as unknown as Node[];
+      };
+    });
+  }, [graph.nodes, posOverrides]) as unknown as Node[];
   const focusLineage = useCallback(
     (personId: string) => {
       const parents = new Set(
@@ -937,6 +974,7 @@ function FlowInner() {
           nodes={nodes}
           edges={graph.edges as Edge[]}
           nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
           fitView
           fitViewOptions={{ padding: 0.2 }}
           onNodeClick={(_, node) => {
@@ -952,8 +990,8 @@ function FlowInner() {
             setCreatePersonOpen(true);
           }}
           onNodeDragStop={(event, node) => {
-            moveNode(node.id, node.position);
             if (node.type !== "person") return;
+            moveNode(node.id, node.position);
             // En táctil arrastrar compite con el pan: no se propone unión
             // (la pareja se crea desde el menú ⋯ → "Añadir pareja").
             const pointerType = (event as unknown as { pointerType?: string })

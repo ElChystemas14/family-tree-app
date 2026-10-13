@@ -33,6 +33,10 @@ describe("transformFamilyToGraph (B2)", () => {
     // 16 personas + 5 uniones; aristas: 5 uniones × 2 + 10 relaciones.
     expect(graph.nodes).toHaveLength(21);
     expect(graph.edges).toHaveLength(20);
+    // `measured` obligatorio: sin él React Flow avisa error#015 al arrastrar.
+    for (const node of graph.nodes) {
+      expect(node.measured).toEqual({ width: node.width, height: node.height });
+    }
     const lucyEdge = graph.edges.find((e) => e.id === "r-lucy");
     expect(lucyEdge).toMatchObject({
       source: "u-margaret-thomas",

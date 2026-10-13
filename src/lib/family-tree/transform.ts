@@ -14,6 +14,7 @@ export interface LayoutPersonNode {
   position: { x: number; y: number };
   width: number;
   height: number;
+  measured: { width: number; height: number };
   data: {
     id: string;
     firstName: string;
@@ -34,6 +35,7 @@ export interface LayoutUnionNode {
   position: { x: number; y: number };
   width: number;
   height: number;
+  measured: { width: number; height: number };
   data: {
     id: string;
     partner1Id: string;
@@ -151,6 +153,7 @@ export function layoutFamilyToGraph(
       position: { x: point.x - 130, y: point.y - 58 },
       width: 260,
       height: 116,
+      measured: { width: 260, height: 116 },
     };
   });
   const unionNodes: LayoutUnionNode[] = unions.map((union) => {
@@ -167,6 +170,7 @@ export function layoutFamilyToGraph(
       position: { x: point.x - 11, y: point.y - 11 },
       width: 22,
       height: 22,
+      measured: { width: 22, height: 22 },
     };
   });
   const edges: FamilyLayout["edges"] = [

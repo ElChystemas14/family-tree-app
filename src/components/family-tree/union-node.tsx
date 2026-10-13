@@ -13,7 +13,8 @@ export function UnionNode({ data }: NodeProps & { data: UnionNodeData }) {
       <Handle
         type="target"
         position={data.layout === "horizontal" ? Position.Left : Position.Top}
-        className="size-1! border-0! bg-primary!"
+        isConnectable={false}
+        className="!size-1 !border-0 !bg-muted-foreground/50"
       />
       <Button
         variant="ghost"
@@ -29,7 +30,8 @@ export function UnionNode({ data }: NodeProps & { data: UnionNodeData }) {
         position={
           data.layout === "horizontal" ? Position.Right : Position.Bottom
         }
-        className="size-1! border-0! bg-primary!"
+        isConnectable={false}
+        className="!size-1 !border-0 !bg-muted-foreground/50"
       />
       <span className="sr-only">
         {t("unionOf", { a: data.partner1Id, b: data.partner2Id })}

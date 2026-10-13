@@ -79,6 +79,9 @@ export interface GraphData {
     position: { x: number; y: number };
     width: number;
     height: number;
+    // Obligatorio para React Flow: sin `measured` el arrastre avisa error#015
+    // y los nodos se consideran no inicializados en cada re-render.
+    measured: { width: number; height: number };
     type: "person" | "union";
   }>;
   edges: Array<{

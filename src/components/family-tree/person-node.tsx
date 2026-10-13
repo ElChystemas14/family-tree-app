@@ -22,7 +22,8 @@ export function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
       <Handle
         type="target"
         position={data.layout === "horizontal" ? Position.Left : Position.Top}
-        className="size-2! border-0! bg-primary!"
+        isConnectable={false}
+        className="size-1.5! border-0! bg-muted-foreground/50!"
       />
       <div className="flex items-center gap-3">
         <Avatar className="size-11 shrink-0 border border-border">
@@ -83,7 +84,8 @@ export function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
         position={
           data.layout === "horizontal" ? Position.Right : Position.Bottom
         }
-        className="size-2! border-0! bg-primary!"
+        isConnectable={false}
+        className="size-1.5! border-0! bg-muted-foreground/50!"
       />
     </div>
   );
