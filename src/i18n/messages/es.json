@@ -53,6 +53,7 @@
   },
   "unionNode": {
     "addChild": "Añadir hijo/a a esta unión",
+    "swap": "Intercambiar lados de la pareja",
     "unionOf": "Unión entre {a} y {b}"
   },
   "detail": {
@@ -104,6 +105,14 @@
     "createButtonSuffix": " y añadir como {relation}",
     "existingLabel": "Persona del archivo",
     "existingPlaceholder": "Elige una persona",
+    "childOf": "Hijo/a de",
+    "unionAuto": "Automática (primera unión)",
+    "singleParent": "Solo esta persona (monoparental)",
+    "singleNote": "Sin uniones: se registrará como monoparental.",
+    "relTypeLabel": "Tipo de vínculo",
+    "relBio": "Biológico/a",
+    "relAdopted": "Adoptado/a",
+    "relStep": "Afín",
     "linkButton": "Vincular persona existente",
     "linkButtonSuffix": " como {relation}"
   },
@@ -221,6 +230,7 @@
     "saveError": "No se pudo guardar.",
     "connected": "Ramas familiares conectadas.",
     "unionError": "No se pudo crear la unión.",
+    "swapped": "Lados de la pareja intercambiados.",
     "removed": "Persona desvinculada del archivo.",
     "removeError": "No se pudo eliminar."
   }

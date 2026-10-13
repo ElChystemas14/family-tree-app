@@ -18,7 +18,7 @@ import { PersonNode } from "./person-node";
 import { UnionNode } from "./union-node";
 import { TreeControls } from "./tree-controls";
 import { PersonDetailSheet } from "./person-detail-sheet";
-import { AddRelativeModal } from "./add-relative-modal";
+import { AddRelativeModal, type LinkOptions } from "./add-relative-modal";
 import {
   layoutFamilyToGraph,
   withGraphSelection,
@@ -113,6 +113,7 @@ function FlowInner() {
     layout,
     addPerson: storeAddPerson,
     connectUnion: storeConnectUnion,
+    swapUnion: storeSwapUnion,
     removePerson: storeRemovePerson,
     updatePerson: storeUpdatePerson,
     moveNode,
@@ -207,7 +208,11 @@ function FlowInner() {
     []
   );
   const addPerson = useCallback(
-    (personInput: Omit<Person, "id">, existingId?: string) => {
+    (
+      personInput: Omit<Person, "id">,
+      existingId?: string,
+      opts?: LinkOptions
+    ) => {
       if (!requireEdit()) return;
       const closeModal = () => {
         setModal(undefined);
@@ -218,7 +223,9 @@ function FlowInner() {
         existingId,
         relationship: modal?.relationship,
         anchorId: modal?.personId,
-        unionId: modal?.unionId,
+        unionId: opts?.unionId ?? modal?.unionId,
+        singleParentOnly: opts?.singleParent,
+        relType: opts?.relType,
       });
       if (!result.ok) {
         if (result.error) notify(result.error);
@@ -289,6 +296,14 @@ function FlowInner() {
           search,
           onPersonAction: (id, action) => openRelationship(action, id),
           onUnionChild: (id) => openRelationship("child", undefined, id),
+          onUnionSwap: (id) => {
+            const result = storeSwapUnion(id);
+            notify(
+              result.ok
+                ? tToasts("swapped")
+                : (result.error ?? tToasts("unionError"))
+            );
+          },
         }
       ),
     [
@@ -299,6 +314,9 @@ function FlowInner() {
       selected?.id,
       search,
       openRelationship,
+      storeSwapUnion,
+      notify,
+      tToasts,
     ]
   );
   const nodes = useMemo(() => {
@@ -1102,6 +1120,8 @@ function FlowInner() {
         }}
         people={data.persons}
         relationship={modal?.relationship}
+        anchorId={modal?.personId}
+        unions={data.unions}
         onCreate={addPerson}
       />
       {editing && (

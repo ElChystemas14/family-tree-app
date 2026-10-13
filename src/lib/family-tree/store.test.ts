@@ -5,6 +5,7 @@ import {
   applyAddPerson,
   applyConnectUnion,
   applyRemovePerson,
+  applySwapUnion,
   applyUpdatePerson,
   getParentIds,
   isAncestorOf,
@@ -166,5 +167,90 @@ describe("applyRemovePerson / applyUpdatePerson (B1)", () => {
     expect(applyUpdatePerson(empty, { ...solo, id: "nadie" }).result.ok).toBe(
       false
     );
+  });
+});
+
+describe("applySwapUnion (orden izq/der)", () => {
+  it("intercambia partner1 ↔ partner2 sin tocar hijos", () => {
+    const before = familyTreeData.unions.find(
+      (u) => u.id === "u-margaret-thomas"
+    )!;
+    const { state, result } = applySwapUnion(
+      familyTreeData,
+      "u-margaret-thomas"
+    );
+    expect(result.ok).toBe(true);
+    const after = state.unions.find((u) => u.id === "u-margaret-thomas")!;
+    expect(after.partner1Id).toBe(before.partner2Id);
+    expect(after.partner2Id).toBe(before.partner1Id);
+    expect(state.relationships).toEqual(familyTreeData.relationships);
+    expect(applySwapUnion(familyTreeData, "inexistente").result.ok).toBe(false);
+  });
+});
+
+describe("vínculos: tipo y monoparental", () => {
+  const baby = {
+    firstName: "Bebé",
+    lastName: "Prueba",
+    gender: "other" as const,
+  };
+
+  it("hijo monoparental adoptado aunque el padre tenga uniones", () => {
+    const { state, result } = applyAddPerson(familyTreeData, {
+      personInput: baby,
+      relationship: "child",
+      anchorId: "margaret",
+      singleParentOnly: true,
+      relType: "adopted",
+    });
+    expect(result.ok).toBe(true);
+    const rel = state.relationships.find(
+      (r) => r.childId === result.person!.id
+    )!;
+    expect(rel.singleParentId).toBe("margaret");
+    expect(rel.unionId).toBeUndefined();
+    expect(rel.type).toBe("adopted");
+  });
+
+  it("hijo en unión elegida con tipo afín", () => {
+    const { state, result } = applyAddPerson(empty, {
+      personInput: baby,
+      relationship: "child",
+      anchorId: "solo",
+      unionId: undefined,
+      relType: "step",
+    });
+    expect(result.ok).toBe(true);
+    const rel = state.relationships.find(
+      (r) => r.childId === result.person!.id
+    )!;
+    expect(rel.type).toBe("step");
+    expect(rel.singleParentId).toBe("solo");
+  });
+
+  it("padre con vínculo adoptado", () => {
+    const { state, result } = applyAddPerson(empty, {
+      personInput: baby,
+      relationship: "parent",
+      anchorId: "solo",
+      relType: "adopted",
+    });
+    expect(result.ok).toBe(true);
+    const rel = state.relationships.find((r) => r.childId === "solo")!;
+    expect(rel.type).toBe("adopted");
+  });
+
+  it("por defecto sigue siendo biológico en unión", () => {
+    const { state, result } = applyAddPerson(empty, {
+      personInput: baby,
+      relationship: "child",
+      anchorId: "solo",
+    });
+    expect(result.ok).toBe(true);
+    const rel = state.relationships.find(
+      (r) => r.childId === result.person!.id
+    )!;
+    expect(rel.type).toBe("biological");
+    expect(rel.singleParentId).toBe("solo");
   });
 });

@@ -58,6 +58,7 @@ export interface SelectionOptions {
     action: "parent" | "spouse" | "child"
   ) => void;
   onUnionChild?: (unionId: string) => void;
+  onUnionSwap?: (unionId: string) => void;
 }
 
 let layoutRuns = 0;
@@ -203,6 +204,7 @@ export function withGraphSelection(
     search = "",
     onPersonAction,
     onUnionChild,
+    onUnionSwap,
   } = opts;
   const parentsByChild = buildParentsByChild(unions, relationships);
   const ancestors = new Set<string>();
@@ -256,6 +258,7 @@ export function withGraphSelection(
           isDimmed: !!selectedId && !highlighted,
           isPathHighlighted: highlighted,
           onAddChild: () => onUnionChild?.(node.id),
+          onSwapUnion: () => onUnionSwap?.(node.id),
         },
       };
     }
@@ -308,11 +311,19 @@ export function transformFamilyToGraph(
     personId: string,
     action: "parent" | "spouse" | "child"
   ) => void,
-  onUnionChild?: (unionId: string) => void
+  onUnionChild?: (unionId: string) => void,
+  onUnionSwap?: (unionId: string) => void
 ): GraphData {
   return withGraphSelection(
     layoutFamilyToGraph(persons, unions, relationships, layout),
     { unions, relationships },
-    { layout, selectedId, search: "", onPersonAction, onUnionChild }
+    {
+      layout,
+      selectedId,
+      search: "",
+      onPersonAction,
+      onUnionChild,
+      onUnionSwap,
+    }
   );
 }

@@ -209,7 +209,21 @@ export function PersonDetailSheet({
                     }>
                   ).map((group) => (
                     <section key={group.title} className="flex flex-col gap-2">
-                      <h3 className="text-sm font-semibold">{group.title}</h3>
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="text-sm font-semibold">{group.title}</h3>
+                        {(group.action !== "parent" ||
+                          group.items.length === 0) && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              person && onAddRelative?.(group.action, person.id)
+                            }
+                          >
+                            {group.addLabel}
+                          </Button>
+                        )}
+                      </div>
                       {group.items.length ? (
                         group.items.map((item) => (
                           <RelativeCard
@@ -220,25 +234,11 @@ export function PersonDetailSheet({
                           />
                         ))
                       ) : (
-                        <div className="flex flex-col gap-2 rounded-xl border border-dashed px-3 py-3">
-                          <p className="text-sm text-muted-foreground">
-                            {t("noneRegistered", {
-                              group: group.title.toLowerCase(),
-                            })}
-                          </p>
-                          {person && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="self-start"
-                              onClick={() =>
-                                onAddRelative?.(group.action, person.id)
-                              }
-                            >
-                              {group.addLabel}
-                            </Button>
-                          )}
-                        </div>
+                        <p className="rounded-xl border border-dashed px-3 py-3 text-sm text-muted-foreground">
+                          {t("noneRegistered", {
+                            group: group.title.toLowerCase(),
+                          })}
+                        </p>
                       )}
                     </section>
                   ))}

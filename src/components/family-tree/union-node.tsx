@@ -1,7 +1,7 @@
 "use client";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { useTranslations } from "next-intl";
-import { Plus } from "lucide-react";
+import { ArrowLeftRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { UnionNodeData } from "@/types/family-tree";
 export function UnionNode({ data }: NodeProps & { data: UnionNodeData }) {
@@ -25,6 +25,15 @@ export function UnionNode({ data }: NodeProps & { data: UnionNodeData }) {
         onClick={() => data.onAddChild?.()}
       >
         <Plus data-icon />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute -left-8 -top-6 size-6 rounded-full border bg-card opacity-0 shadow-sm transition-opacity hover:opacity-100 group-hover:opacity-100 focus-visible:opacity-100"
+        aria-label={t("swap")}
+        onClick={() => data.onSwapUnion?.()}
+      >
+        <ArrowLeftRight data-icon />
       </Button>
       <Handle
         type="source"

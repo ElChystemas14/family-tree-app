@@ -74,12 +74,18 @@ export interface AddPersonResult extends ActionResult {
   selectOnly?: boolean;
 }
 
+export type RelationshipKind = "biological" | "adopted" | "step";
+
 export interface AddPersonArgs {
   personInput: Omit<Person, "id">;
   existingId?: string;
   relationship?: "parent" | "spouse" | "child";
   anchorId?: string;
   unionId?: string;
+  /** Tipo del vínculo creado (hijo/padre). Por defecto `biological`. */
+  relType?: RelationshipKind;
+  /** Hijo solo de `anchorId`, aunque tenga uniones. */
+  singleParentOnly?: boolean;
 }
 
 const newId = (prefix: string) => `${prefix}-${crypto.randomUUID()}`;
@@ -89,7 +95,15 @@ export function applyAddPerson(
   state: FamilyTreeData,
   args: AddPersonArgs
 ): { state: FamilyTreeData; result: AddPersonResult } {
-  const { personInput, existingId, relationship, anchorId, unionId } = args;
+  const {
+    personInput,
+    existingId,
+    relationship,
+    anchorId,
+    unionId,
+    relType = "biological",
+    singleParentOnly = false,
+  } = args;
   const personId = existingId ?? newId("person");
   const person = existingId
     ? state.persons.find((item) => item.id === existingId)
@@ -165,7 +179,7 @@ export function applyAddPerson(
         id: newId("rel"),
         childId: anchorId,
         unionId: childUnionId,
-        type: "biological",
+        type: relType,
       },
     ];
   }
@@ -186,26 +200,39 @@ export function applyAddPerson(
           error: "Esta persona ya tiene padres registrados.",
         },
       };
-    const union = unionId
-      ? unions.find((item) => item.id === unionId)
-      : unions.find(
-          (item) => item.partner1Id === anchorId || item.partner2Id === anchorId
-        );
-    if (unionId && !union)
-      return {
-        state,
-        result: { ok: false, error: "La unión seleccionada ya no existe." },
-      };
-    relationships = [
-      ...relationships,
-      {
-        id: newId("rel"),
-        childId: personId,
-        unionId: union?.id,
-        singleParentId: !union && anchorId ? anchorId : undefined,
-        type: "biological",
-      },
-    ];
+    if (singleParentOnly && anchorId) {
+      relationships = [
+        ...relationships,
+        {
+          id: newId("rel"),
+          childId: personId,
+          singleParentId: anchorId,
+          type: relType,
+        },
+      ];
+    } else {
+      const union = unionId
+        ? unions.find((item) => item.id === unionId)
+        : unions.find(
+            (item) =>
+              item.partner1Id === anchorId || item.partner2Id === anchorId
+          );
+      if (unionId && !union)
+        return {
+          state,
+          result: { ok: false, error: "La unión seleccionada ya no existe." },
+        };
+      relationships = [
+        ...relationships,
+        {
+          id: newId("rel"),
+          childId: personId,
+          unionId: union?.id,
+          singleParentId: !union && anchorId ? anchorId : undefined,
+          type: relType,
+        },
+      ];
+    }
   }
 
   const persons = existingId ? state.persons : [...state.persons, person];
@@ -299,6 +326,32 @@ export function applyRemovePerson(
   };
 }
 
+/** Intercambiar los lados de una pareja (partner1 ↔ partner2). La unión es
+ * simétrica: solo cambia el orden visual izq/der de su rama. */
+export function applySwapUnion(
+  state: FamilyTreeData,
+  unionId: string
+): { state: FamilyTreeData; result: ActionResult } {
+  const union = state.unions.find((item) => item.id === unionId);
+  if (!union)
+    return { state, result: { ok: false, error: "La unión no existe." } };
+  return {
+    state: {
+      ...state,
+      unions: state.unions.map((item) =>
+        item.id === unionId
+          ? {
+              ...item,
+              partner1Id: item.partner2Id,
+              partner2Id: item.partner1Id,
+            }
+          : item
+      ),
+    },
+    result: { ok: true },
+  };
+}
+
 /** Actualizar datos básicos de una persona (sin tocar conexiones). */
 export function applyUpdatePerson(
   state: FamilyTreeData,
@@ -326,6 +379,7 @@ export interface FamilyTreeStore {
   layout: LayoutMode;
   addPerson: (args: AddPersonArgs) => AddPersonResult;
   connectUnion: (sourceId: string, targetId: string) => ActionResult;
+  swapUnion: (unionId: string) => ActionResult;
   removePerson: (personId: string) => ActionResult;
   updatePerson: (updated: Person) => ActionResult;
   moveNode: (nodeId: string, position: { x: number; y: number }) => void;
@@ -353,6 +407,15 @@ export function useFamilyTree(
   const connectUnion = useCallback(
     (sourceId: string, targetId: string): ActionResult => {
       const { state, result } = applyConnectUnion(data, sourceId, targetId);
+      if (result.ok) setData(state);
+      return result;
+    },
+    [data]
+  );
+
+  const swapUnion = useCallback(
+    (unionId: string): ActionResult => {
+      const { state, result } = applySwapUnion(data, unionId);
       if (result.ok) setData(state);
       return result;
     },
@@ -407,6 +470,7 @@ export function useFamilyTree(
     layout,
     addPerson,
     connectUnion,
+    swapUnion,
     removePerson,
     updatePerson,
     moveNode,

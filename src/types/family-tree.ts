@@ -68,6 +68,7 @@ export interface UnionNodeData {
   isPathHighlighted?: boolean;
   layout: LayoutMode;
   onAddChild?: () => void;
+  onSwapUnion?: () => void;
 }
 
 export type NodeData = PersonNodeData | UnionNodeData;

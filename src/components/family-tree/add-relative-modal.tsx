@@ -22,19 +22,32 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import type { Person } from "@/types/family-tree";
+import type { Person, Union } from "@/types/family-tree";
 import {
   validatePersonForm,
   type PersonFormErrors,
 } from "@/lib/family-tree/schema";
 
 type Relationship = "parent" | "spouse" | "child";
+
+export interface LinkOptions {
+  unionId?: string;
+  singleParent?: boolean;
+  relType?: "biological" | "adopted" | "step";
+}
+
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   people: Person[];
   relationship?: Relationship;
-  onCreate: (person: Omit<Person, "id">, existingId?: string) => void;
+  anchorId?: string;
+  unions?: Union[];
+  onCreate: (
+    person: Omit<Person, "id">,
+    existingId?: string,
+    opts?: LinkOptions
+  ) => void;
 };
 
 export function AddRelativeModal({
@@ -42,6 +55,8 @@ export function AddRelativeModal({
   onOpenChange,
   people,
   relationship,
+  anchorId,
+  unions = [],
   onCreate,
 }: Props) {
   const [mode, setMode] = useState<"create" | "existing">("create");
@@ -54,7 +69,31 @@ export function AddRelativeModal({
   const [bio, setBio] = useState("");
   const [existingId, setExistingId] = useState("");
   const [errors, setErrors] = useState<PersonFormErrors>({});
+  const [relType, setRelType] = useState<"biological" | "adopted" | "step">(
+    "biological"
+  );
+  const [childUnionId, setChildUnionId] = useState("");
+  const [singleParent, setSingleParent] = useState(false);
   const t = useTranslations("addRelative");
+  const anchorUnions = useMemo(
+    () =>
+      anchorId
+        ? unions.filter(
+            (union) =>
+              union.partner1Id === anchorId || union.partner2Id === anchorId
+          )
+        : [],
+    [unions, anchorId]
+  );
+  const unionName = (id: string) => {
+    const union = unions.find((item) => item.id === id);
+    if (!union) return id;
+    const nameOf = (personId: string) => {
+      const found = people.find((person) => person.id === personId);
+      return found ? `${found.firstName} ${found.lastName}` : personId;
+    };
+    return `${nameOf(union.partner1Id)} + ${nameOf(union.partner2Id)}`;
+  };
   const sortedPeople = useMemo(
     () =>
       people
@@ -76,15 +115,33 @@ export function AddRelativeModal({
     setBio("");
     setExistingId("");
     setErrors({});
+    setRelType("biological");
+    setChildUnionId("");
+    setSingleParent(false);
   };
   const handleOpenChange = (next: boolean) => {
     if (!next) reset();
     onOpenChange(next);
   };
   const submit = () => {
+    const linkOpts: LinkOptions | undefined =
+      relationship === "child" || relationship === "parent"
+        ? {
+            unionId:
+              relationship === "child" && !singleParent
+                ? childUnionId || undefined
+                : undefined,
+            singleParent: relationship === "child" && singleParent,
+            relType,
+          }
+        : undefined;
     if (mode === "existing") {
       if (existingId)
-        onCreate({ firstName: "", lastName: "", gender: "other" }, existingId);
+        onCreate(
+          { firstName: "", lastName: "", gender: "other" },
+          existingId,
+          linkOpts
+        );
       return;
     }
     const validation = validatePersonForm({
@@ -101,16 +158,20 @@ export function AddRelativeModal({
       return;
     }
     setErrors({});
-    onCreate({
-      firstName: validation.value.firstName,
-      lastName: validation.value.lastName,
-      gender: validation.value.gender,
-      birthDate: validation.value.birthDate,
-      deathDate: validation.value.deathDate,
-      photoUrl: validation.value.photoUrl,
-      bio: validation.value.bio,
-      attributes: {},
-    });
+    onCreate(
+      {
+        firstName: validation.value.firstName,
+        lastName: validation.value.lastName,
+        gender: validation.value.gender,
+        birthDate: validation.value.birthDate,
+        deathDate: validation.value.deathDate,
+        photoUrl: validation.value.photoUrl,
+        bio: validation.value.bio,
+        attributes: {},
+      },
+      undefined,
+      linkOpts
+    );
     handleOpenChange(false);
   };
   const relationshipLabels: Record<Relationship, string> = {
@@ -135,6 +196,75 @@ export function AddRelativeModal({
             {relationship ? t("addDescription") : t("createDescription")}
           </DialogDescription>
         </DialogHeader>
+        {(relationship === "child" || relationship === "parent") && (
+          <div className="flex flex-col gap-3 rounded-xl border p-3">
+            {relationship === "child" && (
+              <div className="flex flex-col gap-2">
+                <Label>{t("childOf")}</Label>
+                {anchorUnions.length > 0 ? (
+                  <Select
+                    value={singleParent ? "__single__" : childUnionId}
+                    onValueChange={(value) => {
+                      if (value === "__single__") setSingleParent(true);
+                      else {
+                        setSingleParent(false);
+                        setChildUnionId(value ?? "");
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("unionAuto")}>
+                        {singleParent
+                          ? t("singleParent")
+                          : childUnionId
+                            ? unionName(childUnionId)
+                            : null}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {anchorUnions.map((union) => (
+                        <SelectItem key={union.id} value={union.id}>
+                          {unionName(union.id)}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__single__">
+                        {t("singleParent")}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    {t("singleNote")}
+                  </p>
+                )}
+              </div>
+            )}
+            <div className="flex flex-col gap-2">
+              <Label>{t("relTypeLabel")}</Label>
+              <Select
+                value={relType}
+                onValueChange={(value) =>
+                  setRelType((value as typeof relType | null) ?? "biological")
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue>
+                    {relType === "adopted"
+                      ? t("relAdopted")
+                      : relType === "step"
+                        ? t("relStep")
+                        : t("relBio")}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="biological">{t("relBio")}</SelectItem>
+                  <SelectItem value="adopted">{t("relAdopted")}</SelectItem>
+                  <SelectItem value="step">{t("relStep")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
         <Tabs
           value={mode}
           onValueChange={(value) =>
