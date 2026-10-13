@@ -21,6 +21,8 @@ import {
 } from "@/lib/family-tree/mock-data";
 import type { FamilyTreeData, Person } from "@/types/family-tree";
 
+type RelationshipAction = "parent" | "spouse" | "child";
+
 type Props = {
   person?: Person;
   data: FamilyTreeData;
@@ -29,6 +31,7 @@ type Props = {
   onSelectRelative: (person: Person) => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onAddRelative?: (relationship: RelationshipAction, personId: string) => void;
 };
 function useRelationshipLabels(): Record<string, string> {
   const t = useTranslations("detail");
@@ -81,6 +84,7 @@ export function PersonDetailSheet({
   onSelectRelative,
   onEdit,
   onDelete,
+  onAddRelative,
 }: Props) {
   const t = useTranslations("detail");
   const family = person
@@ -174,25 +178,40 @@ export function PersonDetailSheet({
                       </p>
                     </div>
                   </div>
-                  {[
-                    [t("parents"), family.parents],
-                    [t("partners"), family.partners],
-                    [t("children"), family.children],
-                  ].map(([title, items]) => (
-                    <section
-                      key={String(title)}
-                      className="flex flex-col gap-2"
-                    >
-                      <h3 className="text-sm font-semibold">{String(title)}</h3>
-                      {(
-                        items as Array<{ person: Person; relationship: string }>
-                      ).length ? (
-                        (
-                          items as Array<{
-                            person: Person;
-                            relationship: string;
-                          }>
-                        ).map((item) => (
+                  {(
+                    [
+                      {
+                        title: t("parents"),
+                        items: family.parents,
+                        action: "parent",
+                        addLabel: t("addParent"),
+                      },
+                      {
+                        title: t("partners"),
+                        items: family.partners,
+                        action: "spouse",
+                        addLabel: t("addSpouse"),
+                      },
+                      {
+                        title: t("children"),
+                        items: family.children,
+                        action: "child",
+                        addLabel: t("addChild"),
+                      },
+                    ] as Array<{
+                      title: string;
+                      items: Array<{
+                        person: Person;
+                        relationship: string;
+                      }>;
+                      action: RelationshipAction;
+                      addLabel: string;
+                    }>
+                  ).map((group) => (
+                    <section key={group.title} className="flex flex-col gap-2">
+                      <h3 className="text-sm font-semibold">{group.title}</h3>
+                      {group.items.length ? (
+                        group.items.map((item) => (
                           <RelativeCard
                             key={item.person.id}
                             person={item.person}
@@ -201,11 +220,25 @@ export function PersonDetailSheet({
                           />
                         ))
                       ) : (
-                        <p className="rounded-xl border border-dashed px-3 py-3 text-sm text-muted-foreground">
-                          {t("noneRegistered", {
-                            group: String(title).toLowerCase(),
-                          })}
-                        </p>
+                        <div className="flex flex-col gap-2 rounded-xl border border-dashed px-3 py-3">
+                          <p className="text-sm text-muted-foreground">
+                            {t("noneRegistered", {
+                              group: group.title.toLowerCase(),
+                            })}
+                          </p>
+                          {person && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="self-start"
+                              onClick={() =>
+                                onAddRelative?.(group.action, person.id)
+                              }
+                            >
+                              {group.addLabel}
+                            </Button>
+                          )}
+                        </div>
                       )}
                     </section>
                   ))}

@@ -762,7 +762,7 @@ function FlowInner() {
     : undefined;
   return (
     <main className="family-tree-flow relative flex h-dvh min-h-175 flex-col overflow-hidden bg-background">
-      <header className="flex h-16 shrink-0 items-center justify-between border-b bg-card px-5">
+      <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b bg-card px-5">
         <div className="flex items-center gap-3">
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
             H
@@ -776,137 +776,149 @@ function FlowInner() {
             </p>
           </div>
         </div>
-        <div className="hidden items-center gap-5 text-xs text-muted-foreground sm:flex">
-          <span>{tHeader("persons", { count: data.persons.length })}</span>
-          <span>{tHeader("unions", { count: data.unions.length })}</span>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setExportOpen(true)}
-          >
-            {tHeader("export")}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => fileRef.current?.click()}
-          >
-            {tHeader("importJson")}
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => setCsvOpen(true)}>
-            {tHeader("importCsv")}
-          </Button>
-          <Button size="sm" onClick={() => setCreatePersonOpen(true)}>
-            {tHeader("create")}
-          </Button>
-          {SUPABASE_ENABLED &&
-            (user ? (
-              <>
-                <span className="max-w-40 truncate">{user.email}</span>
-                <Button size="sm" variant="outline" onClick={handleSignOut}>
-                  {tAuth("signOut")}
+        <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-3 text-xs text-muted-foreground sm:flex">
+            <span>{tHeader("persons", { count: data.persons.length })}</span>
+            <span>{tHeader("unions", { count: data.unions.length })}</span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setExportOpen(true)}
+            >
+              {tHeader("export")}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => fileRef.current?.click()}
+            >
+              {tHeader("importJson")}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setCsvOpen(true)}
+            >
+              {tHeader("importCsv")}
+            </Button>
+            <Button size="sm" onClick={() => setCreatePersonOpen(true)}>
+              {tHeader("create")}
+            </Button>
+            {SUPABASE_ENABLED &&
+              (user ? (
+                <>
+                  <span className="max-w-40 truncate">{user.email}</span>
+                  <Button size="sm" variant="outline" onClick={handleSignOut}>
+                    {tAuth("signOut")}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setLoginOpen(true)}
+                >
+                  {tAuth("signIn")}
                 </Button>
-              </>
-            ) : (
+              ))}
+            {SUPABASE_ENABLED && user && (
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setLoginOpen(true)}
+                onClick={() => setTreeDialogOpen(true)}
               >
-                {tAuth("signIn")}
+                {activeTreeName ?? tTrees("title")}
+                {syncing ? " …" : ""}
+              </Button>
+            )}
+          </div>
+          <Button
+            size="sm"
+            className="sm:hidden"
+            onClick={() => setCreatePersonOpen(true)}
+          >
+            {tHeader("createShort")}
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            className="sm:hidden"
+            onClick={() => setExportOpen(true)}
+            aria-label={tHeader("exportLabel")}
+          >
+            <Download className="size-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            className="sm:hidden"
+            onClick={() => fileRef.current?.click()}
+            aria-label={tHeader("importJsonLabel")}
+          >
+            <Upload className="size-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            className="sm:hidden"
+            onClick={() => setCsvOpen(true)}
+            aria-label={tHeader("importCsvLabel")}
+          >
+            <FileUp className="size-4" />
+          </Button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            aria-label={tHeader("selectJsonFileLabel")}
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) handleImportFile(file);
+            }}
+          />
+          {SUPABASE_ENABLED &&
+            (user ? (
+              <Button
+                size="icon"
+                variant="outline"
+                className="sm:hidden"
+                onClick={handleSignOut}
+                aria-label={tAuth("signOut")}
+              >
+                <LogOut className="size-4" />
+              </Button>
+            ) : (
+              <Button
+                size="icon"
+                variant="outline"
+                className="sm:hidden"
+                onClick={() => setLoginOpen(true)}
+                aria-label={tAuth("signIn")}
+              >
+                <LogIn className="size-4" />
               </Button>
             ))}
           {SUPABASE_ENABLED && user && (
             <Button
-              size="sm"
+              size="icon"
               variant="outline"
+              className="sm:hidden"
               onClick={() => setTreeDialogOpen(true)}
+              aria-label={tTrees("open")}
             >
-              {activeTreeName ?? tTrees("title")}
-              {syncing ? " …" : ""}
+              <Network className="size-4" />
             </Button>
           )}
-        </div>
-        <Button
-          size="sm"
-          className="sm:hidden"
-          onClick={() => setCreatePersonOpen(true)}
-        >
-          {tHeader("createShort")}
-        </Button>
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={() => setExportOpen(true)}
-          aria-label={tHeader("exportLabel")}
-        >
-          <Download className="size-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={() => fileRef.current?.click()}
-          aria-label={tHeader("importJsonLabel")}
-        >
-          <Upload className="size-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={() => setCsvOpen(true)}
-          aria-label={tHeader("importCsvLabel")}
-        >
-          <FileUp className="size-4" />
-        </Button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="application/json,.json"
-          className="hidden"
-          aria-label={tHeader("selectJsonFileLabel")}
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (file) handleImportFile(file);
-          }}
-        />
-        {SUPABASE_ENABLED &&
-          (user ? (
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={handleSignOut}
-              aria-label={tAuth("signOut")}
-            >
-              <LogOut className="size-4" />
-            </Button>
-          ) : (
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => setLoginOpen(true)}
-              aria-label={tAuth("signIn")}
-            >
-              <LogIn className="size-4" />
-            </Button>
-          ))}
-        {SUPABASE_ENABLED && user && (
           <Button
             size="icon"
             variant="outline"
-            onClick={() => setTreeDialogOpen(true)}
-            aria-label={tTrees("open")}
+            onClick={() => setHelpOpen(true)}
+            aria-label={tHeader("helpLabel")}
           >
-            <Network className="size-4" />
+            <CircleHelp className="size-4" />
           </Button>
-        )}
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={() => setHelpOpen(true)}
-          aria-label={tHeader("helpLabel")}
-        >
-          <CircleHelp className="size-4" />
-        </Button>
+        </div>
       </header>
       <section className="relative min-h-0 flex-1">
         <TreeControls
@@ -934,6 +946,10 @@ function FlowInner() {
           onNodeDoubleClick={(_, node) => {
             if (data.persons.some((item) => item.id === node.id))
               focusLineage(node.id);
+          }}
+          onPaneContextMenu={(event) => {
+            event.preventDefault();
+            setCreatePersonOpen(true);
           }}
           onNodeDragStop={(event, node) => {
             moveNode(node.id, node.position);
@@ -1001,6 +1017,9 @@ function FlowInner() {
         open={!!selected}
         onOpenChange={(open) => !open && setSelected(undefined)}
         onSelectRelative={setSelected}
+        onAddRelative={(relationship, personId) =>
+          openRelationship(relationship, personId)
+        }
         onEdit={() => selected && setEditing(selected)}
         onDelete={() => {
           if (!selected) return;
