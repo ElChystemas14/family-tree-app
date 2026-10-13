@@ -75,16 +75,18 @@ export async function createTree(
   userId: string,
   name: string
 ): Promise<string> {
-  const id = `tree-${crypto.randomUUID()}`;
-  const { error: treeError } = await supabase
-    .from("trees")
-    .insert({ id, name: name.trim() || "Mi árbol", owner_id: userId });
-  if (treeError) fail("No se pudo crear el árbol", treeError);
-  const { error: memberError } = await supabase
-    .from("tree_memberships")
-    .insert({ tree_id: id, user_id: userId, role: "owner" });
-  if (memberError) fail("No se pudo crear el árbol", memberError);
-  return id;
+  // RPC atómica (migración 0002): crea árbol + membership owner. Inserción
+  // directa fallaría por RLS (el creador aún no es miembro). `userId` se
+  // conserva en la firma por claridad (el RPC usa auth.uid()).
+  void userId;
+  const { data, error } = await supabase.rpc("create_tree", {
+    p_name: name.trim() || "Mi árbol",
+  });
+  if (error) fail("No se pudo crear el árbol", error);
+  if (typeof data !== "string" || data === "") {
+    throw new Error("No se pudo crear el árbol: respuesta vacía.");
+  }
+  return data;
 }
 
 export async function pullTree(
