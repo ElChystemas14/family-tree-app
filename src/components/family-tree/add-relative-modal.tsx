@@ -186,7 +186,13 @@ export function AddRelativeModal({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue>
+                      {gender === "female"
+                        ? t("genderFemale")
+                        : gender === "male"
+                          ? t("genderMale")
+                          : t("genderOther")}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="female">{t("genderFemale")}</SelectItem>
@@ -280,7 +286,16 @@ export function AddRelativeModal({
                 onValueChange={(value) => setExistingId(value ?? "")}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t("existingPlaceholder")} />
+                  <SelectValue placeholder={t("existingPlaceholder")}>
+                    {(() => {
+                      const selected = sortedPeople.find(
+                        (person) => person.id === existingId
+                      );
+                      return selected
+                        ? `${selected.firstName} ${selected.lastName}`
+                        : null;
+                    })()}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {sortedPeople.map((person) => (
