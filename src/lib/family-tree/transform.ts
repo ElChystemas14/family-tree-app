@@ -95,7 +95,7 @@ export function layoutFamilyToGraph(
   graph.setGraph({
     rankdir: layoutMode === "vertical" ? "TB" : "LR",
     nodesep: 90,
-    ranksep: 150,
+    ranksep: 50,
     marginx: 80,
     marginy: 70,
   });

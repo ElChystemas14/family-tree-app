@@ -249,6 +249,11 @@ function FlowInner() {
     },
     [setStoreLayout, fitView]
   );
+  // Reordenar: descarta posiciones manuales y vuelve al layout automático.
+  const resetPositions = useCallback(() => {
+    setStoreLayout(layout);
+    window.setTimeout(() => fitView({ padding: 0.2, duration: 400 }), 80);
+  }, [setStoreLayout, layout, fitView]);
   const connectPeople = useCallback(
     (sourceId: string, targetId: string) => {
       if (!requireEdit()) return;
@@ -971,6 +976,7 @@ function FlowInner() {
           layout={layout}
           onLayout={changeLayout}
           onCenter={() => fitView({ padding: 0.2, duration: 500 })}
+          onResetPositions={resetPositions}
           dark={dark}
           onTheme={() => setDark((value) => !value)}
         />

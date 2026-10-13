@@ -39,6 +39,7 @@
     "layoutHorizontalTitle": "Diseño horizontal (generaciones en columnas)",
     "newBranch": "Nueva rama familiar independiente",
     "center": "Centrar vista",
+    "resetPositions": "Reordenar",
     "themeLabel": "Cambiar tema"
   },
   "personNode": {
@@ -133,7 +134,7 @@
     "connectTitle": "Conectar parejas arrastrando",
     "connectBody": "En escritorio, arrastra una tarjeta sobre otra para proponer una unión; siempre pide confirmación. En táctil, arrastrar solo mueve (para no chocar con el desplazamiento): crea la pareja desde el menú ⋯ → Añadir pareja. Mover nodos no altera al resto: cada posición que cambies se conserva.",
     "exploreTitle": "Explorar",
-    "exploreBody": "Busca por nombre, cambia entre diseño vertical y horizontal, centra la vista o alterna claro/oscuro desde la barra superior del lienzo. Clic derecho en el lienzo crea una persona.",
+    "exploreBody": "Busca por nombre, cambia entre diseño vertical y horizontal, centra la vista o alterna claro/oscuro desde la barra superior del lienzo. Clic derecho en el lienzo crea una persona. Reordenar devuelve todas las tarjetas a su sitio.",
     "editTitle": "Editar y eliminar",
     "editBody": "Desde la ficha puedes editar datos o desvincular a la persona. Por seguridad no se puede eliminar a quien tenga pareja o hijos: desvincúlalos primero."
   },

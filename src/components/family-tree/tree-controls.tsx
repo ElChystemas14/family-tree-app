@@ -1,7 +1,15 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Columns3, LocateFixed, Moon, Rows3, Search, Sun } from "lucide-react";
+import {
+  Columns3,
+  LocateFixed,
+  Moon,
+  RotateCcw,
+  Rows3,
+  Search,
+  Sun,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -16,6 +24,7 @@ interface TreeControlsProps {
   layout: LayoutMode;
   onLayout: (value: LayoutMode) => void;
   onCenter: () => void;
+  onResetPositions: () => void;
   dark: boolean;
   onTheme: () => void;
 }
@@ -28,6 +37,7 @@ export function TreeControls({
   layout,
   onLayout,
   onCenter,
+  onResetPositions,
   dark,
   onTheme,
 }: TreeControlsProps) {
@@ -154,6 +164,15 @@ export function TreeControls({
           className="bg-card/95 shadow-sm backdrop-blur"
         >
           <span data-icon>+</span> {t("newBranch")}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onResetPositions}
+          title={t("resetPositions")}
+          className="bg-card/95 shadow-sm backdrop-blur"
+        >
+          <RotateCcw data-icon="inline-start" /> {t("resetPositions")}
         </Button>
         <Button
           variant="outline"
