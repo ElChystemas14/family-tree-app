@@ -38,7 +38,7 @@ Valor: S/M/L. Esfuerzo: S/M/L.
 ## Deuda post-v1.0 (revisión final 2026-10-07)
 
 - **IDEA-17** Extraer los diálogos del canvas a componentes (exportar, importar
-  JSON/CSV, edición, ayuda, onboarding). Valor M, esfuerzo M. `propuesta`.
+  JSON/CSV, edición, ayuda, onboarding). Valor M, esfuerzo M. `aceptada` (→ hecho 2026-10-08: canvas 1584→793, más `useCloudSync`).
 - **IDEA-18** Endurecer export CSV contra inyección de fórmulas (`AUD-LOW-05`).
   Valor M, esfuerzo S. `propuesta`.
 

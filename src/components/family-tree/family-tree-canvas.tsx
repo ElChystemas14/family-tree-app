@@ -19,6 +19,15 @@ import { UnionNode } from "./union-node";
 import { TreeControls } from "./tree-controls";
 import { PersonDetailSheet } from "./person-detail-sheet";
 import { AddRelativeModal, type LinkOptions } from "./add-relative-modal";
+import { EditPersonDialog } from "./dialogs/edit-person-dialog";
+import { PendingUnionDialog } from "./dialogs/pending-union-dialog";
+import { HelpDialog } from "./dialogs/help-dialog";
+import { ImportJsonDialog } from "./dialogs/import-json-dialog";
+import { ImportCsvDialog } from "./dialogs/import-csv-dialog";
+import { ExportDialog } from "./dialogs/export-dialog";
+import { TreesDialog } from "./dialogs/trees-dialog";
+import { OnboardingCard } from "./dialogs/onboarding-card";
+import { TreeHeader } from "./tree-header";
 import {
   layoutFamilyToGraph,
   withGraphSelection,
@@ -32,62 +41,22 @@ import {
   saveStoredTree,
   type ImportResult,
 } from "@/lib/family-tree/storage";
-import {
-  validateFamilyTreeData,
-  validatePersonForm,
-} from "@/lib/family-tree/schema";
+import { validatePersonForm } from "@/lib/family-tree/schema";
 import { readStoredTheme, writeStoredTheme } from "@/lib/family-tree/theme";
 import {
   PERSON_CSV_HEADERS,
   RELATIONSHIP_CSV_HEADERS,
   UNION_CSV_HEADERS,
   buildCsvFilename,
-  hasLivingPersons,
   personToCsvRow,
-  planCsvImport,
   relationshipToCsvRow,
   serializeCsv,
   unionToCsvRow,
   type CsvFileKind,
-  type CsvImportPlan,
 } from "@/lib/family-tree/csv";
-import type { LayoutMode, Person } from "@/types/family-tree";
-import {
-  loadActiveTreeId,
-  loadSyncClock,
-  mergeTrees,
-  saveActiveTreeId,
-  saveSyncClock,
-  type RowClocks,
-} from "@/lib/sync/clock";
-import {
-  createTree,
-  listTrees,
-  pullTree,
-  pushTree,
-  type RemoteTreeItem,
-} from "@/lib/sync/repository";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  CircleHelp,
-  Download,
-  FileUp,
-  LogIn,
-  LogOut,
-  Network,
-  Upload,
-} from "lucide-react";
+import type { FamilyTreeData, LayoutMode, Person } from "@/types/family-tree";
+import { useCloudSync } from "@/lib/sync/use-cloud-sync";
+
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import {
   createSupabaseBrowserClient,
@@ -121,13 +90,6 @@ function FlowInner() {
     importData: storeImportData,
   } = useFamilyTree();
   const tHeader = useTranslations("header");
-  const tOnboarding = useTranslations("onboarding");
-  const tEdit = useTranslations("editDialog");
-  const tUnion = useTranslations("unionDialog");
-  const tHelp = useTranslations("help");
-  const tImportJson = useTranslations("importJson");
-  const tImportCsv = useTranslations("importCsv");
-  const tExport = useTranslations("exportDialog");
   const tAuth = useTranslations("auth");
   const tTrees = useTranslations("trees");
   const tToasts = useTranslations("toasts");
@@ -157,41 +119,35 @@ function FlowInner() {
     ImportResult & { fileName: string }
   >();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [trees, setTrees] = useState<RemoteTreeItem[]>([]);
-  const [activeTreeId, setActiveTreeId] = useState<string | null>(null);
-  const [treeDialogOpen, setTreeDialogOpen] = useState(false);
-  const [newTreeName, setNewTreeName] = useState("");
-  const [syncing, setSyncing] = useState(false);
-  const [creatingTree, setCreatingTree] = useState(false);
-  const [pushToken, setPushToken] = useState(0);
-  const clockRef = useRef<RowClocks>({});
-  const tombstonesRef = useRef<RowClocks>({});
-  const syncedOnceRef = useRef(false);
   const [csvOpen, setCsvOpen] = useState(false);
-  const [csvTexts, setCsvTexts] = useState<
-    Partial<Record<CsvFileKind, string>>
-  >({});
-  const csvPlan: CsvImportPlan | undefined = useMemo(
-    () =>
-      csvOpen && csvTexts.personas
-        ? planCsvImport(
-            {
-              personasText: csvTexts.personas,
-              unionesText: csvTexts.uniones,
-              relacionesText: csvTexts.relaciones,
-            },
-            data
-          )
-        : undefined,
-    [csvOpen, csvTexts, data]
-  );
 
   const notify = useCallback((message: string) => {
     setToast(message);
     window.setTimeout(() => setToast(""), 3200);
   }, []);
   const [user, setUser] = useState<User | null>(null);
-  const [activeRole, setActiveRole] = useState<string>("owner");
+  const {
+    trees,
+    activeTreeId,
+    activeRole,
+    treeDialogOpen,
+    setTreeDialogOpen,
+    syncing,
+    creatingTree,
+    switchTree,
+    createTreeNamed,
+    refreshTrees,
+    resetOnSignOut,
+    recordDeleted,
+  } = useCloudSync({
+    enabled: SUPABASE_ENABLED,
+    user,
+    data,
+    posOverrides,
+    importData: storeImportData,
+    notify,
+    tTrees,
+  });
   const requireEdit = useCallback(() => {
     if (user && activeRole === "viewer") {
       notify(tTrees("readOnly"));
@@ -505,19 +461,12 @@ function FlowInner() {
     if (!requireEdit()) return;
     const previousIds = new Set(data.persons.map((person) => person.id));
     storeImportData(importPreview.data, importPreview.data.posOverrides ?? {});
-    if (activeTreeId) {
-      const now = new Date().toISOString();
-      const removed = [...previousIds].filter(
+    recordDeleted(
+      [...previousIds].filter(
         (id) => !importPreview.data!.persons.some((person) => person.id === id)
-      );
-      for (const id of removed) tombstonesRef.current[id] = now;
-      const stored = loadSyncClock(activeTreeId);
-      saveSyncClock(activeTreeId, {
-        rows: { ...stored.rows, ...clockRef.current },
-        deleted: { ...tombstonesRef.current },
-        pulledAt: stored.pulledAt,
-      });
-    }
+      ),
+      activeTreeId
+    );
     setSelected(undefined);
     notify(
       tToasts("imported", {
@@ -535,52 +484,27 @@ function FlowInner() {
     requireEdit,
     data,
     activeTreeId,
+    recordDeleted,
   ]);
-  const readCsvFile = useCallback(
-    (file: File, kind: CsvFileKind) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setCsvTexts((prev) => ({
-          ...prev,
-          [kind]: String(reader.result ?? ""),
-        }));
-      };
-      reader.onerror = () => notify(tToasts("csvUnreadable"));
-      reader.readAsText(file);
+  const applyCsvImport = useCallback(
+    (applied: FamilyTreeData) => {
+      if (!requireEdit()) return;
+      storeImportData({
+        persons: [...data.persons, ...applied.persons],
+        unions: [...data.unions, ...applied.unions],
+        relationships: [...data.relationships, ...applied.relationships],
+      });
+      setSelected(undefined);
+      notify(
+        tToasts("csvImported", {
+          persons: applied.persons.length,
+          unions: applied.unions.length,
+          relationships: applied.relationships.length,
+        })
+      );
     },
-    [notify, tToasts]
+    [data, storeImportData, notify, tToasts, requireEdit]
   );
-  const closeCsvDialog = useCallback(() => {
-    setCsvOpen(false);
-    setCsvTexts({});
-  }, []);
-  const applyCsvImport = useCallback(() => {
-    if (!csvPlan) return;
-    if (!requireEdit()) return;
-    const { applied } = csvPlan;
-    storeImportData({
-      persons: [...data.persons, ...applied.persons],
-      unions: [...data.unions, ...applied.unions],
-      relationships: [...data.relationships, ...applied.relationships],
-    });
-    setSelected(undefined);
-    notify(
-      tToasts("csvImported", {
-        persons: applied.persons.length,
-        unions: applied.unions.length,
-        relationships: applied.relationships.length,
-      })
-    );
-    closeCsvDialog();
-  }, [
-    csvPlan,
-    data,
-    storeImportData,
-    notify,
-    tToasts,
-    closeCsvDialog,
-    requireEdit,
-  ]);
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     writeStoredTheme(dark ? "dark" : "light");
@@ -629,188 +553,12 @@ function FlowInner() {
     try {
       await createSupabaseBrowserClient().auth.signOut();
       setUser(null);
-      setTrees([]);
-      setActiveTreeId(null);
-      setTreeDialogOpen(false);
-      syncedOnceRef.current = false;
+      resetOnSignOut();
       notify(tAuth("signedOut"));
     } catch {
       notify(tAuth("signOutError"));
     }
-  }, [notify, tAuth]);
-  const syncError = useCallback(
-    (error: unknown) =>
-      notify(
-        tTrees("syncError", {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      ),
-    [notify, tTrees]
-  );
-  const pullIntoTree = useCallback(
-    async (treeId: string) => {
-      if (!user) return;
-      setSyncing(true);
-      try {
-        const supabase = createSupabaseBrowserClient();
-        const pulled = await pullTree(supabase, user.id, treeId);
-        const now = new Date().toISOString();
-        const { merged, clock, changed } = mergeTrees(
-          data,
-          {
-            persons: pulled.persons,
-            unions: pulled.unions,
-            relationships: pulled.relationships,
-          },
-          { rows: clockRef.current, deleted: tombstonesRef.current },
-          now
-        );
-        const validation = validateFamilyTreeData(merged);
-        if (!validation.ok) {
-          throw new Error(validation.errors[0] ?? "datos remotos no válidos");
-        }
-        clockRef.current = clock;
-        saveSyncClock(treeId, {
-          rows: clock,
-          deleted: { ...tombstonesRef.current },
-          pulledAt: now,
-        });
-        if (changed) {
-          storeImportData(merged, {
-            ...pulled.posOverrides,
-            ...posOverrides,
-          });
-        }
-        syncedOnceRef.current = true;
-        setPushToken((token) => token + 1);
-      } catch (error) {
-        syncError(error);
-      } finally {
-        setSyncing(false);
-      }
-    },
-    [data, posOverrides, user, storeImportData, syncError]
-  );
-  const activateTree = useCallback(
-    async (treeId: string, role: string) => {
-      setActiveTreeId(treeId);
-      saveActiveTreeId(treeId);
-      setActiveRole(role);
-      syncedOnceRef.current = false;
-      const stored = loadSyncClock(treeId);
-      clockRef.current = stored.rows;
-      tombstonesRef.current = { ...stored.deleted };
-      await pullIntoTree(treeId);
-    },
-    [pullIntoTree]
-  );
-  const bootedForRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!SUPABASE_ENABLED || !user || bootedForRef.current === user.id) return;
-    bootedForRef.current = user.id;
-    (async () => {
-      setSyncing(true);
-      try {
-        const supabase = createSupabaseBrowserClient();
-        const list = await listTrees(supabase, user.id);
-        setTrees(list);
-        const saved = loadActiveTreeId();
-        const pick = list.find((item) => item.id === saved) ?? list[0];
-        if (!pick) {
-          const name = tTrees("defaultName");
-          const id = await createTree(supabase, user.id, name);
-          setTrees([{ id, name, role: "owner" }]);
-          await activateTree(id, "owner");
-          notify(tTrees("created"));
-        } else {
-          await activateTree(pick.id, pick.role);
-        }
-      } catch (error) {
-        syncError(error);
-      } finally {
-        setSyncing(false);
-      }
-    })();
-  }, [user, activateTree, notify, syncError, tTrees]);
-  useEffect(() => {
-    if (!SUPABASE_ENABLED || !user || !activeTreeId || !syncedOnceRef.current)
-      return;
-    const timer = window.setTimeout(() => {
-      setSyncing(true);
-      (async () => {
-        try {
-          const supabase = createSupabaseBrowserClient();
-          const tombstones = { ...tombstonesRef.current };
-          const now = await pushTree(
-            supabase,
-            user.id,
-            activeTreeId,
-            data,
-            posOverrides,
-            Object.keys(tombstones)
-          );
-          const rows: RowClocks = {};
-          for (const person of data.persons) rows[person.id] = now;
-          for (const union of data.unions) rows[union.id] = now;
-          for (const relationship of data.relationships)
-            rows[relationship.id] = now;
-          clockRef.current = rows;
-          tombstonesRef.current = {};
-          saveSyncClock(activeTreeId, { rows, deleted: {}, pulledAt: now });
-        } catch (error) {
-          syncError(error);
-        } finally {
-          setSyncing(false);
-        }
-      })();
-    }, 1500);
-    return () => window.clearTimeout(timer);
-  }, [data, posOverrides, user, activeTreeId, pushToken, syncError]);
-  const handleCreateTree = useCallback(async () => {
-    if (!user || creatingTree) return;
-    setCreatingTree(true);
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const name = newTreeName.trim() || tTrees("defaultName");
-      const id = await createTree(supabase, user.id, name);
-      setTrees((prev) => [...prev, { id, name, role: "owner" }]);
-      setNewTreeName("");
-      await activateTree(id, "owner");
-      notify(tTrees("created"));
-    } catch (error) {
-      syncError(error);
-    } finally {
-      setCreatingTree(false);
-    }
-  }, [
-    user,
-    creatingTree,
-    newTreeName,
-    activateTree,
-    notify,
-    syncError,
-    tTrees,
-  ]);
-  const handleRefreshTrees = useCallback(async () => {
-    if (!user) return;
-    setSyncing(true);
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const list = await listTrees(supabase, user.id);
-      setTrees(list);
-      if (activeTreeId) {
-        const current = list.find((item) => item.id === activeTreeId);
-        if (current) {
-          setActiveRole(current.role);
-          await pullIntoTree(activeTreeId);
-        }
-      }
-    } catch (error) {
-      syncError(error);
-    } finally {
-      setSyncing(false);
-    }
-  }, [user, activeTreeId, pullIntoTree, syncError]);
+  }, [notify, tAuth, resetOnSignOut]);
   const activeTreeName = trees.find((item) => item.id === activeTreeId)?.name;
   const roleLabel =
     activeRole === "owner"
@@ -826,164 +574,33 @@ function FlowInner() {
     : undefined;
   return (
     <main className="family-tree-flow relative flex h-dvh min-h-175 flex-col overflow-hidden bg-background">
-      <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b bg-card px-5">
-        <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
-            H
-          </div>
-          <div>
-            <p className="text-sm font-semibold tracking-tight">
-              {tHeader("appName")}
-            </p>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              {tHeader("subtitle")}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-3 text-xs text-muted-foreground sm:flex">
-            <span>{tHeader("persons", { count: data.persons.length })}</span>
-            <span>{tHeader("unions", { count: data.unions.length })}</span>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setExportOpen(true)}
-            >
-              {tHeader("export")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => fileRef.current?.click()}
-            >
-              {tHeader("importJson")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setCsvOpen(true)}
-            >
-              {tHeader("importCsv")}
-            </Button>
-            <Button size="sm" onClick={() => setCreatePersonOpen(true)}>
-              {tHeader("create")}
-            </Button>
-            {SUPABASE_ENABLED &&
-              (user ? (
-                <>
-                  <span className="max-w-40 truncate">{user.email}</span>
-                  <Button size="sm" variant="outline" onClick={handleSignOut}>
-                    {tAuth("signOut")}
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setLoginOpen(true)}
-                >
-                  {tAuth("signIn")}
-                </Button>
-              ))}
-            {SUPABASE_ENABLED && user && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setTreeDialogOpen(true)}
-              >
-                {activeTreeName ?? tTrees("title")}
-                {syncing ? " …" : ""}
-              </Button>
-            )}
-          </div>
-          <Button
-            size="sm"
-            className="sm:hidden"
-            onClick={() => setCreatePersonOpen(true)}
-          >
-            {tHeader("createShort")}
-          </Button>
-          <Button
-            size="icon"
-            variant="outline"
-            className="sm:hidden"
-            onClick={() => setExportOpen(true)}
-            aria-label={tHeader("exportLabel")}
-          >
-            <Download className="size-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="outline"
-            className="sm:hidden"
-            onClick={() => fileRef.current?.click()}
-            aria-label={tHeader("importJsonLabel")}
-          >
-            <Upload className="size-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="outline"
-            className="sm:hidden"
-            onClick={() => setCsvOpen(true)}
-            aria-label={tHeader("importCsvLabel")}
-          >
-            <FileUp className="size-4" />
-          </Button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="application/json,.json"
-            className="hidden"
-            aria-label={tHeader("selectJsonFileLabel")}
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) handleImportFile(file);
-            }}
-          />
-          {SUPABASE_ENABLED &&
-            (user ? (
-              <Button
-                size="icon"
-                variant="outline"
-                className="sm:hidden"
-                onClick={handleSignOut}
-                aria-label={tAuth("signOut")}
-              >
-                <LogOut className="size-4" />
-              </Button>
-            ) : (
-              <Button
-                size="icon"
-                variant="outline"
-                className="sm:hidden"
-                onClick={() => setLoginOpen(true)}
-                aria-label={tAuth("signIn")}
-              >
-                <LogIn className="size-4" />
-              </Button>
-            ))}
-          {SUPABASE_ENABLED && user && (
-            <Button
-              size="icon"
-              variant="outline"
-              className="sm:hidden"
-              onClick={() => setTreeDialogOpen(true)}
-              aria-label={tTrees("open")}
-            >
-              <Network className="size-4" />
-            </Button>
-          )}
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => setHelpOpen(true)}
-            aria-label={tHeader("helpLabel")}
-          >
-            <CircleHelp className="size-4" />
-          </Button>
-        </div>
-      </header>
+      <TreeHeader
+        supabaseEnabled={SUPABASE_ENABLED}
+        personsCount={data.persons.length}
+        unionsCount={data.unions.length}
+        user={user}
+        activeTreeName={activeTreeName}
+        syncing={syncing}
+        onExport={() => setExportOpen(true)}
+        onJsonClick={() => fileRef.current?.click()}
+        onCsvOpen={() => setCsvOpen(true)}
+        onCreate={() => setCreatePersonOpen(true)}
+        onHelp={() => setHelpOpen(true)}
+        onLogin={() => setLoginOpen(true)}
+        onLogout={handleSignOut}
+        onTreesOpen={() => setTreeDialogOpen(true)}
+      />
+      <input
+        ref={fileRef}
+        type="file"
+        accept="application/json,.json"
+        className="hidden"
+        aria-label={tHeader("selectJsonFileLabel")}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) handleImportFile(file);
+        }}
+      />
       <section className="relative min-h-0 flex-1">
         <TreeControls
           persons={data.persons}
@@ -1051,31 +668,10 @@ function FlowInner() {
           />
         </ReactFlow>
         {hydrated && data.persons.length === 0 && (
-          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-6">
-            <div className="pointer-events-auto flex max-w-sm flex-col items-center gap-3 rounded-2xl border bg-card p-6 text-center shadow-lg">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-primary text-lg font-bold text-primary-foreground">
-                H
-              </div>
-              <h2 className="text-lg font-semibold tracking-tight">
-                {tOnboarding("title")}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {tOnboarding("description")}
-              </p>
-              <div className="mt-1 flex flex-wrap justify-center gap-2">
-                <Button size="sm" onClick={() => setCreatePersonOpen(true)}>
-                  {tOnboarding("create")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => fileRef.current?.click()}
-                >
-                  {tOnboarding("import")}
-                </Button>
-              </div>
-            </div>
-          </div>
+          <OnboardingCard
+            onCreate={() => setCreatePersonOpen(true)}
+            onImport={() => fileRef.current?.click()}
+          />
         )}
       </section>
       <PersonDetailSheet
@@ -1097,15 +693,7 @@ function FlowInner() {
             notify(result.error ?? tToasts("removeError"));
             return;
           }
-          tombstonesRef.current[removedId] = new Date().toISOString();
-          if (activeTreeId) {
-            const stored = loadSyncClock(activeTreeId);
-            saveSyncClock(activeTreeId, {
-              rows: { ...stored.rows, ...clockRef.current },
-              deleted: { ...tombstonesRef.current },
-              pulledAt: stored.pulledAt,
-            });
-          }
+          recordDeleted([removedId], activeTreeId);
           setSelected(undefined);
           notify(tToasts("removed"));
         }}
@@ -1125,441 +713,62 @@ function FlowInner() {
         onCreate={addPerson}
       />
       {editing && (
-        <Dialog open onOpenChange={(open) => !open && setEditing(undefined)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{tEdit("title")}</DialogTitle>
-              <DialogDescription>{tEdit("description")}</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={saveEdit} className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="edit-first">{tEdit("firstName")}</Label>
-                  <Input
-                    id="edit-first"
-                    name="firstName"
-                    defaultValue={editing.firstName}
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="edit-last">{tEdit("lastName")}</Label>
-                  <Input
-                    id="edit-last"
-                    name="lastName"
-                    defaultValue={editing.lastName}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-birth">{tEdit("birth")}</Label>
-                <Input
-                  id="edit-birth"
-                  name="birthDate"
-                  type="date"
-                  defaultValue={editing.birthDate}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-bio">{tEdit("bio")}</Label>
-                <Textarea id="edit-bio" name="bio" defaultValue={editing.bio} />
-              </div>
-              <Button type="submit">{tEdit("save")}</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <EditPersonDialog
+          editing={editing}
+          onClose={() => setEditing(undefined)}
+          onSubmit={saveEdit}
+        />
       )}
       {pendingUnion && pendingSource && pendingTarget && (
-        <Dialog
-          open
-          onOpenChange={(open) => {
-            if (!open) setPendingUnion(undefined);
+        <PendingUnionDialog
+          sourceName={`${pendingSource.firstName} ${pendingSource.lastName}`}
+          targetName={`${pendingTarget.firstName} ${pendingTarget.lastName}`}
+          onCancel={() => setPendingUnion(undefined)}
+          onConfirm={() => {
+            connectPeople(pendingUnion.sourceId, pendingUnion.targetId);
+            setPendingUnion(undefined);
           }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{tUnion("title")}</DialogTitle>
-              <DialogDescription>
-                {tUnion("description", {
-                  a: `${pendingSource.firstName} ${pendingSource.lastName}`,
-                  b: `${pendingTarget.firstName} ${pendingTarget.lastName}`,
-                })}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setPendingUnion(undefined)}
-              >
-                {tUnion("cancel")}
-              </Button>
-              <Button
-                onClick={() => {
-                  connectPeople(pendingUnion.sourceId, pendingUnion.targetId);
-                  setPendingUnion(undefined);
-                }}
-              >
-                {tUnion("confirm")}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        />
       )}
-      {helpOpen && (
-        <Dialog
-          open
-          onOpenChange={(open) => {
-            if (!open) setHelpOpen(false);
-          }}
-        >
-          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>{tHelp("title")}</DialogTitle>
-              <DialogDescription>{tHelp("description")}</DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col gap-4 text-sm leading-6">
-              <section>
-                <h3 className="font-semibold">{tHelp("cardTitle")}</h3>
-                <p className="text-muted-foreground">{tHelp("cardBody")}</p>
-              </section>
-              <section>
-                <h3 className="font-semibold">{tHelp("unionTitle")}</h3>
-                <p className="text-muted-foreground">{tHelp("unionBody")}</p>
-              </section>
-              <section>
-                <h3 className="font-semibold">{tHelp("createTitle")}</h3>
-                <p className="text-muted-foreground">{tHelp("createBody")}</p>
-              </section>
-              <section>
-                <h3 className="font-semibold">{tHelp("connectTitle")}</h3>
-                <p className="text-muted-foreground">{tHelp("connectBody")}</p>
-              </section>
-              <section>
-                <h3 className="font-semibold">{tHelp("exploreTitle")}</h3>
-                <p className="text-muted-foreground">{tHelp("exploreBody")}</p>
-              </section>
-              <section>
-                <h3 className="font-semibold">{tHelp("editTitle")}</h3>
-                <p className="text-muted-foreground">{tHelp("editBody")}</p>
-              </section>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
       {importPreview?.data && (
-        <Dialog
-          open
-          onOpenChange={(open) => {
-            if (!open) {
-              setImportPreview(undefined);
-              if (fileRef.current) fileRef.current.value = "";
-            }
+        <ImportJsonDialog
+          preview={importPreview}
+          onCancel={() => {
+            setImportPreview(undefined);
+            if (fileRef.current) fileRef.current.value = "";
           }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{tImportJson("title")}</DialogTitle>
-              <DialogDescription>
-                {tImportJson("description", { file: importPreview.fileName })}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col gap-2 text-sm">
-              <p>
-                {tImportJson("summary", {
-                  persons: importPreview.summary?.persons ?? 0,
-                  unions: importPreview.summary?.unions ?? 0,
-                  relationships: importPreview.summary?.relationships ?? 0,
-                })}
-              </p>
-              <p className="text-muted-foreground">
-                {tImportJson("validNote")}
-              </p>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setImportPreview(undefined);
-                  if (fileRef.current) fileRef.current.value = "";
-                }}
-              >
-                {tImportJson("cancel")}
-              </Button>
-              <Button onClick={applyImport}>{tImportJson("apply")}</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+          onApply={applyImport}
+        />
       )}
-      {csvOpen && (
-        <Dialog
-          open
-          onOpenChange={(open) => {
-            if (!open) closeCsvDialog();
-          }}
-        >
-          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>{tImportCsv("title")}</DialogTitle>
-              <DialogDescription>
-                {tImportCsv("descriptionStart")} Plantillas:{" "}
-                <a
-                  className="underline"
-                  href="/plantilla-personas.csv"
-                  download
-                >
-                  {tImportCsv("templates")}
-                </a>
-                {", "}
-                <a className="underline" href="/plantilla-uniones.csv" download>
-                  {tImportCsv("templatesUnions")}
-                </a>
-                {", "}
-                <a
-                  className="underline"
-                  href="/plantilla-relaciones.csv"
-                  download
-                >
-                  {tImportCsv("templatesRelations")}
-                </a>
-                .
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col gap-4">
-              {(
-                [
-                  ["personas", tImportCsv("personasLabel")],
-                  ["uniones", tImportCsv("unionesLabel")],
-                  ["relaciones", tImportCsv("relacionesLabel")],
-                ] as Array<[CsvFileKind, string]>
-              ).map(([kind, label]) => (
-                <div key={kind} className="flex flex-col gap-2">
-                  <Label htmlFor={`csv-${kind}`}>{label}</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      id={`csv-${kind}`}
-                      type="file"
-                      accept=".csv,text/csv"
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        if (file) readCsvFile(file, kind);
-                        event.target.value = "";
-                      }}
-                    />
-                    {csvTexts[kind] && (
-                      <span className="shrink-0 text-xs text-muted-foreground">
-                        {tImportCsv("loaded")}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {csvPlan && (
-                <div className="flex flex-col gap-2 text-sm">
-                  <p>
-                    {tImportCsv("applying", {
-                      persons: csvPlan.applied.persons.length,
-                      unions: csvPlan.applied.unions.length,
-                      relationships: csvPlan.applied.relationships.length,
-                    })}
-                  </p>
-                  {csvPlan.rejected.length > 0 ? (
-                    <div className="flex flex-col gap-1">
-                      <p className="font-semibold">
-                        {tImportCsv("rejected", {
-                          count: csvPlan.rejected.length,
-                        })}
-                      </p>
-                      <ul className="max-h-48 overflow-y-auto rounded-xl border p-3 text-xs leading-5">
-                        {csvPlan.rejected.slice(0, 100).map((error, index) => (
-                          <li key={index}>
-                            {tImportCsv("errorLine", {
-                              file: error.file,
-                              line: error.line,
-                              suffix: error.field ? ` · ${error.field}` : "",
-                              message: error.message,
-                            })}
-                          </li>
-                        ))}
-                      </ul>
-                      {csvPlan.rejected.length > 100 && (
-                        <p className="text-xs text-muted-foreground">
-                          {tImportCsv("more", {
-                            count: csvPlan.rejected.length - 100,
-                          })}
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">
-                      {tImportCsv("allValid")}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={closeCsvDialog}>
-                {tImportCsv("cancel")}
-              </Button>
-              <Button
-                onClick={applyCsvImport}
-                disabled={
-                  !csvPlan ||
-                  csvPlan.applied.persons.length +
-                    csvPlan.applied.unions.length +
-                    csvPlan.applied.relationships.length ===
-                    0
-                }
-              >
-                {tImportCsv("apply")}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-      {exportOpen && (
-        <Dialog
-          open
-          onOpenChange={(open) => {
-            if (!open) setExportOpen(false);
-          }}
-        >
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{tExport("title")}</DialogTitle>
-              <DialogDescription>{tExport("description")}</DialogDescription>
-            </DialogHeader>
-            {hasLivingPersons(data.persons) && (
-              <p
-                role="note"
-                className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs leading-5"
-              >
-                {tExport("privacy")}
-              </p>
-            )}
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" onClick={handleExportJson}>
-                {tExport("json")}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleExportCsv("personas")}
-              >
-                personas.csv
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleExportCsv("uniones")}
-              >
-                uniones.csv
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleExportCsv("relaciones")}
-              >
-                relaciones.csv
-              </Button>
-            </div>
-            <div className="flex justify-end">
-              <Button variant="outline" onClick={() => setExportOpen(false)}>
-                {tExport("close")}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-      {treeDialogOpen && (
-        <Dialog
-          open
-          onOpenChange={(open) => {
-            if (!open) setTreeDialogOpen(false);
-          }}
-        >
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{tTrees("title")}</DialogTitle>
-              <DialogDescription>{tTrees("description")}</DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col gap-3">
-              {activeTreeId && (
-                <p className="text-xs text-muted-foreground">
-                  {activeTreeName} · {roleLabel}
-                  {activeRole === "viewer" ? ` · ${tTrees("readOnly")}` : ""}
-                  {syncing ? " …" : ""}
-                </p>
-              )}
-              {trees.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  {tTrees("empty")}
-                </p>
-              ) : (
-                <ul className="flex max-h-48 flex-col gap-2 overflow-y-auto">
-                  {trees.map((item) => (
-                    <li
-                      key={item.id}
-                      className="flex items-center justify-between gap-2 rounded-xl border p-3 text-sm"
-                    >
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate font-medium">
-                          {item.name}
-                        </span>
-                        <span className="block text-xs text-muted-foreground">
-                          {item.role === "owner"
-                            ? tTrees("roleOwner")
-                            : item.role === "editor"
-                              ? tTrees("roleEditor")
-                              : tTrees("roleViewer")}
-                        </span>
-                      </span>
-                      {item.id === activeTreeId ? (
-                        <Badge>{tTrees("active")}</Badge>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => activateTree(item.id, item.role)}
-                        >
-                          {tTrees("change")}
-                        </Button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <div className="flex gap-2">
-                <Input
-                  value={newTreeName}
-                  onChange={(event) => setNewTreeName(event.target.value)}
-                  placeholder={tTrees("newPlaceholder")}
-                  aria-label={tTrees("newPlaceholder")}
-                  className="flex-1"
-                />
-                <Button
-                  size="sm"
-                  onClick={handleCreateTree}
-                  disabled={creatingTree || syncing}
-                >
-                  {tTrees("create")}
-                </Button>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={handleRefreshTrees}
-                disabled={syncing}
-              >
-                {tTrees("refresh")}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setTreeDialogOpen(false)}
-              >
-                {tTrees("cancel")}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <ImportCsvDialog
+        open={csvOpen}
+        data={data}
+        onClose={() => setCsvOpen(false)}
+        onApply={applyCsvImport}
+        notify={notify}
+      />
+      <ExportDialog
+        open={exportOpen}
+        persons={data.persons}
+        onClose={() => setExportOpen(false)}
+        onExportJson={handleExportJson}
+        onExportCsv={handleExportCsv}
+      />
+      <TreesDialog
+        open={treeDialogOpen}
+        trees={trees}
+        activeTreeId={activeTreeId}
+        activeName={activeTreeName}
+        roleLabel={roleLabel}
+        showReadOnly={activeRole === "viewer"}
+        syncing={syncing}
+        busy={creatingTree}
+        onClose={() => setTreeDialogOpen(false)}
+        onSwitch={(treeId, role) => switchTree(treeId, role)}
+        onCreate={createTreeNamed}
+        onRefresh={refreshTrees}
+      />
       {SUPABASE_ENABLED && (
         <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
       )}

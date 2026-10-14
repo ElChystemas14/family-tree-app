@@ -8,14 +8,14 @@ export function UnionNode({ data }: NodeProps & { data: UnionNodeData }) {
   const t = useTranslations("unionNode");
   return (
     <div
-      className={`group relative flex size-[22px] items-center justify-center rounded-full border-2 border-primary bg-card shadow-sm transition-opacity ${data.isDimmed ? "opacity-20" : "opacity-100"} ${data.isPathHighlighted ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
+      className={`group relative flex size-5.5 items-center justify-center rounded-full border-2 border-primary bg-card shadow-sm transition-opacity ${data.isDimmed ? "opacity-20" : "opacity-100"} ${data.isPathHighlighted ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
     >
       <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
       <Handle
         type="target"
         position={data.layout === "horizontal" ? Position.Left : Position.Top}
         isConnectable={false}
-        className="!size-1 !border-0 !bg-muted-foreground/50"
+        className="size-1! border-0! bg-muted-foreground/50!"
       />
       <Button
         variant="ghost"
@@ -41,7 +41,7 @@ export function UnionNode({ data }: NodeProps & { data: UnionNodeData }) {
           data.layout === "horizontal" ? Position.Right : Position.Bottom
         }
         isConnectable={false}
-        className="!size-1 !border-0 !bg-muted-foreground/50"
+        className="size-1! border-0! bg-muted-foreground/50!"
       />
       <span className="sr-only">
         {t("unionOf", { a: data.partner1Id, b: data.partner2Id })}
